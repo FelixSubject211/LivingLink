@@ -8,6 +8,9 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinPluginSerialization)
+    alias(libs.plugins.i18n4k)
+    alias(libs.plugins.mokkery)
 }
 
 kotlin {
@@ -27,6 +30,11 @@ kotlin {
             baseName = "ComposeApp"
             isStatic = true
         }
+    }
+
+    i18n4k {
+        sourceCodeLocales = listOf("en", "de")
+        languageFilesOutputDirectory = "{projectDir}/src/commonMain/composeResources/files/i18n"
     }
 
     @OptIn(ExperimentalWasmDsl::class)
@@ -50,10 +58,15 @@ kotlin {
     }
 
     sourceSets {
-
+        iosMain.dependencies {
+            implementation(libs.kvault)
+            implementation(libs.ktor.client.darwin)
+        }
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.kvault)
+            implementation(libs.ktor.client.okhttp)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -64,7 +77,22 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.ktor.serialization.json)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.i18n4k.core)
+            implementation(libs.navigation.compose)
             implementation(projects.shared)
+        }
+        commonTest.dependencies {
+            implementation(libs.ktor.client.mock)
+            implementation(libs.kotlin.test)
+            implementation(libs.junit)
+            implementation(libs.turbine)
+            implementation(libs.coroutines.test)
         }
     }
 }

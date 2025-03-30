@@ -10,15 +10,43 @@
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
-		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
+		3E0CE1B42D95375800B97630 /* BindingExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0CE1B32D95375100B97630 /* BindingExtension.swift */; };
+		3E0CE1B72D953F4B00B97630 /* RegisterScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0CE1B62D953F3F00B97630 /* RegisterScreen.swift */; };
+		3E2599BB2D93F06E009CDC00 /* LivingLinkErrorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E2599BA2D93F067009CDC00 /* LivingLinkErrorExtension.swift */; };
+		3E2599BD2D93F0C1009CDC00 /* LoadbaleStatefulView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E2599BC2D93F0BE009CDC00 /* LoadbaleStatefulView.swift */; };
+		3E2599BF2D93F117009CDC00 /* SettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E2599BE2D93F116009CDC00 /* SettingsScreen.swift */; };
+		3E2599C12D9400DA009CDC00 /* IosNavigator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E2599C02D9400D4009CDC00 /* IosNavigator.swift */; };
+		3E773E932D94388000434B2D /* ViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E773E922D94387A00434B2D /* ViewExtension.swift */; };
+		3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */; };
+		3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */; };
+		3EBEBF712D90706C003DF183 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF702D90706B003DF183 /* DesignSystem.swift */; };
+		3EEEF8182D8F53B100FE7D80 /* KotlinStateFlowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */; };
+		3EEEF81A2D8F541500FE7D80 /* StatefulView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8192D8F540700FE7D80 /* StatefulView.swift */; };
+		3EEEF81E2D8F6C3800FE7D80 /* CustomTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF81D2D8F6C3700FE7D80 /* CustomTextField.swift */; };
+		3EEEF8202D8F6C5D00FE7D80 /* CustomSecureField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF81F2D8F6C5B00FE7D80 /* CustomSecureField.swift */; };
+		7555FF83242A565900829871 /* ContentComposeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentComposeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		058557BA273AAA24004C7B11 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
+		3E0CE1B32D95375100B97630 /* BindingExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BindingExtension.swift; sourceTree = "<group>"; };
+		3E0CE1B62D953F3F00B97630 /* RegisterScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterScreen.swift; sourceTree = "<group>"; };
+		3E2599BA2D93F067009CDC00 /* LivingLinkErrorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivingLinkErrorExtension.swift; sourceTree = "<group>"; };
+		3E2599BC2D93F0BE009CDC00 /* LoadbaleStatefulView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadbaleStatefulView.swift; sourceTree = "<group>"; };
+		3E2599BE2D93F116009CDC00 /* SettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsScreen.swift; sourceTree = "<group>"; };
+		3E2599C02D9400D4009CDC00 /* IosNavigator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IosNavigator.swift; sourceTree = "<group>"; };
+		3E773E922D94387A00434B2D /* ViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtension.swift; sourceTree = "<group>"; };
+		3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I18n4kExtension.swift; sourceTree = "<group>"; };
+		3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
+		3EBEBF702D90706B003DF183 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
+		3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinStateFlowExtension.swift; sourceTree = "<group>"; };
+		3EEEF8192D8F540700FE7D80 /* StatefulView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulView.swift; sourceTree = "<group>"; };
+		3EEEF81D2D8F6C3700FE7D80 /* CustomTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextField.swift; sourceTree = "<group>"; };
+		3EEEF81F2D8F6C5B00FE7D80 /* CustomSecureField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomSecureField.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* LivingLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LivingLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		7555FF82242A565900829871 /* ContentComposeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentComposeView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AB3632DC29227652001CCB65 /* Config.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = Config.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -40,6 +68,24 @@
 				058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		3EEEF81B2D8F6BB700FE7D80 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				3E0CE1B32D95375100B97630 /* BindingExtension.swift */,
+				3E773E922D94387A00434B2D /* ViewExtension.swift */,
+				7555FF82242A565900829871 /* ContentComposeView.swift */,
+				3E2599BC2D93F0BE009CDC00 /* LoadbaleStatefulView.swift */,
+				3E2599BA2D93F067009CDC00 /* LivingLinkErrorExtension.swift */,
+				3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */,
+				3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */,
+				3EBEBF702D90706B003DF183 /* DesignSystem.swift */,
+				3EEEF81F2D8F6C5B00FE7D80 /* CustomSecureField.swift */,
+				3EEEF81D2D8F6C3700FE7D80 /* CustomTextField.swift */,
+				3EEEF8192D8F540700FE7D80 /* StatefulView.swift */,
+			);
+			path = Common;
 			sourceTree = "<group>";
 		};
 		42799AB246E5F90AF97AA0EF /* Frameworks */ = {
@@ -70,10 +116,14 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
-				058557BA273AAA24004C7B11 /* Assets.xcassets */,
-				7555FF82242A565900829871 /* ContentView.swift */,
-				7555FF8C242A565B00829871 /* Info.plist */,
+				3EEEF81B2D8F6BB700FE7D80 /* Common */,
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
+				3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */,
+				3E0CE1B62D953F3F00B97630 /* RegisterScreen.swift */,
+				3E2599BE2D93F116009CDC00 /* SettingsScreen.swift */,
+				3E2599C02D9400D4009CDC00 /* IosNavigator.swift */,
+				058557BA273AAA24004C7B11 /* Assets.xcassets */,
+				7555FF8C242A565B00829871 /* Info.plist */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 			);
 			path = iosApp;
@@ -184,8 +234,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E0CE1B42D95375800B97630 /* BindingExtension.swift in Sources */,
+				3EEEF8182D8F53B100FE7D80 /* KotlinStateFlowExtension.swift in Sources */,
+				3EEEF81A2D8F541500FE7D80 /* StatefulView.swift in Sources */,
+				3E2599BF2D93F117009CDC00 /* SettingsScreen.swift in Sources */,
+				3E0CE1B72D953F4B00B97630 /* RegisterScreen.swift in Sources */,
+				3E2599C12D9400DA009CDC00 /* IosNavigator.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
-				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				3EBEBF712D90706C003DF183 /* DesignSystem.swift in Sources */,
+				7555FF83242A565900829871 /* ContentComposeView.swift in Sources */,
+				3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */,
+				3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */,
+				3EEEF8202D8F6C5D00FE7D80 /* CustomSecureField.swift in Sources */,
+				3E773E932D94388000434B2D /* ViewExtension.swift in Sources */,
+				3EEEF81E2D8F6C3800FE7D80 /* CustomTextField.swift in Sources */,
+				3E2599BB2D93F06E009CDC00 /* LivingLinkErrorExtension.swift in Sources */,
+				3E2599BD2D93F0C1009CDC00 /* LoadbaleStatefulView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -319,14 +383,14 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = 2CU6SR888H;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -346,14 +410,14 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_ASSET_PATHS = "\"iosApp/Preview Content\"";
-				DEVELOPMENT_TEAM = "${TEAM_ID}";
+				DEVELOPMENT_TEAM = 2CU6SR888H;
 				ENABLE_PREVIEWS = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\n$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
