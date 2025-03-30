@@ -8,6 +8,7 @@ import org.ktorm.database.Database
 abstract class BaseIntegrationTest {
 
     val config: ServerConfig = object : ServerConfig {
+        override val serverHost: String = "serverHost"
         override val serverPort: Int = 8080
         override val authenticationConfig = "authenticationConfig"
         override val userIdClaim = "userIdClaim"

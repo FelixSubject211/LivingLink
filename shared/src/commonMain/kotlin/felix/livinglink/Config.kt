@@ -1,6 +1,7 @@
 package felix.livinglink
 
 interface Config {
+    val serverHost: String
     val serverPort: Int
     val authenticationConfig: String
     val userIdClaim: String
@@ -12,6 +13,7 @@ interface Config {
 
 fun defaultConfig(): Config {
     return object : Config {
+        override val serverHost = "100.105.28.50"
         override val serverPort = 8080
         override val authenticationConfig = "auth-jwt"
         override val userIdClaim = "userId"
