@@ -90,4 +90,3 @@ struct RegisterScreen: View {
 }
 
 fileprivate typealias RegisterScreenError = ViewModelStateCombinedError<RegisterViewModel.Error, NetworkError>
-

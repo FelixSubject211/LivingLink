@@ -3,10 +3,8 @@ package felix.livinglink.ui.settings
 import SettingsScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
@@ -67,13 +65,12 @@ private fun SettingsContent(
         item {
             GroupedSection(
                 title = SettingsScreenLocalizables.sectionAccountTitle(),
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 when (loadableData) {
                     is AuthenticatedHttpClient.AuthSession.LoggedIn -> {
                         Text(SettingsScreenLocalizables.loggedInAs(loadableData.username))
-
-                        Spacer(modifier = Modifier.height(5.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Button(onClick = viewModel::logout) {
@@ -88,8 +85,6 @@ private fun SettingsContent(
 
                     AuthenticatedHttpClient.AuthSession.LoggedOut -> {
                         Text(SettingsScreenLocalizables.notLoggedIn())
-
-                        Spacer(modifier = Modifier.height(5.dp))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Button(onClick = viewModel::login) {

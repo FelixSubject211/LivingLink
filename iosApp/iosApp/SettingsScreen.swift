@@ -58,7 +58,6 @@ struct SettingsScreen: View {
                 case is AuthenticatedHttpClientAuthSession.LoggedOut:
                     Text(localizables.notLoggedIn.localized)
                     Button(localizables.loginButton.localized, action: viewModel.login)
-                    
                 default:
                     EmptyView()
                 }
