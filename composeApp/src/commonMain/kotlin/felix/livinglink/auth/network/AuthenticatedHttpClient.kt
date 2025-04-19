@@ -26,9 +26,12 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.decodeBase64Bytes
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -62,13 +65,18 @@ class AuthenticatedHttpDefaultClient(
     private val engine: HttpClientEngine,
     private val authNetworkDataSource: AuthNetworkDataSource,
     private val tokenStore: TokenStore,
+    private val scope: CoroutineScope
 ) : AuthenticatedHttpClient {
 
     private val _bearerTokens: MutableStateFlow<BearerTokens?> = MutableStateFlow(tokenStore.get())
 
-    override val session: Flow<AuthenticatedHttpClient.AuthSession> = _bearerTokens.map { tokens ->
-        tokens.toAuthSession(config = config)
-    }
+    override val session = _bearerTokens
+        .map { tokens -> tokens.toAuthSession(config) }
+        .stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = AuthenticatedHttpClient.AuthSession.LoggedOut
+        )
 
     override val client: HttpClient by lazy {
         HttpClient(engine) {

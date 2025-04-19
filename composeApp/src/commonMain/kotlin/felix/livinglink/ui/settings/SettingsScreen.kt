@@ -11,13 +11,16 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import felix.livinglink.auth.network.AuthenticatedHttpClient
+import felix.livinglink.haptics.store.HapticsSettingsStore
 import felix.livinglink.ui.common.GroupedSection
 import felix.livinglink.ui.common.state.LoadableStatefulView
 
@@ -50,7 +53,7 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
 
 @Composable
 private fun SettingsContent(
-    loadableData: AuthenticatedHttpClient.AuthSession,
+    loadableData: SettingsViewModel.LoadableData,
     data: SettingsViewModel.Data,
     viewModel: SettingsViewModel
 ) {
@@ -60,7 +63,7 @@ private fun SettingsContent(
         modifier = Modifier
             .fillMaxSize()
             .padding(18.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
             GroupedSection(
@@ -68,9 +71,9 @@ private fun SettingsContent(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                when (loadableData) {
+                when (val session = loadableData.session) {
                     is AuthenticatedHttpClient.AuthSession.LoggedIn -> {
-                        Text(SettingsScreenLocalizables.loggedInAs(loadableData.username))
+                        Text(SettingsScreenLocalizables.loggedInAs(session.username))
 
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             Button(onClick = viewModel::logout) {
@@ -80,6 +83,13 @@ private fun SettingsContent(
                             Button(onClick = viewModel::showDeleteUserAlert) {
                                 Text(SettingsScreenLocalizables.deleteUserButtonTitle())
                             }
+                        }
+
+                        if (showDeleteDialog) {
+                            ConfirmDeleteUserDialog(
+                                onConfirm = viewModel::deleteUser,
+                                onDismiss = viewModel::closeDeleteUserAlert
+                            )
                         }
                     }
 
@@ -95,12 +105,31 @@ private fun SettingsContent(
                 }
             }
         }
-    }
-
-    if (showDeleteDialog) {
-        ConfirmDeleteUserDialog(
-            onConfirm = viewModel::deleteUser,
-            onDismiss = viewModel::closeDeleteUserAlert
-        )
+        item {
+            GroupedSection(
+                title = SettingsScreenLocalizables.sectionHapticsTitle(),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(SettingsScreenLocalizables.enableHaptics())
+                    Switch(
+                        checked = loadableData.hapticsOptions == HapticsSettingsStore.Options.ON,
+                        onCheckedChange = { isChecked ->
+                            if (isChecked) {
+                                viewModel.setHapticsOption(HapticsSettingsStore.Options.ON)
+                            } else {
+                                viewModel.setHapticsOption(HapticsSettingsStore.Options.OFF)
+                            }
+                        }
+                    )
+                }
+            }
+        }
     }
 }

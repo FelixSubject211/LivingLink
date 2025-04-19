@@ -39,15 +39,3 @@ class StateFlowObservable<T>: ObservableObject {
     }
 }
 
-fileprivate class StateFlowCollector<T>: Kotlinx_coroutines_coreFlowCollector {
-    let onValueEmitted: (T) -> Void
-
-    init(onValueEmitted: @escaping (T) -> Void) {
-        self.onValueEmitted = onValueEmitted
-    }
-
-    func emit(value: Any?) async throws {
-        onValueEmitted(value as! T)
-    }
-}
-

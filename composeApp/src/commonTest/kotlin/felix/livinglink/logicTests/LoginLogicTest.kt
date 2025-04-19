@@ -18,12 +18,13 @@ import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.defaultAppTestModule
 import felix.livinglink.expectStates
-import felix.livinglink.haptics.HapticsController
+import felix.livinglink.haptics.controller.HapticsController
 import felix.livinglink.ui.UiModule
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelState
 import felix.livinglink.ui.common.state.ViewModelState
 import felix.livinglink.ui.login.LoginViewModel
+import felix.livinglink.ui.settings.SettingsViewModel
 import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -94,14 +95,21 @@ class LoginLogicTest {
             assertNull(loginViewModelError.awaitItem())
             loginViewModelError.ensureAllEventsConsumed()
 
-
             settingsViewModelLoadableData.expectStates(
                 LoadableViewModelState.State.Loading(),
-                LoadableViewModelState.State.Data(AuthenticatedHttpClient.AuthSession.LoggedOut),
                 LoadableViewModelState.State.Data(
-                    AuthenticatedHttpClient.AuthSession.LoggedIn(
-                        userId = "userId",
-                        username = "username",
+                    data = SettingsViewModel.LoadableData(
+                        hapticsOptions = null,
+                        session = AuthenticatedHttpClient.AuthSession.LoggedOut
+                    )
+                ),
+                LoadableViewModelState.State.Data(
+                    data = SettingsViewModel.LoadableData(
+                        hapticsOptions = null,
+                        session = AuthenticatedHttpClient.AuthSession.LoggedIn(
+                            userId = "userId",
+                            username = "username",
+                        )
                     )
                 )
             )

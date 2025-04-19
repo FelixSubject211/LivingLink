@@ -29,6 +29,7 @@ fun defaultAuthModule(
             engine = engine,
             tokenStore = tokenStore,
             authNetworkDataSource = authNetworkDataSource,
+            scope = commonModule.defaultScope
         )
     }
 }

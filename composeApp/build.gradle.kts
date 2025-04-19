@@ -58,15 +58,20 @@ kotlin {
     }
 
     sourceSets {
+        wasmJsMain.dependencies {
+            implementation(libs.kstore.storage)
+        }
         iosMain.dependencies {
             implementation(libs.kvault)
             implementation(libs.ktor.client.darwin)
+            implementation(libs.kstore.file)
         }
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.kvault)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.kstore.file)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -85,6 +90,7 @@ kotlin {
             implementation(libs.ktor.client.logging)
             implementation(libs.i18n4k.core)
             implementation(libs.navigation.compose)
+            implementation(libs.kstore)
             implementation(projects.shared)
         }
         commonTest.dependencies {

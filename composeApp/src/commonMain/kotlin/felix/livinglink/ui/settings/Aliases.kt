@@ -1,12 +1,11 @@
 package felix.livinglink.ui.settings
 
-import felix.livinglink.auth.network.AuthenticatedHttpClient
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.ui.common.state.LoadableStatefulViewModel
 import felix.livinglink.ui.common.state.LoadableViewModelState
 
 typealias SettingsViewModelState = LoadableViewModelState<
-        AuthenticatedHttpClient.AuthSession,
+        SettingsViewModel.LoadableData,
         SettingsViewModel.Data,
         Nothing,
         Nothing,
@@ -14,7 +13,7 @@ typealias SettingsViewModelState = LoadableViewModelState<
         >
 
 typealias SettingsStatefulViewModel = LoadableStatefulViewModel<
-        AuthenticatedHttpClient.AuthSession,
+        SettingsViewModel.LoadableData,
         SettingsViewModel.Data,
         Nothing,
         Nothing,
