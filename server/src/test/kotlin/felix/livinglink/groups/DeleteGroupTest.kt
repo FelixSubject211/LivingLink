@@ -1,6 +1,7 @@
 package felix.livinglink.groups
 
 import felix.livinglink.common.BaseIntegrationTest
+import felix.livinglink.common.UuidFactory
 import felix.livinglink.common.addSampleGroups
 import felix.livinglink.common.addSampleUsers
 import felix.livinglink.common.defaultAppModule
@@ -19,13 +20,21 @@ class DeleteGroupTest: BaseIntegrationTest() {
 
     @Test
     fun `should delete group if user is member`() = testApplication {
-        // Arrange
         val groupToDelete = TestData.groupOwnedByAlice1
+        val uuid = "any-uuid"
+
+        // Arrange
+        val uuidFactory = object : UuidFactory {
+            override fun invoke() = uuid
+        }
 
         application {
             module(
                 config = config,
-                appModule = defaultAppModule(config = config)
+                appModule = defaultAppModule(
+                    config = config,
+                    uuidFactory = uuidFactory
+                )
             )
         }
 
@@ -49,6 +58,8 @@ class DeleteGroupTest: BaseIntegrationTest() {
 
         val getGroups: GetGroupsForUserResponse = client.get("groups", token)
         assertTrue(getGroups.groups.none { it.id == groupToDelete.id })
+
+        assertRedisChangeSet(userId = TestData.alice.id, expectedChangeId = uuid)
     }
 
     @Test
@@ -80,5 +91,8 @@ class DeleteGroupTest: BaseIntegrationTest() {
 
         val getGroups: GetGroupsForUserResponse = client.get("groups", token)
         assertTrue(getGroups.groups.none { it.id == groupToDelete.id })
+
+        assertNoRedisChangeSet(userId = TestData.alice.id)
+        assertNoRedisChangeSet(userId = TestData.bob.id)
     }
 }

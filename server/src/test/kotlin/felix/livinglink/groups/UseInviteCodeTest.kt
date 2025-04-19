@@ -1,7 +1,16 @@
 package felix.livinglink.groups
 
-import felix.livinglink.common.*
+import felix.livinglink.common.BaseIntegrationTest
+import felix.livinglink.common.GroupInvitesTable
+import felix.livinglink.common.UuidFactory
+import felix.livinglink.common.addSampleGroups
+import felix.livinglink.common.addSampleUsers
+import felix.livinglink.common.defaultAppModule
+import felix.livinglink.common.get
+import felix.livinglink.common.loginUser
+import felix.livinglink.common.post
 import felix.livinglink.group.CreateInviteRequest
+import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.GetGroupsForUserResponse
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
@@ -21,11 +30,23 @@ class UseInviteCodeTest : BaseIntegrationTest() {
     @Test
     fun `should allow invited user to join group and remove code`() = testApplication {
         val group = TestData.groupOwnedByAlice1
-        val code = Uuid.random().toString()
+        val inviteCode = Uuid.random().toString()
+        val changeId = "changeId"
 
         // Arrange
         val uuidFactory = object : UuidFactory {
-            override fun invoke(): String = code
+            var callCount = 0
+
+            override fun invoke(): String {
+                return when (callCount) {
+                    0 -> "sessionId"
+                    1 -> "refreshToken"
+                    2 -> "sessionId"
+                    3 -> "refreshToken"
+                    4 -> inviteCode
+                    else -> changeId
+                }.also { callCount++ }
+            }
         }
 
         application {
@@ -48,14 +69,14 @@ class UseInviteCodeTest : BaseIntegrationTest() {
         val bobToken = client.loginUser(TestData.bob.username, TestData.bob.password).accessToken
 
         // Act
-        val inviteResponse = client.post<CreateInviteRequest, felix.livinglink.group.CreateInviteResponse>(
+        val inviteResponse = client.post<CreateInviteRequest, CreateInviteResponse>(
             urlString = "groups/invite/create",
             token = aliceToken,
             request = CreateInviteRequest(groupId = group.id)
         )
 
         // Assert
-        assertEquals(code.take(16), inviteResponse.code)
+        assertEquals(inviteCode.take(16), inviteResponse.code)
 
         val useResponse = client.post<UseInviteRequest, UseInviteResponse>(
             urlString = "groups/invite/use",
@@ -74,6 +95,9 @@ class UseInviteCodeTest : BaseIntegrationTest() {
 
         val remainingInvites = database.from(GroupInvitesTable).select().totalRecordsInAllPages
         assertEquals(0, remainingInvites)
+
+        assertRedisChangeSet(userId = TestData.bob.id, expectedChangeId = changeId)
+        assertRedisChangeSet(userId = TestData.alice.id, expectedChangeId = changeId)
     }
 
     @Test
@@ -103,5 +127,7 @@ class UseInviteCodeTest : BaseIntegrationTest() {
 
         // Assert
         assertEquals(UseInviteResponse.InvalidOrAlreadyUsed, response)
+
+        assertNoRedisChangeSet(userId = TestData.alice.id)
     }
 }

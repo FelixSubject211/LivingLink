@@ -3,15 +3,12 @@ package felix.livinglink.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.JWTVerifier
 import com.auth0.jwt.algorithms.Algorithm
-import felix.livinglink.common.DatabaseInitializer
-import felix.livinglink.common.RawUser
 import felix.livinglink.common.RefreshTokensTable
 import felix.livinglink.common.ServerConfig
 import felix.livinglink.common.UsersTable
 import org.ktorm.database.Database
 import org.ktorm.dsl.eq
 import org.ktorm.dsl.from
-import org.ktorm.dsl.insert
 import org.ktorm.dsl.map
 import org.ktorm.dsl.select
 import org.ktorm.dsl.where

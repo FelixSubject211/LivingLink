@@ -1,6 +1,12 @@
 package felix.livinglink.groups
 
-import felix.livinglink.common.*
+import felix.livinglink.common.BaseIntegrationTest
+import felix.livinglink.common.UuidFactory
+import felix.livinglink.common.addSampleGroups
+import felix.livinglink.common.addSampleUsers
+import felix.livinglink.common.defaultAppModule
+import felix.livinglink.common.loginUser
+import felix.livinglink.common.post
 import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.module
@@ -11,7 +17,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import kotlin.uuid.toJavaUuid
 
 class CreateInviteCodeTest : BaseIntegrationTest() {
 
@@ -54,6 +59,8 @@ class CreateInviteCodeTest : BaseIntegrationTest() {
         // Assert
         assertNotNull(response.code)
         assertEquals(uuid.take(16), response.code)
+
+        assertNoRedisChangeSet(userId = TestData.alice.id)
     }
 
     @Test
@@ -85,5 +92,8 @@ class CreateInviteCodeTest : BaseIntegrationTest() {
                 request = CreateInviteRequest(groupId = group.id)
             )
         }
+
+        assertNoRedisChangeSet(userId = TestData.alice.id)
+        assertNoRedisChangeSet(userId = TestData.bob.id)
     }
 }

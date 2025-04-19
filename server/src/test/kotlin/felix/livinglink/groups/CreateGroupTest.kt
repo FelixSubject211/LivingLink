@@ -1,6 +1,11 @@
 package felix.livinglink.groups
 
-import felix.livinglink.common.*
+import felix.livinglink.common.BaseIntegrationTest
+import felix.livinglink.common.addSampleUsers
+import felix.livinglink.common.defaultAppModule
+import felix.livinglink.common.get
+import felix.livinglink.common.loginUser
+import felix.livinglink.common.post
 import felix.livinglink.group.CreateGroupRequest
 import felix.livinglink.group.CreateGroupResponse
 import felix.livinglink.group.GetGroupsForUserResponse
@@ -52,5 +57,7 @@ class CreateGroupTest : BaseIntegrationTest() {
         requireNotNull(createdGroup) { "Group not returned in list" }
         assertEquals(groupName, createdGroup.name)
         assertEquals(TestData.alice.username, createdGroup.groupMemberIdsToName[TestData.alice.id])
+
+        assertNoRedisChangeSet(userId = TestData.alice.id)
     }
 }

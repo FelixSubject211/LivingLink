@@ -5,6 +5,7 @@ import felix.livinglink.common.AppModule
 import felix.livinglink.common.DatabaseInitializer
 import felix.livinglink.common.ServerConfig
 import felix.livinglink.common.UserPrincipal
+import felix.livinglink.change.changeRoutes
 import felix.livinglink.common.defaultAppModule
 import felix.livinglink.common.defaultServerConfig
 import felix.livinglink.groups.groupRoutes
@@ -71,6 +72,9 @@ fun Application.module(
         )
 
         authenticate(config.authenticationConfig) {
+            changeRoutes(
+                changeNotifier = appModule.changeNotifier
+            )
             groupRoutes(
                 groupService = appModule.groupService
             )

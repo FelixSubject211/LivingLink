@@ -1,17 +1,18 @@
 package felix.livinglink.groups
 
+import felix.livinglink.change.ChangeNotifier
 import felix.livinglink.group.CreateGroupRequest
 import felix.livinglink.group.CreateGroupResponse
 import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.DeleteGroupResponse
 import felix.livinglink.group.GetGroupsForUserResponse
-import felix.livinglink.group.Group
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 
 class GroupService(
-    private val groupStore: GroupStore
+    private val groupStore: GroupStore,
+    private val changeNotifier: ChangeNotifier
 ) {
 
     fun getGroupsForUser(userId: String): GetGroupsForUserResponse {
@@ -30,19 +31,18 @@ class GroupService(
     }
 
     fun deleteGroup(groupId: String, userId: String): DeleteGroupResponse {
-        return when(groupStore.getGroupsForUser(userId).firstOrNull { it.id == groupId }) {
-            is Group -> {
-                if (groupStore.deleteGroup(groupId)) {
-                    DeleteGroupResponse.Success
-                } else {
-                    DeleteGroupResponse.Error
-                }
-            }
+        val allowed = groupStore.getGroupsForUser(userId).any { it.id == groupId }
+        if (!allowed) return DeleteGroupResponse.NotAllowed
 
-            else -> {
-                DeleteGroupResponse.NotAllowed
-            }
+        val userIds = groupStore.getUserIdsInGroup(groupId)
+        val success = groupStore.deleteGroup(groupId)
+
+        if (success) {
+            userIds.forEach { changeNotifier.markGroupChangeForUser(it) }
+            return DeleteGroupResponse.Success
         }
+
+        return DeleteGroupResponse.Error
     }
 
     fun createInviteCode(request: CreateInviteRequest, userId: String): CreateInviteResponse? {
@@ -52,6 +52,15 @@ class GroupService(
 
     fun useInviteCode(request: UseInviteRequest, userId: String): UseInviteResponse {
         val success = groupStore.useInviteCode(request.code, userId)
+        if (success) {
+            val groupId = groupStore.getGroupsForUser(userId)
+                .firstOrNull { it.groupMemberIdsToName.containsKey(userId) }?.id
+
+            if (groupId != null) {
+                val userIds = groupStore.getUserIdsInGroup(groupId)
+                userIds.forEach { changeNotifier.markGroupChangeForUser(it) }
+            }
+        }
         return if (success) UseInviteResponse.Success else UseInviteResponse.InvalidOrAlreadyUsed
     }
 }

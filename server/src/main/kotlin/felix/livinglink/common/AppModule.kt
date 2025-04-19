@@ -9,6 +9,8 @@ import felix.livinglink.auth.PasswordHasherDefaultService
 import felix.livinglink.auth.PasswordHasherService
 import felix.livinglink.auth.PostgresUserStore
 import felix.livinglink.auth.UserStore
+import felix.livinglink.change.ChangeDefaultNotifier
+import felix.livinglink.change.ChangeNotifier
 import felix.livinglink.groups.GroupDefaultStore
 import felix.livinglink.groups.GroupService
 import felix.livinglink.groups.GroupStore
@@ -22,6 +24,7 @@ interface AppModule {
     val passwordHasherService: PasswordHasherService
     val jwtService: JwtService
     val authService: AuthService
+    val changeNotifier: ChangeNotifier
     val groupStore: GroupStore
     val groupService: GroupService
 }
@@ -51,12 +54,17 @@ fun defaultAppModule(
             timeService = timeService,
             uuidFactory = uuidFactory
         )
+        override val changeNotifier = ChangeDefaultNotifier(
+            config = config,
+            uuidFactory = uuidFactory
+        )
         override val groupStore = GroupDefaultStore(
             timeService = timeService,
             uuidFactory = uuidFactory,
             database = database
         )
         override val groupService = GroupService(
+            changeNotifier = changeNotifier,
             groupStore = groupStore
         )
     }

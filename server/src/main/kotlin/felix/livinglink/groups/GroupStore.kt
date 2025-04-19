@@ -29,6 +29,7 @@ interface GroupStore {
     fun deleteGroup(groupId: String): Boolean
     fun createInviteCode(groupId: String, createdBy: String): String?
     fun useInviteCode(code: String, userId: String): Boolean
+    fun getUserIdsInGroup(groupId: String): List<String>
 }
 
 class GroupDefaultStore(
@@ -197,5 +198,13 @@ class GroupDefaultStore(
         } catch (e: Exception) {
             false
         }
+    }
+
+    override fun getUserIdsInGroup(groupId: String): List<String> {
+        return database
+            .from(GroupMembersTable)
+            .select(GroupMembersTable.userId)
+            .where { GroupMembersTable.groupId eq groupId }
+            .map { it[GroupMembersTable.userId]!! }
     }
 }

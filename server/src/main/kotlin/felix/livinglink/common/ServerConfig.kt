@@ -11,6 +11,7 @@ interface ServerConfig : Config {
     val dbJdbcUrl: String
     val dbUsername: String
     val dbPassword: String
+    val redisUri: String
 }
 
 fun defaultServerConfig(config: Config): ServerConfig {
@@ -29,5 +30,7 @@ fun defaultServerConfig(config: Config): ServerConfig {
             ?: error("Missing env variable: DB_USER")
         override val dbPassword = dotenv["DB_PASSWORD"]
             ?: error("Missing env variable: DB_PASSWORD")
+        override val redisUri = dotenv["REDIS_URI"]
+            ?: error("Missing env variable: REDIS_URI")
     }
 }

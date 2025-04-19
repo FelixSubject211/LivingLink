@@ -30,6 +30,8 @@ dependencies {
     implementation(libs.dotenv)
     implementation(libs.postgresql)
     implementation(libs.ktorm)
+    implementation(libs.lettuce)
+    implementation(libs.coroutines.reactive)
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlin.test.junit)

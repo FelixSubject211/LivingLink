@@ -48,5 +48,8 @@ class GetGroupsForUserTest : BaseIntegrationTest() {
             expected = setOf(TestData.groupOwnedByAlice1, TestData.groupOwnedByAlice2),
             actual = response.groups
         )
+
+        assertNoRedisChangeSet(userId = TestData.alice.id)
+        assertNoRedisChangeSet(userId = TestData.bob.id)
     }
 }
