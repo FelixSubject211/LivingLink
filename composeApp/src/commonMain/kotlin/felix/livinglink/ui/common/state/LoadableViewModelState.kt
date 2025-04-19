@@ -3,7 +3,7 @@ package felix.livinglink.ui.common.state
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.model.RepositoryState
-import felix.livinglink.haptics.HapticsController
+import felix.livinglink.haptics.controller.HapticsController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

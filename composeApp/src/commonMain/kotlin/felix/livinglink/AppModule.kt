@@ -28,7 +28,9 @@ fun defaultAppModule(
         config = config,
         engine = engine
     )
-    val hapticsModule = defaultHapticsModule()
+    val hapticsModule = defaultHapticsModule(
+        commonModule = commonModule
+    )
     val authModule = defaultAuthModule(
         config = config,
         engine = engine,

@@ -10,7 +10,6 @@
 import SwiftUI
 import ComposeApp
 
-
 struct SettingsScreen: View {
     let viewModel: SettingsViewModel
     let localizables = SettingsScreenLocalizables()
@@ -33,10 +32,10 @@ struct SettingsScreen: View {
         }
     }
     
-    private func content(loadableData: AuthenticatedHttpClientAuthSession, data: SettingsViewModel.Data) -> some View {
+    private func content(loadableData: SettingsViewModel.LoadableData, data: SettingsViewModel.Data) -> some View {
         List {
             Section(localizables.sectionAccountTitle.localized) {
-                switch loadableData {
+                switch loadableData.session {
                 case let loggedIn as AuthenticatedHttpClientAuthSession.LoggedIn:
                     Text(localizables.loggedInAs.localized(loggedIn.username))
                     Button(localizables.logoutButton.localized, action: viewModel.logout)
@@ -60,6 +59,24 @@ struct SettingsScreen: View {
                     Button(localizables.loginButton.localized, action: viewModel.login)
                 default:
                     EmptyView()
+                }
+            }
+            Section(localizables.sectionHapticsTitle.localized) {
+                HStack {
+                    Text(localizables.enableHaptics.localized)
+                    Spacer()
+                    Toggle("", isOn: .init(
+                        get: {
+                            loadableData.hapticsOptions == HapticsSettingsStoreOptions.on
+                        },
+                        set: { isOn in
+                            if isOn {
+                                viewModel.setHapticsOption(option: HapticsSettingsStoreOptions.on)
+                            } else {
+                                viewModel.setHapticsOption(option: HapticsSettingsStoreOptions.off)
+                            }
+                        }
+                    ))
                 }
             }
         }

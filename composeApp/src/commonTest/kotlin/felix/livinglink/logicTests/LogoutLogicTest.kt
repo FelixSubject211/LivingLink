@@ -17,7 +17,7 @@ import felix.livinglink.auth.store.TokenStore
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.defaultAppTestModule
 import felix.livinglink.expectStates
-import felix.livinglink.haptics.HapticsController
+import felix.livinglink.haptics.controller.HapticsController
 import felix.livinglink.ui.UiModule
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelState
@@ -95,12 +95,20 @@ class LogoutLogicTest {
             loadableData.expectStates(
                 LoadableViewModelState.State.Loading(),
                 LoadableViewModelState.State.Data(
-                    AuthenticatedHttpClient.AuthSession.LoggedIn(
-                        userId = "userId",
-                        username = "username",
+                    data = SettingsViewModel.LoadableData(
+                        hapticsOptions = null,
+                        session = AuthenticatedHttpClient.AuthSession.LoggedIn(
+                            userId = "userId",
+                            username = "username",
+                        )
                     )
                 ),
-                LoadableViewModelState.State.Data(AuthenticatedHttpClient.AuthSession.LoggedOut),
+                LoadableViewModelState.State.Data(
+                    data = SettingsViewModel.LoadableData(
+                        hapticsOptions = null,
+                        session = AuthenticatedHttpClient.AuthSession.LoggedOut
+                    )
+                )
             )
         }
 

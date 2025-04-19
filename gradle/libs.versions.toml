@@ -19,6 +19,7 @@ i18n4kCore = "0.10.0"
 java-jwt = "4.4.0"
 junit = "4.13.2"
 jbcrypt = "0.4"
+kstore = "0.9.1"
 ktorm = "4.1.1"
 kotlin = "2.1.0"
 kotlinx-serialization-json = "1.7.3"
@@ -48,6 +49,9 @@ i18n4k-core = { module = "de.comahe.i18n4k:i18n4k-core", version.ref = "i18n4kCo
 jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+kstore = { module = "io.github.xxfast:kstore", version.ref = "kstore" }
+kstore-file = { module = "io.github.xxfast:kstore-file", version.ref = "kstore" }
+kstore-storage = { module = "io.github.xxfast:kstore-storage", version.ref = "kstore" }
 ktorm = { module = "org.ktorm:ktorm-core", version.ref = "ktorm" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }

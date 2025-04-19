@@ -10,7 +10,7 @@ import felix.livinglink.ui.common.state.ViewModelDefaultState
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 
 interface UiModule {
     val settingsViewModel: SettingsViewModel
@@ -25,13 +25,25 @@ fun defaultUiModule(
     authModule: AuthModule
 ): UiModule {
     return object : UiModule {
+
+        val settingsViewModelInout = combine(
+            authModule.authenticatedHttpClient.session,
+            hapticsModule.hapticsSettingsStore.updates
+        ) { session, hapticsOptions ->
+            RepositoryState.Data<SettingsViewModel.LoadableData, Nothing>(
+                SettingsViewModel.LoadableData(
+                    session = session,
+                    hapticsOptions = hapticsOptions
+                )
+            )
+        }
+
         override val settingsViewModel = SettingsViewModel(
             navigator = navigator,
             authenticatedHttpClient = authModule.authenticatedHttpClient,
+            hapticsSettingsStore = hapticsModule.hapticsSettingsStore,
             viewModelState = LoadableViewModelDefaultState(
-                input = authModule.authenticatedHttpClient.session.map {
-                    RepositoryState.Data(it)
-                },
+                input = settingsViewModelInout,
                 initialState = SettingsViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope

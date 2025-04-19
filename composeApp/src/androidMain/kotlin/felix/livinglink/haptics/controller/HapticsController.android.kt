@@ -1,4 +1,4 @@
-package felix.livinglink.haptics
+package felix.livinglink.haptics.controller
 
 import android.content.Context
 import android.os.Build
@@ -7,8 +7,13 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.core.content.getSystemService
 import felix.livinglink.AppContext
+import felix.livinglink.haptics.store.HapticsSettingsStore
 
-actual class HapticsDefaultController : HapticsController {
+actual class HapticsDefaultController actual constructor(
+    hapticsSettingsStore: HapticsSettingsStore
+) : HapticsController {
+
+    private val hapticsSettingsStore = hapticsSettingsStore
 
     private val vibrator: Vibrator? by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -21,7 +26,9 @@ actual class HapticsDefaultController : HapticsController {
     }
 
     override fun performSuccess() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (hapticsSettingsStore.updates.value?.equals(HapticsSettingsStore.Options.OFF) == true) {
+            return
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             vibrator?.vibrate(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK)
             )
@@ -31,7 +38,9 @@ actual class HapticsDefaultController : HapticsController {
     }
 
     override fun performError() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (hapticsSettingsStore.updates.value?.equals(HapticsSettingsStore.Options.OFF) == true) {
+            return
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             vibrator?.vibrate(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_DOUBLE_CLICK)
             )
@@ -44,7 +53,9 @@ actual class HapticsDefaultController : HapticsController {
     }
 
     override fun performLightImpact() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (hapticsSettingsStore.updates.value?.equals(HapticsSettingsStore.Options.OFF) == true) {
+            return
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             vibrator?.vibrate(
                 VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
             )
