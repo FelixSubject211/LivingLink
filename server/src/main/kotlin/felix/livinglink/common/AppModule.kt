@@ -9,6 +9,9 @@ import felix.livinglink.auth.PasswordHasherDefaultService
 import felix.livinglink.auth.PasswordHasherService
 import felix.livinglink.auth.PostgresUserStore
 import felix.livinglink.auth.UserStore
+import felix.livinglink.groups.GroupDefaultStore
+import felix.livinglink.groups.GroupService
+import felix.livinglink.groups.GroupStore
 import org.ktorm.database.Database
 
 interface AppModule {
@@ -19,6 +22,8 @@ interface AppModule {
     val passwordHasherService: PasswordHasherService
     val jwtService: JwtService
     val authService: AuthService
+    val groupStore: GroupStore
+    val groupService: GroupService
 }
 
 fun defaultAppModule(
@@ -45,6 +50,14 @@ fun defaultAppModule(
             jwtService = jwtService,
             timeService = timeService,
             uuidFactory = uuidFactory
+        )
+        override val groupStore = GroupDefaultStore(
+            timeService = timeService,
+            uuidFactory = uuidFactory,
+            database = database
+        )
+        override val groupService = GroupService(
+            groupStore = groupStore
         )
     }
 }

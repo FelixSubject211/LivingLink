@@ -7,10 +7,12 @@ import felix.livinglink.common.ServerConfig
 import felix.livinglink.common.UserPrincipal
 import felix.livinglink.common.defaultAppModule
 import felix.livinglink.common.defaultServerConfig
+import felix.livinglink.groups.groupRoutes
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -67,5 +69,11 @@ fun Application.module(
             config = config,
             authService = appModule.authService
         )
+
+        authenticate(config.authenticationConfig) {
+            groupRoutes(
+                groupService = appModule.groupService
+            )
+        }
     }
 }

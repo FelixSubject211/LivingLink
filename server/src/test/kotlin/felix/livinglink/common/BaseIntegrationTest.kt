@@ -29,6 +29,9 @@ abstract class BaseIntegrationTest {
     @Before
     fun setup() {
         database.dropTableIfExists(RefreshTokensTable)
+        database.dropTableIfExists(GroupMembersTable)
+        database.dropTableIfExists(GroupInvitesTable)
+        database.dropTableIfExists(GroupsTable)
         database.dropTableIfExists(UsersTable)
     }
 

@@ -26,7 +26,7 @@ fun defaultUiModule(
 ): UiModule {
     return object : UiModule {
 
-        val settingsViewModelInout = combine(
+        val settingsViewModelInput = combine(
             authModule.authenticatedHttpClient.session,
             hapticsModule.hapticsSettingsStore.updates
         ) { session, hapticsOptions ->
@@ -43,7 +43,7 @@ fun defaultUiModule(
             authenticatedHttpClient = authModule.authenticatedHttpClient,
             hapticsSettingsStore = hapticsModule.hapticsSettingsStore,
             viewModelState = LoadableViewModelDefaultState(
-                input = settingsViewModelInout,
+                input = settingsViewModelInput,
                 initialState = SettingsViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope
