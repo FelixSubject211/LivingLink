@@ -1,4 +1,4 @@
-package felix.livinglink.change
+package felix.livinglink.event
 
 import felix.livinglink.common.ServerConfig
 import felix.livinglink.common.UuidFactory
@@ -10,7 +10,7 @@ import kotlinx.coroutines.runBlocking
 
 interface ChangeNotifier {
     fun markGroupChangeForUser(userId: String)
-    suspend fun getLastChangeIdForUser(userId: String): String?
+    suspend fun getLastGroupChangeIdForUser(userId: String): String?
 }
 
 class ChangeDefaultNotifier(
@@ -26,12 +26,12 @@ class ChangeDefaultNotifier(
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
     override fun markGroupChangeForUser(userId: String) {
         runBlocking {
-            redis.set("user:$userId:lastChangeId", uuidFactory())
+            redis.set("user:$userId:lastGroupChangeId", uuidFactory())
         }
     }
 
     @OptIn(ExperimentalLettuceCoroutinesApi::class)
-    override suspend fun getLastChangeIdForUser(userId: String): String? {
-        return redis.get("user:$userId:lastChangeId")
+    override suspend fun getLastGroupChangeIdForUser(userId: String): String? {
+        return redis.get("user:$userId:lastGroupChangeId")
     }
 }

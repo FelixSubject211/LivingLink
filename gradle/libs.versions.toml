@@ -75,6 +75,7 @@ ktor-server-auth = { module = "io.ktor:ktor-server-auth", version.ref = "ktor" }
 ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-server-tests = { module = "io.ktor:ktor-server-tests-jvm", version.ref = "ktorTest" }
+ktor-server-cors = { module = "io.ktor:ktor-server-cors", version.ref = "ktor" }
 kvault = { module = "com.liftric:kvault", version.ref = "kvault" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation-compose" }
 postgresql = { module = "org.postgresql:postgresql", version.ref = "postgresql" }

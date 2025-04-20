@@ -5,6 +5,14 @@ sealed class RepositoryState<out DATA, out ERROR> {
     data class Loading<out DATA>(val data: DATA?) : RepositoryState<DATA, Nothing>()
     data class Error<out DATA, out ERROR>(val data: DATA?, val error: ERROR) :
         RepositoryState<DATA, ERROR>()
-
     data class Data<out DATA, out ERROR>(val data: DATA) : RepositoryState<DATA, ERROR>()
+}
+
+fun <DATA, ERROR> RepositoryState<DATA, ERROR>.dataOrNull(): DATA? {
+    return when (this) {
+        RepositoryState.Empty -> null
+        is RepositoryState.Error -> this.data
+        is RepositoryState.Loading -> this.data
+        is RepositoryState.Data -> this.data
+    }
 }

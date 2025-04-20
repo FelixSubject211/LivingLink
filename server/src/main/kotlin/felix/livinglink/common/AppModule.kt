@@ -9,8 +9,8 @@ import felix.livinglink.auth.PasswordHasherDefaultService
 import felix.livinglink.auth.PasswordHasherService
 import felix.livinglink.auth.PostgresUserStore
 import felix.livinglink.auth.UserStore
-import felix.livinglink.change.ChangeDefaultNotifier
-import felix.livinglink.change.ChangeNotifier
+import felix.livinglink.event.ChangeDefaultNotifier
+import felix.livinglink.event.ChangeNotifier
 import felix.livinglink.groups.GroupDefaultStore
 import felix.livinglink.groups.GroupService
 import felix.livinglink.groups.GroupStore

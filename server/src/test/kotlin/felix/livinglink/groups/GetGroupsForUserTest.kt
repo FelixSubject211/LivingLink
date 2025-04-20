@@ -39,7 +39,7 @@ class GetGroupsForUserTest : BaseIntegrationTest() {
 
         // Act
         val response: GetGroupsForUserResponse = client.get(
-            urlString = "groups",
+            urlString = "groups/get",
             token = client.loginUser(TestData.alice.username, TestData.alice.password).accessToken
         )
 

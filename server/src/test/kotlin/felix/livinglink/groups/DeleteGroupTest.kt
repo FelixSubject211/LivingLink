@@ -56,7 +56,7 @@ class DeleteGroupTest: BaseIntegrationTest() {
         // Assert
         assertEquals(DeleteGroupResponse.Success, deleteResponse)
 
-        val getGroups: GetGroupsForUserResponse = client.get("groups", token)
+        val getGroups: GetGroupsForUserResponse = client.get("groups/get", token)
         assertTrue(getGroups.groups.none { it.id == groupToDelete.id })
 
         assertRedisChangeSet(userId = TestData.alice.id, expectedChangeId = uuid)
@@ -89,7 +89,7 @@ class DeleteGroupTest: BaseIntegrationTest() {
 
         assertEquals(DeleteGroupResponse.NotAllowed, deleteResponse)
 
-        val getGroups: GetGroupsForUserResponse = client.get("groups", token)
+        val getGroups: GetGroupsForUserResponse = client.get("groups/get", token)
         assertTrue(getGroups.groups.none { it.id == groupToDelete.id })
 
         assertNoRedisChangeSet(userId = TestData.alice.id)

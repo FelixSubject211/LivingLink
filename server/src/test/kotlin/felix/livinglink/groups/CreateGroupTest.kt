@@ -49,7 +49,7 @@ class CreateGroupTest : BaseIntegrationTest() {
 
 
         val getGroups: GetGroupsForUserResponse = client.get(
-            urlString = "groups",
+            urlString = "groups/get",
             token = token
         )
 

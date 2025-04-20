@@ -133,7 +133,6 @@ class LoadableViewModelDefaultState<
 
     override val data: StateFlow<DATA> = viewModelState.data
 
-
     override val error = viewModelState.error
         .combine(_error) { viewModelError, loadableError ->
             when (viewModelError) {

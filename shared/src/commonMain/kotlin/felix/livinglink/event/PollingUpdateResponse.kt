@@ -1,4 +1,4 @@
-package felix.livinglink.change
+package felix.livinglink.event
 
 import kotlinx.serialization.Serializable
 

@@ -4,6 +4,7 @@ import felix.livinglink.common.model.LivingLinkResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
@@ -31,14 +32,28 @@ suspend inline fun <reified REQUEST, reified RESPONSE> HttpClient.post(
     }
 }
 
-suspend inline fun <reified REQUEST, reified RESPONSE> HttpClient.delete(
+suspend inline fun <reified RESPONSE> HttpClient.get(
     urlString: String,
-    request: REQUEST,
+): LivingLinkResult<RESPONSE, NetworkError> {
+    try {
+        val response = this.get(urlString)
+        if (response.status == HttpStatusCode.NotFound) {
+            return LivingLinkResult.Error(NetworkError.NotFound)
+        }
+        return LivingLinkResult.Data(response.body())
+    } catch (e: IOException) {
+        return LivingLinkResult.Error(NetworkError.IO)
+    } catch (e: Throwable) {
+        return LivingLinkResult.Error(NetworkError.Unknown(error = e))
+    }
+}
+
+suspend inline fun <reified RESPONSE> HttpClient.delete(
+    urlString: String,
 ): LivingLinkResult<RESPONSE, NetworkError> {
     try {
         val response = this.delete(urlString) {
             contentType(ContentType.Application.Json)
-            setBody(request)
         }
         if (response.status == HttpStatusCode.NotFound) {
             return LivingLinkResult.Error(NetworkError.NotFound)

@@ -7,17 +7,17 @@ import felix.livinglink.group.UseInviteRequest
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
+import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.delete
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import io.ktor.server.routing.route
-import io.ktor.server.response.respond
 
 fun Route.groupRoutes(groupService: GroupService) {
     route("/groups") {
 
-        get("") {
+        get("/get") {
             val user = call.principal<UserPrincipal>()!!
             val response = groupService.getGroupsForUser(user.userId)
             call.respond(HttpStatusCode.OK, response)

@@ -86,7 +86,7 @@ class UseInviteCodeTest : BaseIntegrationTest() {
         assertEquals(UseInviteResponse.Success, useResponse)
 
         val updatedGroups = client.get<GetGroupsForUserResponse>(
-            urlString = "groups",
+            urlString = "groups/get",
             token = bobToken
         )
         assertTrue(updatedGroups.groups.any {

@@ -6,6 +6,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import felix.livinglink.ui.UiModule
+import felix.livinglink.ui.listGroups.ListGroupsScreen
 import felix.livinglink.ui.login.LoginScreen
 import felix.livinglink.ui.register.RegisterScreen
 import felix.livinglink.ui.settings.SettingsScreen
@@ -17,9 +18,12 @@ fun NavigationHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = LivingLinkScreen.Settings.route,
+        startDestination = LivingLinkScreen.ListGroups.route,
         modifier = Modifier
     ) {
+        composable(route = LivingLinkScreen.ListGroups.route) {
+            ListGroupsScreen(uiModule.listGroupsViewModel)
+        }
         composable(route = LivingLinkScreen.Settings.route) {
             SettingsScreen(uiModule.settingsViewModel)
         }

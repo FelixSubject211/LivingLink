@@ -1,6 +1,6 @@
 package felix.livinglink.groups
 
-import felix.livinglink.change.ChangeNotifier
+import felix.livinglink.event.ChangeNotifier
 import felix.livinglink.group.CreateGroupRequest
 import felix.livinglink.group.CreateGroupResponse
 import felix.livinglink.group.CreateInviteRequest
@@ -26,6 +26,7 @@ class GroupService(
             name = request.groupName,
             creatorUserId = userId
         )?.let { groupId ->
+            changeNotifier.markGroupChangeForUser(userId)
             return CreateGroupResponse.Success(groupId)
         } ?: return CreateGroupResponse.Error
     }

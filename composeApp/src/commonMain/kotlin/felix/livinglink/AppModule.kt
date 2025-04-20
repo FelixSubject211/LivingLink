@@ -5,6 +5,8 @@ import felix.livinglink.auth.defaultAuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.defaultCommonModule
 import felix.livinglink.common.network.createHttpClientEngine
+import felix.livinglink.event.defaultEventModule
+import felix.livinglink.groups.defaultGroupsModule
 import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.haptics.defaultHapticsModule
 import felix.livinglink.ui.UiModule
@@ -36,11 +38,21 @@ fun defaultAppModule(
         engine = engine,
         commonModule = commonModule
     )
+    val eventModule = defaultEventModule(
+        commonModule = commonModule,
+        authModule = authModule
+    )
+    val groupsModule = defaultGroupsModule(
+        commonModule = commonModule,
+        authModule = authModule,
+        eventModule = eventModule
+    )
     val uiModule = defaultUiModule(
         navigator = navigator,
         commonModule = commonModule,
         hapticsModule = hapticsModule,
-        authModule = authModule
+        authModule = authModule,
+        groupsModule = groupsModule
     )
 
     return object : AppModule {

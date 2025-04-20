@@ -1,6 +1,7 @@
 package felix.livinglink
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -32,10 +33,12 @@ fun App() {
 
     key(i18n4kConfig) {
         MaterialTheme(colorScheme) {
-            NavigationHost(
-                navController = navHostController,
-                uiModule = appModule.uiModule
-            )
+            Column {
+                NavigationHost(
+                    navController = navHostController,
+                    uiModule = appModule.uiModule
+                )
+            }
         }
     }
 }

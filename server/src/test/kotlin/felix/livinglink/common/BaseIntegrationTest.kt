@@ -34,7 +34,7 @@ abstract class BaseIntegrationTest {
     }
 
     protected fun assertRedisChangeSet(userId: String, expectedChangeId: String) {
-        val key = "user:$userId:lastChangeId"
+        val key = "user:$userId:lastGroupChangeId"
         val value = redis.get(key)
         check(value == expectedChangeId) {
             "Expected changeId for user '$userId' to be '$expectedChangeId', but was '$value'"
