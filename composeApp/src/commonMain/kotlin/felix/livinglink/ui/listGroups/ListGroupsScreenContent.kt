@@ -34,6 +34,10 @@ fun ListGroupsScreenContent(
             items(loadableData.groups) { group ->
                 ListGroupsGroupItem(group)
             }
+
+            item {
+                Spacer(modifier = Modifier.height(5.dp))
+            }
         }
 
         Spacer(modifier = Modifier.height(5.dp))

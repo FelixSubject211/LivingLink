@@ -56,7 +56,7 @@ class GroupsDefaultRepository(
         },
         networkRequest = {
             groupsNetworkDataSource.getGroupsForUser().map { respond ->
-                respond.groups.toList().sortedBy { it.name }
+                respond.groups.toList().sortedBy { it.createdAt }
             }
         },
         saveToDb = { groupStore.update(it) },

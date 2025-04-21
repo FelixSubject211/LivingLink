@@ -103,21 +103,39 @@ class AuthenticatedHttpDefaultClient(
         val currentRefreshToken = _bearerTokens.value?.refreshToken ?: return null
 
         val result = authNetworkDataSource.refresh(RefreshTokenRequest(currentRefreshToken))
-        val success =
-            (result as? LivingLinkResult.Data)?.data as? RefreshTokenResponse.Success ?: return null
+        val success = (result as? LivingLinkResult.Data)?.data as? RefreshTokenResponse.Success
 
-        val newBearerTokens = BearerTokens(
-            accessToken = success.accessToken,
-            refreshToken = success.refreshToken
-        )
+        when (result) {
+            is LivingLinkResult.Error<*> -> {
+                return null
+            }
 
-        tokenStore.set(
-            accessToken = newBearerTokens.accessToken,
-            refreshToken = newBearerTokens.refreshToken!!
-        )
-        _bearerTokens.value = newBearerTokens
+            is LivingLinkResult.Data<RefreshTokenResponse> -> {
+                when (result.data) {
+                    RefreshTokenResponse.InvalidOrExpiredRefreshToken -> {
+                        client.authProvider<BearerAuthProvider>()?.clearToken()
+                        tokenStore.clear()
+                        _bearerTokens.value = null
+                        return null
+                    }
 
-        return newBearerTokens
+                    is RefreshTokenResponse.Success -> {
+                        val newBearerTokens = BearerTokens(
+                            accessToken = result.data.accessToken,
+                            refreshToken = result.data.refreshToken
+                        )
+
+                        tokenStore.set(
+                            accessToken = newBearerTokens.accessToken,
+                            refreshToken = newBearerTokens.refreshToken!!
+                        )
+                        _bearerTokens.value = newBearerTokens
+
+                        return newBearerTokens
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun login(

@@ -5,7 +5,6 @@ import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.model.dataOrNull
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,22 +35,24 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
         )
 
         scope.launch {
-            val initialData = loadFromDb().firstOrNull() ?: emptyList()
-            stateFlow.value = RepositoryState.Data(initialData)
+            val initialData = loadFromDb().firstOrNull()
+            if (initialData?.isEmpty() == true || initialData == null) {
+                stateFlow.value = RepositoryState.Empty
+            } else {
+                stateFlow.value = RepositoryState.Data(initialData)
+            }
         }
 
         scope.launch {
             events.collect { event ->
                 when (event) {
                     FetchAndStoreDataEvent.CLEAR -> {
-                        stateFlow.value = RepositoryState.Loading(null)
+                        stateFlow.value = RepositoryState.Empty
                         saveToDb(emptyList())
                     }
 
                     FetchAndStoreDataEvent.RELOAD -> {
                         stateFlow.value = RepositoryState.Loading(stateFlow.value.dataOrNull())
-
-                        delay(1000)
 
                         when (val result = networkRequest()) {
                             is LivingLinkResult.Data<List<DATA>> -> {
@@ -64,10 +65,10 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
                             }
 
                             is LivingLinkResult.Error<ERROR> -> {
-                                stateFlow.value = RepositoryState.Error(
-                                    data = stateFlow.value.dataOrNull(),
-                                    error = result.error
-                                )
+                                stateFlow.value = RepositoryState.Error(error = result.error)
+                                if (stateFlow.value.dataOrNull()?.isEmpty() == true) {
+                                    stateFlow.value = RepositoryState.Empty
+                                }
                             }
                         }
                     }

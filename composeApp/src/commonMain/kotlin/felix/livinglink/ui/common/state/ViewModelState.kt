@@ -37,13 +37,15 @@ interface ViewModelState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : LivingLi
     )
 
     sealed class CombinedError<out ERROR, out REQUEST_ERROR> : LivingLinkError {
-        data class Error<ERROR : LivingLinkError>(val value: ERROR) :
+        abstract val value: LivingLinkError
+
+        data class Error<ERROR : LivingLinkError>(override val value: ERROR) :
             CombinedError<ERROR, Nothing>() {
             override fun title() = value.title()
             override fun message() = value.message()
         }
 
-        data class Request<REQUEST_ERROR : LivingLinkError>(val value: REQUEST_ERROR) :
+        data class Request<REQUEST_ERROR : LivingLinkError>(override val value: REQUEST_ERROR) :
             CombinedError<Nothing, REQUEST_ERROR>() {
             override fun title() = value.title()
             override fun message() = value.message()

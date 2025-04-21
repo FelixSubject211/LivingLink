@@ -11,7 +11,7 @@ import felix.livinglink.ui.common.state.StatefulViewModel
 import felix.livinglink.ui.common.state.ViewModelState
 
 class RegisterViewModel(
-    private val navigator: Navigator,
+    override val navigator: Navigator,
     private val authenticatedHttpClient: AuthenticatedHttpClient,
     private val viewModelState: ViewModelState<Data, Error, NetworkError>,
 ) : StatefulViewModel<RegisterViewModel.Data, RegisterViewModel.Error, NetworkError> {

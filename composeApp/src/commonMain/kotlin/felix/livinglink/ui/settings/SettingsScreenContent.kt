@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.auth.network.AuthenticatedHttpClient
 import felix.livinglink.haptics.store.HapticsSettingsStore
 import felix.livinglink.ui.common.GroupedSection
+import felix.livinglink.ui.common.navigation.LivingLinkScreen
 
 @Composable
 fun SettingsScreenContent(
@@ -64,7 +65,9 @@ fun SettingsScreenContent(
                         Text(SettingsScreenLocalizables.notLoggedIn())
 
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Button(onClick = viewModel::login) {
+                            Button(onClick = {
+                                viewModel.navigator.push(LivingLinkScreen.Login)
+                            }) {
                                 Text(SettingsScreenLocalizables.loginButton())
                             }
                         }

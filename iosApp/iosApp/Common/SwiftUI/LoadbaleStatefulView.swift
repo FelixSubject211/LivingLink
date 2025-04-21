@@ -14,7 +14,6 @@ func LoadableStatefulView<LoadableData: AnyObject, Data, Error: LivingLinkError>
     buildAlert: @escaping (Error) -> Alert,
     emptyContent: @escaping (Data) -> AnyView = { defaultEmptyContent($0) },
     loadingContent: @escaping () -> AnyView = defaultLoadingContent,
-    errorContent: @escaping (Error) -> AnyView,
     content: @escaping (LoadableData, Data) -> AnyView
 ) -> some View {
     LoadableStatefulViewContent(
@@ -22,7 +21,6 @@ func LoadableStatefulView<LoadableData: AnyObject, Data, Error: LivingLinkError>
         buildAlert: buildAlert,
         emptyContent: emptyContent,
         loadingContent: loadingContent,
-        errorContent: errorContent,
         content: content
     )
 }
@@ -53,7 +51,6 @@ fileprivate struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Er
     let buildAlert: (Error) -> Alert
     let emptyContent: (Data) -> AnyView
     let loadingContent: () ->  AnyView
-    let errorContent: (Error) ->  AnyView
     let content: (LoadableData, Data) ->  AnyView
     
     @ObservedObject var loadableData: StateFlowObservable<LoadableViewModelStateState<LoadableData, LivingLinkError>>
@@ -66,7 +63,6 @@ fileprivate struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Er
         buildAlert: @escaping (Error) -> Alert,
         emptyContent: @escaping (Data) -> AnyView,
         loadingContent: @escaping () -> AnyView,
-        errorContent: @escaping (Error) -> AnyView,
         content: @escaping (LoadableData, Data) -> AnyView
     ){
         self.viewModel = viewModel
@@ -78,7 +74,6 @@ fileprivate struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Er
         self.buildAlert = buildAlert
         self.emptyContent = emptyContent
         self.loadingContent = loadingContent
-        self.errorContent = errorContent
         self.content = content
     }
     
@@ -111,13 +106,6 @@ fileprivate struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Er
             
         case is LoadableViewModelStateStateLoading<LoadableData, LivingLinkError>:
             loadingContent()
-            
-        case let errorState as LoadableViewModelStateStateError<LoadableData, LivingLinkError>:
-            if let error = errorState.error as? Error {
-                errorContent(error)
-            } else {
-                loadingContent()
-            }
             
         case let dataState as LoadableViewModelStateStateData<LoadableData, LivingLinkError>:
             if let stateData = dataState.data {

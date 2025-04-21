@@ -43,27 +43,26 @@ interface LoadableViewModelState<
     sealed class State<LOADABLE_DATA, LOADABLE_ERROR> {
         class Empty<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
         class Loading<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
-        data class Error<LOADABLE_DATA, LOADABLE_ERROR>(val error: LOADABLE_ERROR) :
-            State<LOADABLE_DATA, LOADABLE_ERROR>()
-
         data class Data<LOADABLE_DATA, LOADABLE_ERROR>(val data: LOADABLE_DATA) :
             State<LOADABLE_DATA, LOADABLE_ERROR>()
     }
 
     sealed class CombinedError<out LOADABLE_ERROR, out ERROR, out REQUEST_ERROR> : LivingLinkError {
-        data class Loadable<LOADABLE_ERROR : LivingLinkError>(val value: LOADABLE_ERROR) :
+        abstract val value: LivingLinkError
+
+        data class Loadable<LOADABLE_ERROR : LivingLinkError>(override val value: LOADABLE_ERROR) :
             CombinedError<LOADABLE_ERROR, Nothing, Nothing>() {
             override fun title() = value.title()
             override fun message() = value.message()
         }
 
-        data class Error<ERROR : LivingLinkError>(val value: ERROR) :
+        data class Error<ERROR : LivingLinkError>(override val value: ERROR) :
             CombinedError<Nothing, ERROR, Nothing>() {
             override fun title() = value.title()
             override fun message() = value.message()
         }
 
-        data class Request<REQUEST_ERROR : LivingLinkError>(val value: REQUEST_ERROR) :
+        data class Request<REQUEST_ERROR : LivingLinkError>(override val value: REQUEST_ERROR) :
             CombinedError<Nothing, Nothing, REQUEST_ERROR>() {
             override fun title() = value.title()
             override fun message() = value.message()
@@ -112,18 +111,12 @@ class LoadableViewModelDefaultState<
 
             is RepositoryState.Error -> {
                 _loading.value = false
-                val error = state.error
-                if (state.data == null) {
-                    LoadableViewModelState.State.Error(error)
-                } else {
-                    _error.value = error
-                    LoadableViewModelState.State.Data(state.data)
-                }
+                _error.value = state.error
             }
 
             is RepositoryState.Data -> {
                 _loading.value = false
-                LoadableViewModelState.State.Data(state.data)
+                LoadableViewModelState.State.Data<LOADABLE_DATA, LOADABLE_ERROR>(state.data)
             }
         }
     }.stateIn(

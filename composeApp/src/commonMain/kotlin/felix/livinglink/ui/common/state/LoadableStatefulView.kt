@@ -15,7 +15,6 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
     modifier: Modifier,
     emptyContent: @Composable () -> Unit = {},
     loadingContent: @Composable () -> Unit = {},
-    errorContent: @Composable (LOADABLE_ERROR) -> Unit = {},
     content: @Composable (loadableData: LOADABLE_DATA, data: DATA) -> Unit,
 ) {
     val loadableData = viewModel.loadableData.collectAsState()
@@ -41,16 +40,15 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
                     loadingContent()
                 }
 
-                is LoadableViewModelState.State.Error -> {
-                    errorContent(loadableData.error)
-                }
-
                 is LoadableViewModelState.State.Data -> {
                     content(loadableData.data, dataState.value)
                 }
             }
         }
 
-        errorState.value?.toAlert(onDismissRequest = viewModel::closeError)
+        errorState.value?.toAlert(
+            navigator = viewModel.navigator,
+            onDismissRequest = viewModel::closeError
+        )
     }
 }

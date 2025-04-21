@@ -13,6 +13,10 @@ sealed class NetworkError : LivingLinkError {
         override fun message() = NetworkErrorLocalizables.notFoundMessage()
     }
 
+    data object Unauthorized : NetworkError() {
+        override fun title() = NetworkErrorLocalizables.unauthorizedErrorTitle()
+    }
+
     data class Unknown(val error: Throwable) : NetworkError() {
         override fun title() = NetworkErrorLocalizables.unknownErrorTitle()
         override fun message() = error.message

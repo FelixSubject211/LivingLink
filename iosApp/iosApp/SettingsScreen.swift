@@ -17,10 +17,10 @@ struct SettingsScreen: View {
         LoadableStatefulView(
             viewModel: viewModel,
             buildAlert: { (error: SettingsScreenError) in
-                error.asBasicAlert()
-            },
-            errorContent: { (error: SettingsScreenError) in
-                error.asBasicErrorView()
+                error.asAlert(
+                    navigator: viewModel.navigator,
+                    dismiss: viewModel.closeError
+                )
             },
             content: content
         )
@@ -55,7 +55,7 @@ struct SettingsScreen: View {
                         }
                 case is AuthenticatedHttpClientAuthSession.LoggedOut:
                     Text(localizables.notLoggedIn.localized)
-                    Button(localizables.loginButton.localized, action: viewModel.login)
+                    Button(localizables.loginButton.localized, action: { viewModel.navigator.push(screen: LivingLinkScreen.Login()) })
                 default:
                     EmptyView()
                 }

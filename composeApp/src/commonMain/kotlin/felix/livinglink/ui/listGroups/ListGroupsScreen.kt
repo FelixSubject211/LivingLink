@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import felix.livinglink.ui.common.navigation.LivingLinkScreen
 import felix.livinglink.ui.common.state.LoadableStatefulView
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -52,7 +53,9 @@ fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
                             .showSettingsIconContentDescription(),
                         modifier = Modifier
                             .padding(16.dp)
-                            .clickable(onClick = viewModel::showSettings)
+                            .clickable(onClick = {
+                                viewModel.navigator.push(LivingLinkScreen.Settings)
+                            })
                     )
                 }
             )

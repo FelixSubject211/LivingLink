@@ -9,11 +9,10 @@ import felix.livinglink.group.Group
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 import felix.livinglink.groups.repository.GroupsRepository
-import felix.livinglink.ui.common.navigation.LivingLinkScreen
 import felix.livinglink.ui.common.navigation.Navigator
 
 class ListGroupsViewModel(
-    private val navigator: Navigator,
+    override val navigator: Navigator,
     private val groupsRepository: GroupsRepository,
     private val viewModelState: ListGroupsViewModelState,
 ) : ListGroupsStatefulViewModel {
@@ -23,8 +22,6 @@ class ListGroupsViewModel(
     override val loading = viewModelState.loading
 
     override fun closeError() = viewModelState.closeError()
-
-    fun showSettings() = navigator.push(LivingLinkScreen.Settings)
 
     fun showAddGroupDialog() = viewModelState.perform { data ->
         data.copy(showAddGroupDialog = true)

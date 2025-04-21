@@ -18,7 +18,10 @@ struct RegisterScreen: View {
         StatefulView(
             viewModel: viewModel,
             buildAlert: { (error: RegisterScreenError) in
-                error.asBasicAlert()
+                error.asAlert(
+                    navigator: viewModel.navigator,
+                    dismiss: viewModel.closeError
+                )
             },
             content: content(data:)
         )

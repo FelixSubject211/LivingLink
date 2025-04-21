@@ -3,6 +3,7 @@ package felix.livinglink
 import dev.mokkery.MockMode
 import dev.mokkery.answering.returns
 import dev.mokkery.every
+import dev.mokkery.everySuspend
 import dev.mokkery.mock
 import felix.livinglink.auth.AuthModule
 import felix.livinglink.auth.network.AuthNetworkDataSource
@@ -10,6 +11,8 @@ import felix.livinglink.auth.network.AuthenticatedHttpClient
 import felix.livinglink.auth.network.AuthenticatedHttpDefaultClient
 import felix.livinglink.auth.store.TokenStore
 import felix.livinglink.common.CommonModule
+import felix.livinglink.common.model.LivingLinkResult
+import felix.livinglink.common.network.NetworkError
 import felix.livinglink.common.network.createHttpClientEngine
 import felix.livinglink.common.repository.FetchAndStoreDataDefaultHandler
 import felix.livinglink.event.eventbus.DefaultEventBus
@@ -53,7 +56,9 @@ fun defaultAppTestModule(
     changeNotifierClient: ChangeNotifierClient = mock(mode = MockMode.autofill) {
         every { events } returns emptyFlow()
     },
-    groupNetworkDataSource: GroupsNetworkDataSource = mock(mode = MockMode.autofill),
+    groupNetworkDataSource: GroupsNetworkDataSource = mock(mode = MockMode.autofill) {
+        everySuspend { getGroupsForUser() } returns LivingLinkResult.Error(NetworkError.IO)
+    },
     groupStore: GroupStore = mock(mode = MockMode.autofill) {
         every { groups } returns emptyFlow()
     }
@@ -67,7 +72,9 @@ fun defaultAppTestModule(
     )
 
     val eventBus = DefaultEventBus(
-        changeNotifierClient = changeNotifierClient
+        changeNotifierClient = changeNotifierClient,
+        authenticatedHttpClient = authenticatedHttpClient,
+        scope = CoroutineScope(Dispatchers.Default)
     )
 
     val uiModule = defaultUiModule(

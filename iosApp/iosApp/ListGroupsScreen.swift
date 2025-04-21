@@ -17,19 +17,19 @@ struct ListGroupsScreen: View {
         LoadableStatefulView(
             viewModel: viewModel,
             buildAlert: { (error: ListGroupsScreenError) in
-                error.asBasicAlert()
+                error.asAlert(
+                    navigator: viewModel.navigator,
+                    dismiss: viewModel.closeError
+                )
             },
             emptyContent: emptyContent,
-            errorContent: { (error: ListGroupsScreenError) in
-                error.asBasicErrorView()
-            },
             content: content
         )
         .navigationTitle(localizables.navigationTitle.localized)
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button(action: {
-                    viewModel.showSettings()
+                    viewModel.navigator.push(screen: LivingLinkScreen.Settings())
                 }) {
                     Image(systemName: "gearshape")
                         .imageScale(.large)

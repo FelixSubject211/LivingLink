@@ -18,7 +18,10 @@ struct LoginScreen: View {
         StatefulView(
             viewModel: viewModel,
             buildAlert: { (error: LoginScreenError) in
-                error.asBasicAlert()
+                error.asAlert(
+                    navigator: viewModel.navigator,
+                    dismiss: viewModel.closeError
+                )
             },
             content: content(data:)
         )
@@ -56,7 +59,7 @@ struct LoginScreen: View {
                 .submitLabel(.go)
                 .onSubmit(viewModel.login)
 
-                Button(action: viewModel.register) {
+                Button(action: { viewModel.navigator.push(screen: LivingLinkScreen.Register()) } ) {
                     Text(localizables.registerHintText.localized)
                         .font(.footnote)
                 }

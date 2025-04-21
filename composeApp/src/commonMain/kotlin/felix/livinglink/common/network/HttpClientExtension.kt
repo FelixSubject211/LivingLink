@@ -24,6 +24,9 @@ suspend inline fun <reified REQUEST, reified RESPONSE> HttpClient.post(
         if (response.status == HttpStatusCode.NotFound) {
             return LivingLinkResult.Error(NetworkError.NotFound)
         }
+        if (response.status == HttpStatusCode.Unauthorized) {
+            return LivingLinkResult.Error(NetworkError.Unauthorized)
+        }
         return LivingLinkResult.Data(response.body())
     } catch (e: IOException) {
         return LivingLinkResult.Error(NetworkError.IO)
@@ -39,6 +42,9 @@ suspend inline fun <reified RESPONSE> HttpClient.get(
         val response = this.get(urlString)
         if (response.status == HttpStatusCode.NotFound) {
             return LivingLinkResult.Error(NetworkError.NotFound)
+        }
+        if (response.status == HttpStatusCode.Unauthorized) {
+            return LivingLinkResult.Error(NetworkError.Unauthorized)
         }
         return LivingLinkResult.Data(response.body())
     } catch (e: IOException) {
@@ -57,6 +63,9 @@ suspend inline fun <reified RESPONSE> HttpClient.delete(
         }
         if (response.status == HttpStatusCode.NotFound) {
             return LivingLinkResult.Error(NetworkError.NotFound)
+        }
+        if (response.status == HttpStatusCode.Unauthorized) {
+            return LivingLinkResult.Error(NetworkError.Unauthorized)
         }
         return LivingLinkResult.Data(response.body())
     } catch (e: IOException) {

@@ -31,6 +31,9 @@ fun <DATA, ERROR, REQUEST_ERROR> StatefulView(
             content(dataState.value)
         }
 
-        errorState.value?.toAlert(onDismissRequest = viewModel::closeError)
+        errorState.value?.toAlert(
+            navigator = viewModel.navigator,
+            onDismissRequest = viewModel::closeError
+        )
     }
 }

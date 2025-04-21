@@ -19,6 +19,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import felix.livinglink.ui.common.navigation.LivingLinkScreen
 
 @Composable
 fun LoginScreenContent(
@@ -56,7 +57,9 @@ fun LoginScreenContent(
             )
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                TextButton(onClick = viewModel::register) {
+                TextButton(onClick = {
+                    viewModel.navigator.push(LivingLinkScreen.Register)
+                }) {
                     Text(LoginScreenLocalizables.registerHintText())
                 }
             }

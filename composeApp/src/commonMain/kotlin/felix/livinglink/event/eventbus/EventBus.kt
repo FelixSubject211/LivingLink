@@ -50,7 +50,7 @@ class DefaultEventBus(
         }
     }
 
-    private val pendingSuppressions = mutableListOf<EventBus.Event>()
+    private val pendingSuppressions = mutableSetOf<EventBus.Event>()
     private val mutex = Mutex()
 
     override val events: Flow<EventBus.Event> = merge(
@@ -61,20 +61,15 @@ class DefaultEventBus(
             }
         }.filter { incomingEvent ->
             mutex.withLock {
-                val index = pendingSuppressions.indexOfFirst { it == incomingEvent }
-                return@withLock if (index >= 0) {
-                    pendingSuppressions.removeAt(index)
-                    false
-                } else {
-                    true
-                }
+                val wasSuppressed = pendingSuppressions.remove(incomingEvent)
+                !wasSuppressed
             }
         }
     )
 
     override suspend fun emit(event: EventBus.Event) {
         mutex.withLock {
-            pendingSuppressions.add(event)
+            pendingSuppressions += event
         }
         _events.emit(event)
     }

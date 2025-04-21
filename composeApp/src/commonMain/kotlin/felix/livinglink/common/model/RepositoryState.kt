@@ -3,15 +3,14 @@ package felix.livinglink.common.model
 sealed class RepositoryState<out DATA, out ERROR> {
     data object Empty : RepositoryState<Nothing, Nothing>()
     data class Loading<out DATA>(val data: DATA?) : RepositoryState<DATA, Nothing>()
-    data class Error<out DATA, out ERROR>(val data: DATA?, val error: ERROR) :
-        RepositoryState<DATA, ERROR>()
+    data class Error<out ERROR>(val error: ERROR) : RepositoryState<Nothing, ERROR>()
     data class Data<out DATA, out ERROR>(val data: DATA) : RepositoryState<DATA, ERROR>()
 }
 
 fun <DATA, ERROR> RepositoryState<DATA, ERROR>.dataOrNull(): DATA? {
     return when (this) {
         RepositoryState.Empty -> null
-        is RepositoryState.Error -> this.data
+        is RepositoryState.Error -> null
         is RepositoryState.Loading -> this.data
         is RepositoryState.Data -> this.data
     }
@@ -30,7 +29,7 @@ fun <DATA1, DATA2, ERROR> RepositoryState<DATA1, ERROR>.mapState(
         }
 
         is RepositoryState.Error -> {
-            RepositoryState.Error(this.data?.let { transform(it) }, this.error)
+            RepositoryState.Error(this.error)
         }
 
         is RepositoryState.Data -> {
