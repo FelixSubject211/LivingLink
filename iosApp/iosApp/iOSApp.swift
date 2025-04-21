@@ -13,6 +13,8 @@ struct iOSApp: App {
         navigator = IosNavigator()
         uiModule = AppModuleKt.defaultAppModule(navigator: navigator).uiModule
         
+        InitI18n4kKt.doInitI18n4k()
+        
         UIView.appearance(
             whenContainedInInstancesOf: [UIAlertController.self]
         ).tintColor = UIColor(DesignSystem.Colors.primary)
@@ -36,7 +38,10 @@ fileprivate struct NavigationView: View {
 
     var body: some View {
         NavigationStack(path: $navigartor.navigationPath) {
-            SettingsScreen(viewModel: uiModule.settingsViewModel)
+            ListGroupsScreen(viewModel: uiModule.listGroupsViewModel)
+                .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in
+                    SettingsScreen(viewModel: uiModule.settingsViewModel)
+                }
                 .navigationDestination(for: IosNavigator.Screen.Login.self) { _ in
                     LoginScreen(viewModel: uiModule.loginViewModel())
                 }

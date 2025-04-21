@@ -21,7 +21,9 @@ fun defaultEventModule(
 
     return object : EventModule {
         override val eventBus = DefaultEventBus(
-            changeNotifierClient = changeNotifierClient
+            changeNotifierClient = changeNotifierClient,
+            authenticatedHttpClient = authModule.authenticatedHttpClient,
+            scope = commonModule.defaultScope
         )
     }
 }

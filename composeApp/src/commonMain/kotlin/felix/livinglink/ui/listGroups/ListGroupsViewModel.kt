@@ -1,9 +1,11 @@
 package felix.livinglink.ui.listGroups
 
+import ListGroupsScreenLocalizables
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.group.CreateGroupRequest
 import felix.livinglink.group.CreateGroupResponse
+import felix.livinglink.group.Group
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 import felix.livinglink.groups.repository.GroupsRepository
@@ -82,13 +84,18 @@ class ListGroupsViewModel(
         val showJoinGroupDialog: Boolean
     )
 
+    data class LoadableData(
+        val groups: List<Group>
+    )
+
     sealed class Error : LivingLinkError {
         data object InviteInvalidOrAlreadyUsed : Error() {
-            override fun title() = this.toString()
+            override fun title() =
+                ListGroupsScreenLocalizables.errorInviteInvalidOrAlreadyUsedTitle()
         }
 
         data object CreateGroupResponseError : Error() {
-            override fun title() = this.toString()
+            override fun title() = ListGroupsScreenLocalizables.errorCreateGroupResponseTitle()
         }
     }
 }

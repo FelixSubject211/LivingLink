@@ -1,5 +1,6 @@
 package felix.livinglink.ui.listGroups
 
+import ListGroupsScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,11 +16,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import felix.livinglink.group.Group
 
 @Composable
 fun ListGroupsScreenContent(
-    loadableData: List<Group>,
+    loadableData: ListGroupsViewModel.LoadableData,
     viewModel: ListGroupsViewModel
 ) {
     Column(
@@ -31,7 +31,7 @@ fun ListGroupsScreenContent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(loadableData) { group ->
+            items(loadableData.groups) { group ->
                 ListGroupsGroupItem(group)
             }
         }
@@ -43,7 +43,7 @@ fun ListGroupsScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text("Join Group")
+            Text(ListGroupsScreenLocalizables.joinGroupButtonTitle())
         }
 
         TextButton(
@@ -51,7 +51,7 @@ fun ListGroupsScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text("Create Group")
+            Text(ListGroupsScreenLocalizables.createGroupButtonTitle())
         }
     }
 }

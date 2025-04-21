@@ -33,6 +33,10 @@ class IosNavigator: Navigator, ObservableObject {
     func push(screen: LivingLinkScreen) {
         DispatchQueue.main.async {
             switch(screen) {
+            case is LivingLinkScreen.ListGroups:
+                self.navigationPath.append(Screen.ListGroups())
+            case is LivingLinkScreen.Settings:
+                self.navigationPath.append(Screen.Settings())
             case is LivingLinkScreen.Login:
                 self.navigationPath.append(Screen.Login())
             case is LivingLinkScreen.Register:
@@ -43,6 +47,8 @@ class IosNavigator: Navigator, ObservableObject {
     }
     
     enum Screen {
+        struct ListGroups: Hashable{}
+        struct Settings: Hashable{}
         struct Login: Hashable{}
         struct Register: Hashable{}
     }

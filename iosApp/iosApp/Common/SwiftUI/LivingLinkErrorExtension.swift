@@ -25,13 +25,13 @@ extension LivingLinkError {
         }
     }
     
-    func asBasicErrorView() -> some View {
+    func asBasicErrorView() -> AnyView {
         VStack {
             Text(self.title()).bold()
             
             if let message = self.message() {
                 Text(message)
             }
-        }
+        }.eraseToAnyView()
     }
 }

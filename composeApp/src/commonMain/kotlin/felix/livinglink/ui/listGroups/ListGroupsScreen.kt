@@ -1,5 +1,6 @@
 package felix.livinglink.ui.listGroups
 
+import ListGroupsScreenLocalizables
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -40,14 +41,15 @@ fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Groups") },
+                title = { Text(ListGroupsScreenLocalizables.navigationTitle()) },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 ),
                 actions = {
                     Icon(
                         imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
+                        contentDescription = ListGroupsScreenLocalizables
+                            .showSettingsIconContentDescription(),
                         modifier = Modifier
                             .padding(16.dp)
                             .clickable(onClick = viewModel::showSettings)

@@ -6,7 +6,6 @@
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-
 import SwiftUI
 import ComposeApp
 
@@ -32,7 +31,7 @@ struct SettingsScreen: View {
         }
     }
     
-    private func content(loadableData: SettingsViewModel.LoadableData, data: SettingsViewModel.Data) -> some View {
+    private func content(loadableData: SettingsViewModel.LoadableData, data: SettingsViewModel.Data) -> AnyView {
         List {
             Section(localizables.sectionAccountTitle.localized) {
                 switch loadableData.session {
@@ -82,6 +81,7 @@ struct SettingsScreen: View {
         }
         .scrollContentBackground(.hidden)
         .listStyle(.insetGrouped)
+        .eraseToAnyView()
     }
 }
 

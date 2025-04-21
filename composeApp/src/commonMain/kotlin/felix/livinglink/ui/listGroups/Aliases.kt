@@ -1,12 +1,11 @@
 package felix.livinglink.ui.listGroups
 
 import felix.livinglink.common.network.NetworkError
-import felix.livinglink.group.Group
 import felix.livinglink.ui.common.state.LoadableStatefulViewModel
 import felix.livinglink.ui.common.state.LoadableViewModelState
 
 typealias ListGroupsViewModelState = LoadableViewModelState<
-        List<Group>,
+        ListGroupsViewModel.LoadableData,
         ListGroupsViewModel.Data,
         NetworkError,
         ListGroupsViewModel.Error,
@@ -14,7 +13,7 @@ typealias ListGroupsViewModelState = LoadableViewModelState<
         >
 
 typealias ListGroupsStatefulViewModel = LoadableStatefulViewModel<
-        List<Group>,
+        ListGroupsViewModel.LoadableData,
         ListGroupsViewModel.Data,
         NetworkError,
         ListGroupsViewModel.Error,

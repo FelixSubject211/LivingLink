@@ -1,5 +1,6 @@
 package felix.livinglink.ui.listGroups
 
+import ListGroupsScreenLocalizables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -24,10 +25,10 @@ fun ListGroupsAddGroupDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create Group") },
+        title = { Text(ListGroupsScreenLocalizables.createGroupDialogTitle()) },
         text = {
             Column {
-                Text("Enter group name")
+                Text(ListGroupsScreenLocalizables.createGroupDialogLabel())
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = groupName,
@@ -45,12 +46,12 @@ fun ListGroupsAddGroupDialog(
                     }
                 }
             ) {
-                Text("Create")
+                Text(ListGroupsScreenLocalizables.createGroupDialogConfirm())
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(ListGroupsScreenLocalizables.createGroupDialogCancel())
             }
         }
     )

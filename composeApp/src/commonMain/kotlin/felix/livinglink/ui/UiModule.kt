@@ -3,6 +3,7 @@ package felix.livinglink.ui
 import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.model.RepositoryState
+import felix.livinglink.common.model.mapState
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.ui.common.navigation.Navigator
@@ -13,6 +14,7 @@ import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
 interface UiModule {
     val settingsViewModel: SettingsViewModel
@@ -78,7 +80,9 @@ fun defaultUiModule(
             navigator = navigator,
             groupsRepository = groupsModule.groupsRepository,
             viewModelState = LoadableViewModelDefaultState(
-                input = groupsModule.groupsRepository.groups,
+                input = groupsModule.groupsRepository.groups.map { flow ->
+                    flow.mapState { ListGroupsViewModel.LoadableData(it) }
+                },
                 initialState = ListGroupsViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope

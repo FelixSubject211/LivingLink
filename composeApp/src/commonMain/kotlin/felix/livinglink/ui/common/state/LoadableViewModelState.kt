@@ -111,6 +111,7 @@ class LoadableViewModelDefaultState<
             }
 
             is RepositoryState.Error -> {
+                _loading.value = false
                 val error = state.error
                 if (state.data == null) {
                     LoadableViewModelState.State.Error(error)

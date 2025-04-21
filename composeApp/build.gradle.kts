@@ -89,6 +89,7 @@ kotlin {
             implementation(libs.ktor.serialization.json)
             implementation(libs.ktor.client.logging)
             implementation(libs.i18n4k.core)
+            implementation(libs.i18n4k.cldr)
             implementation(libs.navigation.compose)
             implementation(libs.kstore)
             implementation(projects.shared)

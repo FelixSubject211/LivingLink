@@ -48,7 +48,12 @@ class GroupsDefaultRepository(
 ) : GroupsRepository {
 
     override val groups = fetchAndStoreDataDefaultHandler(
-        events = eventBus.events.map { FetchAndStoreDataEvent.RELOAD },
+        events = eventBus.events.map { event ->
+            when (event) {
+                EventBus.Event.ClearAll -> FetchAndStoreDataEvent.CLEAR
+                EventBus.Event.UpdateGroups -> FetchAndStoreDataEvent.RELOAD
+            }
+        },
         networkRequest = {
             groupsNetworkDataSource.getGroupsForUser().map { respond ->
                 respond.groups.toList().sortedBy { it.name }

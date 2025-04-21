@@ -13,6 +13,32 @@ extension View {
         alignment: Alignment = .center
     ) -> some View {
         self
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
+    }
+    
+    func eraseToAnyView() -> AnyView {
+        AnyView(self)
+    }
+    
+    func alertWithTextField(
+        title: String,
+        message: String? = nil,
+        isPresented: Bool,
+        placeholder: String,
+        confirmTitle: String,
+        cancelTitle: String,
+        onCancel: @escaping () -> Void,
+        onConfirm: @escaping (String) -> Void
+    ) -> some View {
+        self.modifier(TextFieldAlertModifier(
+            title: title,
+            message: message,
+            isPresented: isPresented,
+            placeholder: placeholder,
+            confirmTitle: confirmTitle,
+            cancelTitle: cancelTitle,
+            onCancel: onCancel,
+            onConfirm: onConfirm
+        ))
     }
 }

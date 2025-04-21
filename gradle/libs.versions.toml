@@ -49,6 +49,7 @@ coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", ve
 dotenv = { module = "io.github.cdimascio:dotenv-kotlin", version.ref = "dotenv" }
 hikariCP = { module = "com.zaxxer:HikariCP", version.ref = "hikariCP" }
 i18n4k-core = { module = "de.comahe.i18n4k:i18n4k-core", version.ref = "i18n4kCore" }
+i18n4k-cldr = { module = "de.comahe.i18n4k:i18n4k-cldr-plural-rules", version.ref = "i18n4kCore" }
 jbcrypt = { module = "org.mindrot:jbcrypt", version.ref = "jbcrypt" }
 java-jwt = { module = "com.auth0:java-jwt", version.ref = "java-jwt" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

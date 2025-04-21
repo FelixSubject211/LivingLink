@@ -1,5 +1,6 @@
 package felix.livinglink.ui.listGroups
 
+import ListGroupsScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,10 +19,10 @@ fun ListGroupsEmptyContent(viewModel: ListGroupsViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Button(onClick = viewModel::showJoinGroupDialog) {
-            Text("Join Group")
+            Text(ListGroupsScreenLocalizables.joinGroupButtonTitle())
         }
         TextButton(onClick = viewModel::showAddGroupDialog) {
-            Text("Create Group")
+            Text(ListGroupsScreenLocalizables.createGroupButtonTitle())
         }
     }
 }

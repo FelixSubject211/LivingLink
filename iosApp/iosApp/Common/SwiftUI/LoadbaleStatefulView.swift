@@ -9,35 +9,13 @@
 import ComposeApp
 import SwiftUI
 
-func LoadableStatefulView<
-    LoadableData: AnyObject,
-    Data,
-    Error: LivingLinkError,
-    EmptyContent: View,
-    LoadingContent: View,
-    ErrorContent: View,
-    Content: View
->(
+func LoadableStatefulView<LoadableData: AnyObject, Data, Error: LivingLinkError>(
     viewModel: LoadableStatefulViewModel,
     buildAlert: @escaping (Error) -> Alert,
-    emptyContent: @escaping () -> EmptyContent = {
-        EmptyView()
-            .fillMaxSize()
-            .background {
-                DesignSystem.background
-                    .ignoresSafeArea()
-            }
-    },
-    loadingContent: @escaping () -> LoadingContent = {
-        ProgressView()
-            .fillMaxSize()
-            .background {
-                DesignSystem.background
-                    .ignoresSafeArea()
-            }
-    },
-    errorContent: @escaping (Error) -> ErrorContent,
-    content: @escaping (LoadableData, Data) -> Content
+    emptyContent: @escaping (Data) -> AnyView = { defaultEmptyContent($0) },
+    loadingContent: @escaping () -> AnyView = defaultLoadingContent,
+    errorContent: @escaping (Error) -> AnyView,
+    content: @escaping (LoadableData, Data) -> AnyView
 ) -> some View {
     LoadableStatefulViewContent(
         viewModel: viewModel,
@@ -49,21 +27,34 @@ func LoadableStatefulView<
     )
 }
 
-fileprivate struct LoadableStatefulViewContent<
-    LoadableData: AnyObject,
-    Data,
-    Error: LivingLinkError,
-    EmptyContent: View,
-    LoadingContent: View,
-    ErrorContent: View,
-    Content: View
->: View {
+private func defaultEmptyContent<Data>(_ _: Data) -> AnyView {
+    EmptyView()
+        .fillMaxSize()
+        .background {
+            DesignSystem.background
+                .ignoresSafeArea()
+        }
+        .eraseToAnyView()
+    
+}
+
+private func defaultLoadingContent() -> AnyView {
+    ProgressView()
+        .fillMaxSize()
+        .background {
+            DesignSystem.background
+                .ignoresSafeArea()
+        }
+        .eraseToAnyView()
+}
+
+fileprivate struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error: LivingLinkError>: View {
     let viewModel: LoadableStatefulViewModel
     let buildAlert: (Error) -> Alert
-    let emptyContent: () -> EmptyContent
-    let loadingContent: () -> LoadingContent
-    let errorContent: (Error) -> ErrorContent
-    let content: (LoadableData, Data) -> Content
+    let emptyContent: (Data) -> AnyView
+    let loadingContent: () ->  AnyView
+    let errorContent: (Error) ->  AnyView
+    let content: (LoadableData, Data) ->  AnyView
     
     @ObservedObject var loadableData: StateFlowObservable<LoadableViewModelStateState<LoadableData, LivingLinkError>>
     @ObservedObject var data: StateFlowObservable<Data>
@@ -73,10 +64,10 @@ fileprivate struct LoadableStatefulViewContent<
     init(
         viewModel: LoadableStatefulViewModel,
         buildAlert: @escaping (Error) -> Alert,
-        emptyContent: @escaping () -> EmptyContent,
-        loadingContent: @escaping () -> LoadingContent,
-        errorContent: @escaping (Error) -> ErrorContent,
-        content: @escaping (LoadableData, Data) -> Content
+        emptyContent: @escaping (Data) -> AnyView,
+        loadingContent: @escaping () -> AnyView,
+        errorContent: @escaping (Error) -> AnyView,
+        content: @escaping (LoadableData, Data) -> AnyView
     ){
         self.viewModel = viewModel
         self.loadableData = viewModel.loadableData.asObservableObject()
@@ -99,9 +90,6 @@ fileprivate struct LoadableStatefulViewContent<
                 .disabled(loading.value.boolValue)
             
             if (loading.value.boolValue) {
-                Color.black.opacity(0.2)
-                    .ignoresSafeArea()
-                
                 VStack {
                     ProgressView()
                         .padding()
@@ -109,9 +97,9 @@ fileprivate struct LoadableStatefulViewContent<
             }
             
             EmptyView()
-                .alert(isPresented: isErrorAlertPresented) {
-                    buildAlert(error.value!)
-                }
+        }
+        .alert(isPresented: isErrorAlertPresented) {
+            buildAlert(error.value!)
         }
     }
     
@@ -119,7 +107,7 @@ fileprivate struct LoadableStatefulViewContent<
     private func loadableStateContent() -> some View {
         switch loadableData.value {
         case is LoadableViewModelStateStateEmpty<LoadableData, LivingLinkError>:
-            emptyContent()
+            emptyContent(data.value)
             
         case is LoadableViewModelStateStateLoading<LoadableData, LivingLinkError>:
             loadingContent()

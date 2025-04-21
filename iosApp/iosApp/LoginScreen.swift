@@ -29,7 +29,7 @@ struct LoginScreen: View {
         }
     }
     
-    private func content(data: LoginViewModel.Data) -> some View {
+    private func content(data: LoginViewModel.Data) -> AnyView {
         VStack {
             Spacer()
             
@@ -64,15 +64,13 @@ struct LoginScreen: View {
 
             Spacer()
 
-            Button(
+            DesignSystem.PrimaryButton(
+                title: localizables.loginButtonTitle.localized,
                 action: viewModel.login
-            ) {
-                Text(localizables.loginButtonTitle.localized)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-            }
-            .buttonStyle(DesignSystem.PrimaryButtonStyle())
-        }.padding(DesignSystem.bodyPadding)
+            )
+        }
+        .padding(DesignSystem.Padding.large)
+        .eraseToAnyView()
     }
     
     private enum Field {

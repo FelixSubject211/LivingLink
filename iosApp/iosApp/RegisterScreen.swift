@@ -29,7 +29,7 @@ struct RegisterScreen: View {
         }
     }
     
-    private func content(data: RegisterViewModel.Data) -> some View {
+    private func content(data: RegisterViewModel.Data) -> AnyView {
         VStack {
             Spacer()
             
@@ -71,15 +71,13 @@ struct RegisterScreen: View {
 
             Spacer()
 
-            Button(
+            DesignSystem.PrimaryButton(
+                title: localizables.registerButtonTitle.localized,
                 action: viewModel.register
-            ) {
-                Text(localizables.registerButtonTitle.localized)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-            }
-            .buttonStyle(DesignSystem.PrimaryButtonStyle())
-        }.padding(DesignSystem.bodyPadding)
+            )
+        }
+        .padding(DesignSystem.Padding.large)
+        .eraseToAnyView()
     }
     
     private enum Field {
