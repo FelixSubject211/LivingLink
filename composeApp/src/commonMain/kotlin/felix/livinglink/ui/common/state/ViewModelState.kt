@@ -25,14 +25,14 @@ interface ViewModelState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : LivingLi
 
     fun <RESULT> perform(
         assert: (currentData: DATA) -> LivingLinkResult<Unit, ERROR> = {
-            LivingLinkResult.Data(Unit)
+            LivingLinkResult.Success(Unit)
         },
         request: suspend (currentData: DATA) -> LivingLinkResult<RESULT, REQUEST_ERROR>,
         onSuccess: (
             currentData: DATA,
             result: RESULT
         ) -> LivingLinkResult<DATA, ERROR> = { data, _ ->
-            LivingLinkResult.Data(data)
+            LivingLinkResult.Success(data)
         }
     )
 
@@ -114,9 +114,9 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
                     error.value = ViewModelState.CombinedError.Request(response.error)
                 }
 
-                is LivingLinkResult.Data -> {
+                is LivingLinkResult.Success -> {
                     when (val result = onSuccess(data.value, response.data)) {
-                        is LivingLinkResult.Data -> {
+                        is LivingLinkResult.Success -> {
                             hapticsController.performSuccess()
                             data.update { result.data }
                         }

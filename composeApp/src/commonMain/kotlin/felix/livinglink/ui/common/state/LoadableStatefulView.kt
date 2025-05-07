@@ -17,21 +17,21 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
     loadingContent: @Composable () -> Unit = {},
     content: @Composable (loadableData: LOADABLE_DATA, data: DATA) -> Unit,
 ) {
-    val loadableData = viewModel.loadableData.collectAsState()
-    val dataState = viewModel.data.collectAsState()
-    val errorState = viewModel.error.collectAsState()
-    val loadingState = viewModel.loading.collectAsState()
+    val loadableData = viewModel.loadableData.collectAsState().value
+    val dataState = viewModel.data.collectAsState().value
+    val errorState = viewModel.error.collectAsState().value
+    val loadingState = viewModel.loading.collectAsState().value
 
     Box(modifier = modifier) {
         Column {
-            if (loadingState.value) {
+            if (loadingState) {
                 LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
             }
 
-            when (val loadableData = loadableData.value) {
+            when (loadableData) {
                 is LoadableViewModelState.State.Empty -> {
                     emptyContent()
                 }
@@ -41,12 +41,12 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
                 }
 
                 is LoadableViewModelState.State.Data -> {
-                    content(loadableData.data, dataState.value)
+                    content(loadableData.data, dataState)
                 }
             }
         }
 
-        errorState.value?.toAlert(
+        errorState?.toAlert(
             navigator = viewModel.navigator,
             onDismissRequest = viewModel::closeError
         )

@@ -103,14 +103,13 @@ class AuthenticatedHttpDefaultClient(
         val currentRefreshToken = _bearerTokens.value?.refreshToken ?: return null
 
         val result = authNetworkDataSource.refresh(RefreshTokenRequest(currentRefreshToken))
-        val success = (result as? LivingLinkResult.Data)?.data as? RefreshTokenResponse.Success
 
         when (result) {
             is LivingLinkResult.Error<*> -> {
                 return null
             }
 
-            is LivingLinkResult.Data<RefreshTokenResponse> -> {
+            is LivingLinkResult.Success<RefreshTokenResponse> -> {
                 when (result.data) {
                     RefreshTokenResponse.InvalidOrExpiredRefreshToken -> {
                         client.authProvider<BearerAuthProvider>()?.clearToken()
@@ -145,7 +144,7 @@ class AuthenticatedHttpDefaultClient(
         val result = authNetworkDataSource.login(
             LoginRequest(username = username, password = password)
         )
-        if (result is LivingLinkResult.Data<*> && result.data is LoginResponse.Success) {
+        if (result is LivingLinkResult.Success<*> && result.data is LoginResponse.Success) {
             val newBearerTokens = BearerTokens(
                 accessToken = result.data.accessToken,
                 refreshToken = result.data.refreshToken
@@ -166,7 +165,7 @@ class AuthenticatedHttpDefaultClient(
         val result = authNetworkDataSource.register(
             RegisterRequest(username = username, password = password)
         )
-        if (result is LivingLinkResult.Data<*> && result.data is RegisterResponse.Success) {
+        if (result is LivingLinkResult.Success<*> && result.data is RegisterResponse.Success) {
             val newBearerTokens = BearerTokens(
                 accessToken = result.data.accessToken,
                 refreshToken = result.data.refreshToken

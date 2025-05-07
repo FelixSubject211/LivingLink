@@ -40,6 +40,6 @@ class HapticsSettingsDefaultStore(
         option: HapticsSettingsStore.Options
     ): LivingLinkResult<Unit, Nothing> {
         store.set(option)
-        return LivingLinkResult.Data(Unit)
+        return LivingLinkResult.Success(Unit)
     }
 }

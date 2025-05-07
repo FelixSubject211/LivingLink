@@ -44,7 +44,7 @@ class LoginViewModel(
 
                 is LoginResponse.Success -> {
                     navigator.popAll()
-                    LivingLinkResult.Data(
+                    LivingLinkResult.Success(
                         currentData.copy(
                             username = "",
                             password = "",

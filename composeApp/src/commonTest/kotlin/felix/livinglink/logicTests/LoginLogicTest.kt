@@ -66,7 +66,7 @@ class LoginLogicTest {
         // Arrange
         everySuspend {
             mockAuthNetworkDataSource.login(any())
-        } returns LivingLinkResult.Data(
+        } returns LivingLinkResult.Success(
             LoginResponse.Success(
                 accessToken = accessToken,
                 refreshToken = refreshToken
@@ -172,7 +172,7 @@ class LoginLogicTest {
         // Arrange
         everySuspend {
             mockAuthNetworkDataSource.login(any())
-        } returns LivingLinkResult.Data(LoginResponse.InvalidUsernameOrPassword)
+        } returns LivingLinkResult.Success(LoginResponse.InvalidUsernameOrPassword)
 
         val loginViewModel = appTestModule.loginViewModel()
 

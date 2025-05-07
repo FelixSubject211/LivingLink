@@ -45,7 +45,7 @@ class ChangeNotifierDefaultClient(
                         delay(10_000)
                     }
 
-                    is LivingLinkResult.Data<PollingUpdateResponse> -> {
+                    is LivingLinkResult.Success<PollingUpdateResponse> -> {
                         if (result.data.changeId != lastGroupChangeIdStore.get()) {
                             lastGroupChangeIdStore.set(result.data.changeId)
                             _events.emit(ChangeNotifierClient.Event.GroupChanged)

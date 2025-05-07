@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 
 interface LoadableViewModelState<
@@ -36,7 +36,7 @@ interface LoadableViewModelState<
             currentData: DATA,
             result: RESULT
         ) -> LivingLinkResult<DATA, ERROR> = { data, _ ->
-            LivingLinkResult.Data(data)
+            LivingLinkResult.Success(data)
         }
     )
 
@@ -92,38 +92,39 @@ class LoadableViewModelDefaultState<
         scope = scope
     )
 
-    @Suppress("UNCHECKED_CAST")
-    override val loadableData = input.map { state ->
-        when (state) {
+    override val loadableData = input.mapNotNull { repoState ->
+        when (repoState) {
             RepositoryState.Empty -> {
                 _loading.value = false
-                LoadableViewModelState.State.Empty<LOADABLE_DATA, LOADABLE_ERROR>()
+                LoadableViewModelState.State.Empty()
             }
 
-            is RepositoryState.Loading<*> -> {
-                if (state.data == null) {
-                    LoadableViewModelState.State.Loading<LOADABLE_DATA, LOADABLE_ERROR>()
+            is RepositoryState.Loading<LOADABLE_DATA> -> {
+                val data = repoState.data
+                if (data == null) {
+                    LoadableViewModelState.State.Loading()
                 } else {
                     _loading.value = true
-                    LoadableViewModelState.State.Data(state.data)
+                    LoadableViewModelState.State.Data<LOADABLE_DATA, LOADABLE_ERROR>(data)
                 }
             }
 
-            is RepositoryState.Error -> {
+            is RepositoryState.Error<LOADABLE_ERROR> -> {
                 _loading.value = false
-                _error.value = state.error
+                _error.value = repoState.error
+                null
             }
 
-            is RepositoryState.Data -> {
+            is RepositoryState.Data<LOADABLE_DATA, LOADABLE_ERROR> -> {
                 _loading.value = false
-                LoadableViewModelState.State.Data<LOADABLE_DATA, LOADABLE_ERROR>(state.data)
+                LoadableViewModelState.State.Data(repoState.data)
             }
         }
     }.stateIn(
         scope = scope,
         started = SharingStarted.Lazily,
-        initialValue = LoadableViewModelState.State.Loading<LOADABLE_DATA, LOADABLE_ERROR>()
-    ) as StateFlow<LoadableViewModelState.State<LOADABLE_DATA, LOADABLE_ERROR>>
+        initialValue = LoadableViewModelState.State.Loading()
+    )
 
     override val data: StateFlow<DATA> = viewModelState.data
 

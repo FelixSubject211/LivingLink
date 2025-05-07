@@ -2,6 +2,7 @@ package felix.livinglink.groups.repository
 
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.model.RepositoryState
+import felix.livinglink.common.model.alsoIfIsSuccess
 import felix.livinglink.common.model.map
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.common.repository.FetchAndStoreDataDefaultHandler
@@ -65,11 +66,10 @@ class GroupsDefaultRepository(
 
     override suspend fun createGroup(
         request: CreateGroupRequest
-    )
-            : LivingLinkResult<CreateGroupResponse, NetworkError> {
+    ): LivingLinkResult<CreateGroupResponse, NetworkError> {
         return groupsNetworkDataSource
             .createGroup(request)
-            .also { eventBus.emit(EventBus.Event.UpdateGroups) }
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 
     override suspend fun deleteGroup(
@@ -77,7 +77,7 @@ class GroupsDefaultRepository(
     ): LivingLinkResult<DeleteGroupResponse, NetworkError> {
         return groupsNetworkDataSource
             .deleteGroup(groupId)
-            .also { eventBus.emit(EventBus.Event.UpdateGroups) }
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 
     override suspend fun createInvite(
@@ -85,7 +85,7 @@ class GroupsDefaultRepository(
     ): LivingLinkResult<CreateInviteResponse, NetworkError> {
         return groupsNetworkDataSource
             .createInvite(request)
-            .also { eventBus.emit(EventBus.Event.UpdateGroups) }
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 
     override suspend fun useInvite(

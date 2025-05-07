@@ -55,7 +55,7 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
                         stateFlow.value = RepositoryState.Loading(stateFlow.value.dataOrNull())
 
                         when (val result = networkRequest()) {
-                            is LivingLinkResult.Data<List<DATA>> -> {
+                            is LivingLinkResult.Success<List<DATA>> -> {
                                 saveToDb(result.data)
                                 stateFlow.value = if (result.data.isEmpty()) {
                                     RepositoryState.Empty

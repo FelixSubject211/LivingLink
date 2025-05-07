@@ -15,23 +15,23 @@ fun <DATA, ERROR, REQUEST_ERROR> StatefulView(
     modifier: Modifier,
     content: @Composable (data: DATA) -> Unit,
 ) {
-    val dataState = viewModel.data.collectAsState()
-    val errorState = viewModel.error.collectAsState()
-    val loadingState = viewModel.loading.collectAsState()
+    val dataState = viewModel.data.collectAsState().value
+    val errorState = viewModel.error.collectAsState().value
+    val loadingState = viewModel.loading.collectAsState().value
 
     Box(modifier = modifier) {
         Column {
-            if (loadingState.value) {
+            if (loadingState) {
                 LinearProgressIndicator(
                     modifier = Modifier
                         .fillMaxWidth()
                 )
             }
 
-            content(dataState.value)
+            content(dataState)
         }
 
-        errorState.value?.toAlert(
+        errorState?.toAlert(
             navigator = viewModel.navigator,
             onDismissRequest = viewModel::closeError
         )

@@ -48,7 +48,7 @@ class ListGroupsViewModel(
                 }
 
                 is CreateGroupResponse.Success -> {
-                    LivingLinkResult.Data(currentData)
+                    LivingLinkResult.Success(currentData)
                 }
             }
         }
@@ -63,7 +63,7 @@ class ListGroupsViewModel(
                 }
 
                 UseInviteResponse.Success -> {
-                    LivingLinkResult.Data(currentData)
+                    LivingLinkResult.Success(currentData)
                 }
             }
         }

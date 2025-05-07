@@ -51,11 +51,11 @@ class CreateGroupLogicTest {
         // Arrange
         everySuspend {
             mockGroupsNetworkDataSource.createGroup(CreateGroupRequest(group.name))
-        } returns LivingLinkResult.Data(CreateGroupResponse.Success(groupId = group.id))
+        } returns LivingLinkResult.Success(CreateGroupResponse.Success(groupId = group.id))
 
         everySuspend {
             mockGroupsNetworkDataSource.getGroupsForUser()
-        } returns LivingLinkResult.Data(GetGroupsForUserResponse(groups = setOf(group)))
+        } returns LivingLinkResult.Success(GetGroupsForUserResponse(groups = setOf(group)))
 
         val viewModel = appTestModule.listGroupsViewModel
 
