@@ -76,7 +76,7 @@ class UseInviteCodeTest : BaseIntegrationTest() {
         )
 
         // Assert
-        assertEquals(inviteCode.take(16), inviteResponse.code)
+        assertEquals(inviteCode.take(8), inviteResponse.code)
 
         val useResponse = client.post<UseInviteRequest, UseInviteResponse>(
             urlString = "groups/invite/use",

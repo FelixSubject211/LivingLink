@@ -91,14 +91,18 @@ struct ListGroupsScreen: View {
     }
     
     private func groupCard(_ group: SharedGroup) -> some View {
-        VStack(alignment: .leading, spacing: DesignSystem.Spacing.betweenText) {
-            Text(group.name)
-                .font(.headline)
-                .foregroundColor(DesignSystem.Colors.labelColor)
+        Button(action: {
+            viewModel.navigator.push(screen: LivingLinkScreen.Group(groupId: group.id))
+        }, label: {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.betweenText) {
+                Text(group.name)
+                    .font(.headline)
+                    .foregroundColor(DesignSystem.Colors.labelColor)
 
-            Text(localizables.groupMemberCount.localized(group.groupMemberIdsToName.count))
-                .font(.subheadline)
-        }
+                Text(localizables.groupMemberCount.localized(group.groupMemberIdsToName.count))
+                    .font(.subheadline)
+            }
+        })
     }
 }
 

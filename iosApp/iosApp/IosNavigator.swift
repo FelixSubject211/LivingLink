@@ -35,6 +35,8 @@ class IosNavigator: Navigator, ObservableObject {
             switch(screen) {
             case is LivingLinkScreen.ListGroups:
                 self.navigationPath.append(Screen.ListGroups())
+            case is LivingLinkScreen.Group:
+                self.navigationPath.append(Screen.Group(groupId: (screen as! LivingLinkScreen.Group).groupId))
             case is LivingLinkScreen.Settings:
                 self.navigationPath.append(Screen.Settings())
             case is LivingLinkScreen.Login:
@@ -48,6 +50,7 @@ class IosNavigator: Navigator, ObservableObject {
     
     enum Screen {
         struct ListGroups: Hashable{}
+        struct Group: Hashable{ let groupId: String }
         struct Settings: Hashable{}
         struct Login: Hashable{}
         struct Register: Hashable{}

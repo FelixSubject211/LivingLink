@@ -85,12 +85,13 @@ class GroupsDefaultRepository(
     ): LivingLinkResult<CreateInviteResponse, NetworkError> {
         return groupsNetworkDataSource
             .createInvite(request)
-            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 
     override suspend fun useInvite(
         request: UseInviteRequest
     ): LivingLinkResult<UseInviteResponse, NetworkError> {
-        return groupsNetworkDataSource.useInvite(request)
+        return groupsNetworkDataSource
+            .useInvite(request)
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 }

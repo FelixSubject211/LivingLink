@@ -10,7 +10,7 @@ import io.ktor.server.routing.route
 fun Route.eventRoutes(changeNotifier: ChangeNotifier) {
     route("/event") {
         get("/group-change") {
-            val pollInterval = 20
+            val pollInterval = 5
             val userId = call.principal<UserPrincipal>()!!.userId
             val changeId = changeNotifier.getLastGroupChangeIdForUser(userId)
             call.respond(PollingUpdateResponse(changeId, pollInterval))

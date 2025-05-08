@@ -39,6 +39,9 @@ fileprivate struct NavigationView: View {
     var body: some View {
         NavigationStack(path: $navigartor.navigationPath) {
             ListGroupsScreen(viewModel: uiModule.listGroupsViewModel)
+                .navigationDestination(for: IosNavigator.Screen.Group.self) { group in
+                    GroupScreen(viewModel: uiModule.groupViewModel(groupId: group.groupId))
+                }
                 .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in
                     SettingsScreen(viewModel: uiModule.settingsViewModel)
                 }

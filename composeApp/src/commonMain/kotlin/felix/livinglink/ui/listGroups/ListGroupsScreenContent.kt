@@ -16,6 +16,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import felix.livinglink.ui.common.navigation.LivingLinkScreen
 
 @Composable
 fun ListGroupsScreenContent(
@@ -32,7 +33,10 @@ fun ListGroupsScreenContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(loadableData.groups) { group ->
-                ListGroupsGroupItem(group)
+                ListGroupsGroupItem(
+                    group = group,
+                    onClick = { viewModel.navigator.push(LivingLinkScreen.Group(group.id)) }
+                )
             }
 
             item {

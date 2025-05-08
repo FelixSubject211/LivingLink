@@ -58,7 +58,7 @@ class CreateInviteCodeTest : BaseIntegrationTest() {
 
         // Assert
         assertNotNull(response.code)
-        assertEquals(uuid.take(16), response.code)
+        assertEquals(uuid.take(8), response.code)
 
         assertNoRedisChangeSet(userId = TestData.alice.id)
     }

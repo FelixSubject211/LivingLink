@@ -4,11 +4,13 @@ import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.model.mapState
+import felix.livinglink.group.Group
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
 import felix.livinglink.ui.common.state.ViewModelDefaultState
+import felix.livinglink.ui.group.GroupViewModel
 import felix.livinglink.ui.listGroups.ListGroupsViewModel
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
@@ -21,6 +23,7 @@ interface UiModule {
     fun loginViewModel(): LoginViewModel
     fun registerViewModel(): RegisterViewModel
     val listGroupsViewModel: ListGroupsViewModel
+    fun groupViewModel(groupId: String): GroupViewModel
 }
 
 fun defaultUiModule(
@@ -84,6 +87,25 @@ fun defaultUiModule(
                     flow.mapState { ListGroupsViewModel.LoadableData(it) }
                 },
                 initialState = ListGroupsViewModel.initialState,
+                hapticsController = hapticsModule.hapticsController,
+                scope = commonModule.defaultScope
+            )
+        )
+
+        override fun groupViewModel(groupId: String) = GroupViewModel(
+            navigator = navigator,
+            groupId = groupId,
+            groupsRepository = groupsModule.groupsRepository,
+            viewModelState = LoadableViewModelDefaultState(
+                input = groupsModule.groupsRepository.groups.map { flow ->
+                    flow.mapState { state ->
+                        when (val group = state.firstOrNull { it.id == groupId }) {
+                            is Group -> GroupViewModel.LoadableData(group)
+                            else -> null
+                        }
+                    }
+                },
+                initialState = GroupViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope
             )

@@ -131,7 +131,7 @@ class GroupDefaultStore(
 
     override fun createInviteCode(groupId: String, createdBy: String): String? {
         val now = java.time.Instant.ofEpochMilli(timeService.currentTimeMillis())
-        val code = uuidFactory().take(16)
+        val code = uuidFactory().take(8)
 
         return try {
             database.useTransaction {

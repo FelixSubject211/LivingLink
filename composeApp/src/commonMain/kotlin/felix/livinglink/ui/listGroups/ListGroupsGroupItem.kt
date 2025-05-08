@@ -16,12 +16,16 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.group.Group
 
 @Composable
-fun ListGroupsGroupItem(group: Group) {
+fun ListGroupsGroupItem(
+    group: Group,
+    onClick: () -> Unit
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        onClick = onClick
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
