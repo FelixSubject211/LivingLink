@@ -6,17 +6,15 @@ import felix.livinglink.auth.network.AuthenticatedHttpClient
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.network.NetworkError
-import felix.livinglink.ui.common.navigation.LivingLinkScreen
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.StatefulViewModel
 import felix.livinglink.ui.common.state.ViewModelState
 
 class LoginViewModel(
-    private val navigator: Navigator,
+    override val navigator: Navigator,
     private val authenticatedHttpClient: AuthenticatedHttpClient,
     private val viewModelState: ViewModelState<Data, Error, NetworkError>,
 ) : StatefulViewModel<LoginViewModel.Data, LoginViewModel.Error, NetworkError> {
-
     override val data = viewModelState.data
     override val error = viewModelState.error
     override val loading = viewModelState.loading
@@ -30,8 +28,6 @@ class LoginViewModel(
     fun updatePassword(password: String) = viewModelState.perform { current ->
         current.copy(password = password)
     }
-
-    fun register() = navigator.push(LivingLinkScreen.Register)
 
     fun login() = viewModelState.perform(
         request = { currentData ->
@@ -48,7 +44,7 @@ class LoginViewModel(
 
                 is LoginResponse.Success -> {
                     navigator.popAll()
-                    LivingLinkResult.Data(
+                    LivingLinkResult.Success(
                         currentData.copy(
                             username = "",
                             password = "",

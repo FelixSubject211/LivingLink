@@ -10,10 +10,10 @@ import ComposeApp
 import SwiftUI
 
 
-struct StatefulView<Data, Error: LivingLinkError, Content: View>: View {
+struct StatefulView<Data, Error: LivingLinkError>: View {
     let viewModel: StatefulViewModel
     let buildAlert: (Error) -> Alert
-    let content: (Data) -> Content
+    let content: (Data) -> AnyView
     
     @ObservedObject var data: StateFlowObservable<Data>
     @ObservedObject var error: StateFlowObservable<Error?>
@@ -22,7 +22,7 @@ struct StatefulView<Data, Error: LivingLinkError, Content: View>: View {
     init(
         viewModel: StatefulViewModel,
         buildAlert: @escaping (Error) -> Alert,
-        content: @escaping (Data) -> Content
+        content: @escaping (Data) -> AnyView
     ) {
         self.viewModel = viewModel
         self.data = viewModel.data.asObservableObject()
@@ -39,9 +39,6 @@ struct StatefulView<Data, Error: LivingLinkError, Content: View>: View {
                 .disabled(loading.value.boolValue)
             
             if (loading.value.boolValue) {
-                Color.black.opacity(0.2)
-                    .ignoresSafeArea()
-                
                 VStack {
                     ProgressView()
                         .padding()

@@ -9,7 +9,7 @@
 import ComposeApp
 
 extension I18n4k_coreMessageBundleLocalizedStringFactory1 {
-    func localized(_ p0: String) -> String {
+    func localized(_ p0: Any) -> String {
         self.get(p0: p0).invoke()
     }
 }

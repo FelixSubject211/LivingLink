@@ -103,21 +103,38 @@ class AuthenticatedHttpDefaultClient(
         val currentRefreshToken = _bearerTokens.value?.refreshToken ?: return null
 
         val result = authNetworkDataSource.refresh(RefreshTokenRequest(currentRefreshToken))
-        val success =
-            (result as? LivingLinkResult.Data)?.data as? RefreshTokenResponse.Success ?: return null
 
-        val newBearerTokens = BearerTokens(
-            accessToken = success.accessToken,
-            refreshToken = success.refreshToken
-        )
+        when (result) {
+            is LivingLinkResult.Error<*> -> {
+                return null
+            }
 
-        tokenStore.set(
-            accessToken = newBearerTokens.accessToken,
-            refreshToken = newBearerTokens.refreshToken!!
-        )
-        _bearerTokens.value = newBearerTokens
+            is LivingLinkResult.Success<RefreshTokenResponse> -> {
+                when (result.data) {
+                    RefreshTokenResponse.InvalidOrExpiredRefreshToken -> {
+                        client.authProvider<BearerAuthProvider>()?.clearToken()
+                        tokenStore.clear()
+                        _bearerTokens.value = null
+                        return null
+                    }
 
-        return newBearerTokens
+                    is RefreshTokenResponse.Success -> {
+                        val newBearerTokens = BearerTokens(
+                            accessToken = result.data.accessToken,
+                            refreshToken = result.data.refreshToken
+                        )
+
+                        tokenStore.set(
+                            accessToken = newBearerTokens.accessToken,
+                            refreshToken = newBearerTokens.refreshToken!!
+                        )
+                        _bearerTokens.value = newBearerTokens
+
+                        return newBearerTokens
+                    }
+                }
+            }
+        }
     }
 
     override suspend fun login(
@@ -127,7 +144,7 @@ class AuthenticatedHttpDefaultClient(
         val result = authNetworkDataSource.login(
             LoginRequest(username = username, password = password)
         )
-        if (result is LivingLinkResult.Data<*> && result.data is LoginResponse.Success) {
+        if (result is LivingLinkResult.Success<*> && result.data is LoginResponse.Success) {
             val newBearerTokens = BearerTokens(
                 accessToken = result.data.accessToken,
                 refreshToken = result.data.refreshToken
@@ -148,7 +165,7 @@ class AuthenticatedHttpDefaultClient(
         val result = authNetworkDataSource.register(
             RegisterRequest(username = username, password = password)
         )
-        if (result is LivingLinkResult.Data<*> && result.data is RegisterResponse.Success) {
+        if (result is LivingLinkResult.Success<*> && result.data is RegisterResponse.Success) {
             val newBearerTokens = BearerTokens(
                 accessToken = result.data.accessToken,
                 refreshToken = result.data.refreshToken

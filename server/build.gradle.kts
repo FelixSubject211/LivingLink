@@ -22,6 +22,8 @@ dependencies {
     implementation(libs.ktor.server.auth)
     implementation(libs.ktor.server.auth.jwt)
     implementation(libs.ktor.server.content.negotiation)
+    implementation(libs.ktor.server.cors)
+    implementation(libs.kotlinx.datetime)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.jbcrypt)
     implementation(libs.java.jwt)
@@ -29,6 +31,8 @@ dependencies {
     implementation(libs.dotenv)
     implementation(libs.postgresql)
     implementation(libs.ktorm)
+    implementation(libs.lettuce)
+    implementation(libs.coroutines.reactive)
 
     testImplementation(libs.kotlin.test)
     testImplementation(libs.kotlin.test.junit)

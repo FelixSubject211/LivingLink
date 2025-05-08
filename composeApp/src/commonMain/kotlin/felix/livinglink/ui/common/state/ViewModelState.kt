@@ -25,25 +25,27 @@ interface ViewModelState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : LivingLi
 
     fun <RESULT> perform(
         assert: (currentData: DATA) -> LivingLinkResult<Unit, ERROR> = {
-            LivingLinkResult.Data(Unit)
+            LivingLinkResult.Success(Unit)
         },
         request: suspend (currentData: DATA) -> LivingLinkResult<RESULT, REQUEST_ERROR>,
         onSuccess: (
             currentData: DATA,
             result: RESULT
         ) -> LivingLinkResult<DATA, ERROR> = { data, _ ->
-            LivingLinkResult.Data(data)
+            LivingLinkResult.Success(data)
         }
     )
 
     sealed class CombinedError<out ERROR, out REQUEST_ERROR> : LivingLinkError {
-        data class Error<ERROR : LivingLinkError>(val value: ERROR) :
+        abstract val value: LivingLinkError
+
+        data class Error<ERROR : LivingLinkError>(override val value: ERROR) :
             CombinedError<ERROR, Nothing>() {
             override fun title() = value.title()
             override fun message() = value.message()
         }
 
-        data class Request<REQUEST_ERROR : LivingLinkError>(val value: REQUEST_ERROR) :
+        data class Request<REQUEST_ERROR : LivingLinkError>(override val value: REQUEST_ERROR) :
             CombinedError<Nothing, REQUEST_ERROR>() {
             override fun title() = value.title()
             override fun message() = value.message()
@@ -112,9 +114,9 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
                     error.value = ViewModelState.CombinedError.Request(response.error)
                 }
 
-                is LivingLinkResult.Data -> {
+                is LivingLinkResult.Success -> {
                     when (val result = onSuccess(data.value, response.data)) {
-                        is LivingLinkResult.Data -> {
+                        is LivingLinkResult.Success -> {
                             hapticsController.performSuccess()
                             data.update { result.data }
                         }

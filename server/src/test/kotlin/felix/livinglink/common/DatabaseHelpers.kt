@@ -1,6 +1,8 @@
 package felix.livinglink.common
 
 import felix.livinglink.auth.RefreshToken
+import felix.livinglink.group.Group
+import kotlinx.datetime.toJavaInstant
 import org.ktorm.database.Database
 import org.ktorm.dsl.from
 import org.ktorm.dsl.insert
@@ -35,7 +37,7 @@ fun Database.dropTableIfExists(table: BaseTable<*>) {
     }
 }
 
-fun Database.addSampleData(
+fun Database.addSampleUsers(
     users: Collection<RawUser> = emptySet(),
     refreshTokens: Collection<RefreshToken> = emptySet(),
     user: RawUser? = null,
@@ -67,6 +69,32 @@ fun Database.addSampleData(
             set(it.userId, singleRefreshToken.userId)
             set(it.username, singleRefreshToken.username)
             set(it.expiresAt, singleRefreshToken.expiresAt)
+        }
+    }
+}
+
+fun Database.addSampleGroups(
+    groups: Collection<Group> = emptySet(),
+    group: Group? = null
+) {
+    val allGroups = buildList {
+        addAll(groups)
+        group?.let { add(it) }
+    }
+
+    allGroups.forEach { singleGroup ->
+        insert(GroupsTable) {
+            set(it.id, singleGroup.id)
+            set(it.name, singleGroup.name)
+            set(it.createdAt, singleGroup.createdAt.toJavaInstant())
+        }
+
+        singleGroup.groupMemberIdsToName.keys.forEach { memberId ->
+            insert(GroupMembersTable) {
+                set(it.groupId, singleGroup.id)
+                set(it.userId, memberId)
+                set(it.createdAt, singleGroup.createdAt.toJavaInstant())
+            }
         }
     }
 }

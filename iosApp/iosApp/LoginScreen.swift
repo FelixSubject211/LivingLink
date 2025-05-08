@@ -18,7 +18,10 @@ struct LoginScreen: View {
         StatefulView(
             viewModel: viewModel,
             buildAlert: { (error: LoginScreenError) in
-                error.asBasicAlert()
+                error.asAlert(
+                    navigator: viewModel.navigator,
+                    dismiss: viewModel.closeError
+                )
             },
             content: content(data:)
         )
@@ -29,7 +32,7 @@ struct LoginScreen: View {
         }
     }
     
-    private func content(data: LoginViewModel.Data) -> some View {
+    private func content(data: LoginViewModel.Data) -> AnyView {
         VStack {
             Spacer()
             
@@ -56,7 +59,7 @@ struct LoginScreen: View {
                 .submitLabel(.go)
                 .onSubmit(viewModel.login)
 
-                Button(action: viewModel.register) {
+                Button(action: { viewModel.navigator.push(screen: LivingLinkScreen.Register()) } ) {
                     Text(localizables.registerHintText.localized)
                         .font(.footnote)
                 }
@@ -64,15 +67,13 @@ struct LoginScreen: View {
 
             Spacer()
 
-            Button(
+            DesignSystem.PrimaryButton(
+                title: localizables.loginButtonTitle.localized,
                 action: viewModel.login
-            ) {
-                Text(localizables.loginButtonTitle.localized)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-            }
-            .buttonStyle(DesignSystem.PrimaryButtonStyle())
-        }.padding(DesignSystem.bodyPadding)
+            )
+        }
+        .padding(DesignSystem.Padding.large)
+        .eraseToAnyView()
     }
     
     private enum Field {

@@ -60,7 +60,7 @@ class LogoutLogicTest {
 
         everySuspend {
             mockAuthNetworkDataSource.logout(any())
-        } returns LivingLinkResult.Data(
+        } returns LivingLinkResult.Success(
             LogoutResponse.Success
         )
 

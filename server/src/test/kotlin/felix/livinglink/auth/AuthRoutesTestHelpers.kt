@@ -80,7 +80,6 @@ fun Database.assertHasRefreshToken(
     return refreshToken
 }
 
-
 fun assertAccessTokenIsValid(
     config: ServerConfig,
     accessToken: String,

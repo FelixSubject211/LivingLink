@@ -11,7 +11,7 @@ import felix.livinglink.ui.common.state.StatefulViewModel
 import felix.livinglink.ui.common.state.ViewModelState
 
 class RegisterViewModel(
-    private val navigator: Navigator,
+    override val navigator: Navigator,
     private val authenticatedHttpClient: AuthenticatedHttpClient,
     private val viewModelState: ViewModelState<Data, Error, NetworkError>,
 ) : StatefulViewModel<RegisterViewModel.Data, RegisterViewModel.Error, NetworkError> {
@@ -41,7 +41,7 @@ class RegisterViewModel(
                     LivingLinkResult.Error(Error.PasswordsDoNotMatch)
 
                 else ->
-                    LivingLinkResult.Data(Unit)
+                    LivingLinkResult.Success(Unit)
             }
         },
         request = { currentData ->
@@ -66,7 +66,7 @@ class RegisterViewModel(
 
                 is RegisterResponse.Success -> {
                     navigator.popAll()
-                    LivingLinkResult.Data(
+                    LivingLinkResult.Success(
                         currentData.copy(
                             username = "",
                             password = "",

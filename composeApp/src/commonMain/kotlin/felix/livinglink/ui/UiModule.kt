@@ -3,30 +3,39 @@ package felix.livinglink.ui
 import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.model.RepositoryState
+import felix.livinglink.common.model.mapState
+import felix.livinglink.group.Group
+import felix.livinglink.groups.GroupsModule
 import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
 import felix.livinglink.ui.common.state.ViewModelDefaultState
+import felix.livinglink.ui.group.GroupViewModel
+import felix.livinglink.ui.listGroups.ListGroupsViewModel
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 
 interface UiModule {
     val settingsViewModel: SettingsViewModel
     fun loginViewModel(): LoginViewModel
     fun registerViewModel(): RegisterViewModel
+    val listGroupsViewModel: ListGroupsViewModel
+    fun groupViewModel(groupId: String): GroupViewModel
 }
 
 fun defaultUiModule(
     navigator: Navigator,
     commonModule: CommonModule,
     hapticsModule: HapticsModule,
-    authModule: AuthModule
+    authModule: AuthModule,
+    groupsModule: GroupsModule
 ): UiModule {
     return object : UiModule {
 
-        val settingsViewModelInout = combine(
+        val settingsViewModelInput = combine(
             authModule.authenticatedHttpClient.session,
             hapticsModule.hapticsSettingsStore.updates
         ) { session, hapticsOptions ->
@@ -43,7 +52,7 @@ fun defaultUiModule(
             authenticatedHttpClient = authModule.authenticatedHttpClient,
             hapticsSettingsStore = hapticsModule.hapticsSettingsStore,
             viewModelState = LoadableViewModelDefaultState(
-                input = settingsViewModelInout,
+                input = settingsViewModelInput,
                 initialState = SettingsViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope
@@ -65,6 +74,38 @@ fun defaultUiModule(
             authenticatedHttpClient = authModule.authenticatedHttpClient,
             viewModelState = ViewModelDefaultState(
                 initialState = RegisterViewModel.initialState,
+                hapticsController = hapticsModule.hapticsController,
+                scope = commonModule.defaultScope
+            )
+        )
+
+        override val listGroupsViewModel = ListGroupsViewModel(
+            navigator = navigator,
+            groupsRepository = groupsModule.groupsRepository,
+            viewModelState = LoadableViewModelDefaultState(
+                input = groupsModule.groupsRepository.groups.map { flow ->
+                    flow.mapState { ListGroupsViewModel.LoadableData(it) }
+                },
+                initialState = ListGroupsViewModel.initialState,
+                hapticsController = hapticsModule.hapticsController,
+                scope = commonModule.defaultScope
+            )
+        )
+
+        override fun groupViewModel(groupId: String) = GroupViewModel(
+            navigator = navigator,
+            groupId = groupId,
+            groupsRepository = groupsModule.groupsRepository,
+            viewModelState = LoadableViewModelDefaultState(
+                input = groupsModule.groupsRepository.groups.map { flow ->
+                    flow.mapState { state ->
+                        when (val group = state.firstOrNull { it.id == groupId }) {
+                            is Group -> GroupViewModel.LoadableData(group)
+                            else -> null
+                        }
+                    }
+                },
+                initialState = GroupViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope
             )

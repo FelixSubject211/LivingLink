@@ -1,11 +1,16 @@
 package felix.livinglink.ui.common.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import felix.livinglink.ui.UiModule
+import felix.livinglink.ui.group.GroupScreen
+import felix.livinglink.ui.listGroups.ListGroupsScreen
 import felix.livinglink.ui.login.LoginScreen
 import felix.livinglink.ui.register.RegisterScreen
 import felix.livinglink.ui.settings.SettingsScreen
@@ -17,17 +22,58 @@ fun NavigationHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = LivingLinkScreen.Settings.route,
+        startDestination = LivingLinkScreen.ListGroups.route,
         modifier = Modifier
     ) {
+        composable(route = LivingLinkScreen.ListGroups.route) {
+            ViewModelCache.clearAll()
+            ListGroupsScreen(uiModule.listGroupsViewModel)
+        }
+        composable(
+            route = "group/{groupId}",
+            arguments = listOf(navArgument("groupId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val viewModel = remember(groupId) {
+                ViewModelCache.getOrCreate("groupViewModel_$groupId") {
+                    uiModule.groupViewModel(groupId)
+                }
+            }
+            GroupScreen(viewModel)
+        }
         composable(route = LivingLinkScreen.Settings.route) {
+            ViewModelCache.clearAll()
             SettingsScreen(uiModule.settingsViewModel)
         }
         composable(route = LivingLinkScreen.Login.route) {
+            ViewModelCache.clearAll()
             LoginScreen(uiModule.loginViewModel())
         }
         composable(route = LivingLinkScreen.Register.route) {
+            ViewModelCache.clearAll()
             RegisterScreen(uiModule.registerViewModel())
         }
+    }
+}
+
+// ViewModelCache is used to store and retrieve ViewModels to prevent unnecessary recompositions.
+// This ensures that ViewModels persist across navigation changes and are not recreated multiple times.
+private object ViewModelCache {
+    private val cache = mutableMapOf<String, Any>()
+
+    @Suppress("UNCHECKED_CAST")
+    fun <T : Any> getOrCreate(key: String, factory: () -> T): T {
+        val existing = cache[key] as? T
+        return if (existing != null) {
+            existing
+        } else {
+            val newInstance = factory()
+            cache[key] = newInstance
+            newInstance
+        }
+    }
+
+    fun clearAll() {
+        cache.clear()
     }
 }

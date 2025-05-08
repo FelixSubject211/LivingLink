@@ -6,7 +6,7 @@ import felix.livinglink.common.RefreshTokensTable
 import felix.livinglink.common.TimeService
 import felix.livinglink.common.UsersTable
 import felix.livinglink.common.UuidFactory
-import felix.livinglink.common.addSampleData
+import felix.livinglink.common.addSampleUsers
 import felix.livinglink.common.assertHasTotalRecords
 import felix.livinglink.common.defaultAppModule
 import felix.livinglink.common.post
@@ -162,7 +162,7 @@ class AuthRoutesRegisterTest : BaseIntegrationTest() {
             )
         }
 
-        database.addSampleData(user = user)
+        database.addSampleUsers(user = user)
 
         // Act
         val response: RegisterResponse = client.post(

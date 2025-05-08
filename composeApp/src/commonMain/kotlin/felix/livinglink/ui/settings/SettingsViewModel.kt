@@ -2,11 +2,10 @@ package felix.livinglink.ui.settings
 
 import felix.livinglink.auth.network.AuthenticatedHttpClient
 import felix.livinglink.haptics.store.HapticsSettingsStore
-import felix.livinglink.ui.common.navigation.LivingLinkScreen
 import felix.livinglink.ui.common.navigation.Navigator
 
 class SettingsViewModel(
-    private val navigator: Navigator,
+    override val navigator: Navigator,
     private val authenticatedHttpClient: AuthenticatedHttpClient,
     private val hapticsSettingsStore: HapticsSettingsStore,
     private val viewModelState: SettingsViewModelState,
@@ -17,8 +16,6 @@ class SettingsViewModel(
     override val loading = viewModelState.loading
 
     override fun closeError() = viewModelState.closeError()
-
-    fun login() = navigator.push(LivingLinkScreen.Login)
 
     fun showDeleteUserAlert() = viewModelState.perform { current ->
         current.copy(showDeleteUserAlert = true)

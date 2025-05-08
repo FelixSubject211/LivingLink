@@ -42,7 +42,7 @@ class AuthNetworkDefaultDataSource(
 
     override suspend fun refresh(request: RefreshTokenRequest): LivingLinkResult<RefreshTokenResponse, NetworkError> {
         return httpClient.post(
-            urlString = "auth/register",
+            urlString = "auth/refresh",
             request = request
         )
     }
@@ -55,9 +55,6 @@ class AuthNetworkDefaultDataSource(
     }
 
     override suspend fun deleteUser(authenticatedHttpClient: HttpClient): LivingLinkResult<DeleteUserResponse, NetworkError> {
-        return authenticatedHttpClient.delete(
-            urlString = "auth/account",
-            request = ""
-        )
+        return authenticatedHttpClient.delete(urlString = "auth/account")
     }
 }

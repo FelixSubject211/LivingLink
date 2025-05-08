@@ -6,7 +6,6 @@
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-
 import SwiftUI
 import ComposeApp
 
@@ -18,10 +17,10 @@ struct SettingsScreen: View {
         LoadableStatefulView(
             viewModel: viewModel,
             buildAlert: { (error: SettingsScreenError) in
-                error.asBasicAlert()
-            },
-            errorContent: { (error: SettingsScreenError) in
-                error.asBasicErrorView()
+                error.asAlert(
+                    navigator: viewModel.navigator,
+                    dismiss: viewModel.closeError
+                )
             },
             content: content
         )
@@ -32,7 +31,7 @@ struct SettingsScreen: View {
         }
     }
     
-    private func content(loadableData: SettingsViewModel.LoadableData, data: SettingsViewModel.Data) -> some View {
+    private func content(loadableData: SettingsViewModel.LoadableData, data: SettingsViewModel.Data) -> AnyView {
         List {
             Section(localizables.sectionAccountTitle.localized) {
                 switch loadableData.session {
@@ -56,7 +55,7 @@ struct SettingsScreen: View {
                         }
                 case is AuthenticatedHttpClientAuthSession.LoggedOut:
                     Text(localizables.notLoggedIn.localized)
-                    Button(localizables.loginButton.localized, action: viewModel.login)
+                    Button(localizables.loginButton.localized, action: { viewModel.navigator.push(screen: LivingLinkScreen.Login()) })
                 default:
                     EmptyView()
                 }
@@ -82,6 +81,7 @@ struct SettingsScreen: View {
         }
         .scrollContentBackground(.hidden)
         .listStyle(.insetGrouped)
+        .eraseToAnyView()
     }
 }
 

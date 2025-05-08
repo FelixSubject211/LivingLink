@@ -7,14 +7,20 @@ import felix.livinglink.common.ServerConfig
 import felix.livinglink.common.UserPrincipal
 import felix.livinglink.common.defaultAppModule
 import felix.livinglink.common.defaultServerConfig
+import felix.livinglink.event.eventRoutes
+import felix.livinglink.groups.groupRoutes
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication
+import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.routing
 import kotlinx.serialization.json.Json
 
@@ -39,6 +45,18 @@ fun Application.module(
         json(Json {
             isLenient = true
         })
+    }
+
+    install(CORS) {
+        anyHost()
+        allowHeader(HttpHeaders.ContentType)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader(HttpHeaders.Upgrade)
+        allowMethod(HttpMethod.Get)
+        allowMethod(HttpMethod.Post)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Options)
     }
 
     install(Authentication) {
@@ -67,5 +85,14 @@ fun Application.module(
             config = config,
             authService = appModule.authService
         )
+
+        authenticate(config.authenticationConfig) {
+            eventRoutes(
+                changeNotifier = appModule.changeNotifier
+            )
+            groupRoutes(
+                groupService = appModule.groupService
+            )
+        }
     }
 }

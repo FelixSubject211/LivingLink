@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 
 interface LoadableViewModelState<
@@ -36,34 +36,33 @@ interface LoadableViewModelState<
             currentData: DATA,
             result: RESULT
         ) -> LivingLinkResult<DATA, ERROR> = { data, _ ->
-            LivingLinkResult.Data(data)
+            LivingLinkResult.Success(data)
         }
     )
 
     sealed class State<LOADABLE_DATA, LOADABLE_ERROR> {
         class Empty<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
         class Loading<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
-        data class Error<LOADABLE_DATA, LOADABLE_ERROR>(val error: LOADABLE_ERROR) :
-            State<LOADABLE_DATA, LOADABLE_ERROR>()
-
         data class Data<LOADABLE_DATA, LOADABLE_ERROR>(val data: LOADABLE_DATA) :
             State<LOADABLE_DATA, LOADABLE_ERROR>()
     }
 
     sealed class CombinedError<out LOADABLE_ERROR, out ERROR, out REQUEST_ERROR> : LivingLinkError {
-        data class Loadable<LOADABLE_ERROR : LivingLinkError>(val value: LOADABLE_ERROR) :
+        abstract val value: LivingLinkError
+
+        data class Loadable<LOADABLE_ERROR : LivingLinkError>(override val value: LOADABLE_ERROR) :
             CombinedError<LOADABLE_ERROR, Nothing, Nothing>() {
             override fun title() = value.title()
             override fun message() = value.message()
         }
 
-        data class Error<ERROR : LivingLinkError>(val value: ERROR) :
+        data class Error<ERROR : LivingLinkError>(override val value: ERROR) :
             CombinedError<Nothing, ERROR, Nothing>() {
             override fun title() = value.title()
             override fun message() = value.message()
         }
 
-        data class Request<REQUEST_ERROR : LivingLinkError>(val value: REQUEST_ERROR) :
+        data class Request<REQUEST_ERROR : LivingLinkError>(override val value: REQUEST_ERROR) :
             CombinedError<Nothing, Nothing, REQUEST_ERROR>() {
             override fun title() = value.title()
             override fun message() = value.message()
@@ -93,46 +92,41 @@ class LoadableViewModelDefaultState<
         scope = scope
     )
 
-    @Suppress("UNCHECKED_CAST")
-    override val loadableData = input.map { state ->
-        when (state) {
+    override val loadableData = input.mapNotNull { repoState ->
+        when (repoState) {
             RepositoryState.Empty -> {
                 _loading.value = false
-                LoadableViewModelState.State.Empty<LOADABLE_DATA, LOADABLE_ERROR>()
+                LoadableViewModelState.State.Empty()
             }
 
-            is RepositoryState.Loading<*> -> {
-                if (state.data == null) {
-                    LoadableViewModelState.State.Loading<LOADABLE_DATA, LOADABLE_ERROR>()
+            is RepositoryState.Loading<LOADABLE_DATA> -> {
+                val data = repoState.data
+                if (data == null) {
+                    LoadableViewModelState.State.Loading()
                 } else {
                     _loading.value = true
-                    LoadableViewModelState.State.Data(state.data)
+                    LoadableViewModelState.State.Data<LOADABLE_DATA, LOADABLE_ERROR>(data)
                 }
             }
 
-            is RepositoryState.Error -> {
-                val error = state.error
-                if (state.data == null) {
-                    LoadableViewModelState.State.Error(error)
-                } else {
-                    _error.value = error
-                    LoadableViewModelState.State.Data(state.data)
-                }
-            }
-
-            is RepositoryState.Data -> {
+            is RepositoryState.Error<LOADABLE_ERROR> -> {
                 _loading.value = false
-                LoadableViewModelState.State.Data(state.data)
+                _error.value = repoState.error
+                null
+            }
+
+            is RepositoryState.Data<LOADABLE_DATA, LOADABLE_ERROR> -> {
+                _loading.value = false
+                LoadableViewModelState.State.Data(repoState.data)
             }
         }
     }.stateIn(
         scope = scope,
         started = SharingStarted.Lazily,
-        initialValue = LoadableViewModelState.State.Loading<LOADABLE_DATA, LOADABLE_ERROR>()
-    ) as StateFlow<LoadableViewModelState.State<LOADABLE_DATA, LOADABLE_ERROR>>
+        initialValue = LoadableViewModelState.State.Loading()
+    )
 
     override val data: StateFlow<DATA> = viewModelState.data
-
 
     override val error = viewModelState.error
         .combine(_error) { viewModelError, loadableError ->

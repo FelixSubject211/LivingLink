@@ -27,14 +27,6 @@ suspend fun <T : Any, E : Any> ReceiveTurbine<LoadableViewModelState.State<T, E>
                     (actual as LoadableViewModelState.State.Data<*, *>).data
                 )
             }
-
-            is LoadableViewModelState.State.Error -> {
-                assertIs<LoadableViewModelState.State.Error<*, *>>(actual)
-                assertEquals(
-                    expectedState.error,
-                    (actual as LoadableViewModelState.State.Error<*, *>).error
-                )
-            }
         }
     }
 }
