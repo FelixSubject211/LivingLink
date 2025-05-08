@@ -1,5 +1,6 @@
 package felix.livinglink.event.network
 
+import felix.livinglink.Config
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.common.network.get
@@ -22,6 +23,7 @@ interface ChangeNotifierClient {
 }
 
 class ChangeNotifierDefaultClient(
+    private val config: Config,
     private val authenticatedHttpClient: HttpClient,
     private val scope: CoroutineScope
 ) : ChangeNotifierClient {
@@ -42,7 +44,7 @@ class ChangeNotifierDefaultClient(
 
                 when (result) {
                     is LivingLinkResult.Error<*> -> {
-                        delay(10_000)
+                        delay(config.pollingRetryDelaySeconds.toLong() * 1000)
                     }
 
                     is LivingLinkResult.Success<PollingUpdateResponse> -> {

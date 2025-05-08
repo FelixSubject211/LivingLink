@@ -88,6 +88,7 @@ fun Application.module(
 
         authenticate(config.authenticationConfig) {
             eventRoutes(
+                config = config,
                 changeNotifier = appModule.changeNotifier
             )
             groupRoutes(

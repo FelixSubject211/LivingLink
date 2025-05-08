@@ -41,6 +41,7 @@ fun defaultAppModule(
         commonModule = commonModule
     )
     val eventModule = defaultEventModule(
+        config = config,
         commonModule = commonModule,
         authModule = authModule
     )

@@ -9,11 +9,13 @@ interface Config {
     val sessionIdClaim: String
     val accessTokenExpirationMs: Int
     val refreshTokenExpirationMs: Int
+    val pollingIntervalSeconds: Int
+    val pollingRetryDelaySeconds: Int
 }
 
 fun defaultConfig(): Config {
     return object : Config {
-        override val serverHost = "100.105.28.50"
+        override val serverHost = getLocalhost()
         override val serverPort = 8080
         override val authenticationConfig = "auth-jwt"
         override val userIdClaim = "userId"
@@ -21,5 +23,7 @@ fun defaultConfig(): Config {
         override val sessionIdClaim = "sessionId"
         override val accessTokenExpirationMs = 1000 * 60 * 60
         override val refreshTokenExpirationMs = 1000 * 60 * 60 * 24 * 7
+        override val pollingIntervalSeconds = 5
+        override val pollingRetryDelaySeconds = 10
     }
 }

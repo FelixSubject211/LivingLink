@@ -83,9 +83,9 @@ object DataBaseProvider {
 
     private fun createAndStoreDatabase(config: ServerConfig): Database {
         val hikariConfig = HikariConfig().apply {
-            jdbcUrl = config.dbJdbcUrl
-            username = config.dbUsername
-            password = config.dbPassword
+            jdbcUrl = config.postgresJdbcUrl
+            username = config.postgresUsername
+            password = config.postgresPassword
             driverClassName = "org.postgresql.Driver"
             isAutoCommit = true
         }

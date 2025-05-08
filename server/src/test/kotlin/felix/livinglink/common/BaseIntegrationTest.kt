@@ -2,12 +2,15 @@ package felix.livinglink.common
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
+import io.github.cdimascio.dotenv.dotenv
 import io.lettuce.core.RedisClient
 import io.lettuce.core.api.sync.RedisCommands
 import org.junit.Before
 import org.ktorm.database.Database
 
 abstract class BaseIntegrationTest {
+
+    val dotenv = dotenv()
 
     val config: ServerConfig = object : ServerConfig {
         override val serverHost: String = "serverHost"
@@ -18,13 +21,15 @@ abstract class BaseIntegrationTest {
         override val sessionIdClaim = "sessionIdClaim"
         override val accessTokenExpirationMs = 1_000_000
         override val refreshTokenExpirationMs = 1_000_000_000
+        override val pollingIntervalSeconds = 5
+        override val pollingRetryDelaySeconds = 10
         override val secret = "secret"
         override val issuer = "issuer"
         override val jwtAudience = "jwtAudience"
-        override val dbJdbcUrl = "jdbc:postgresql://localhost:5433/test_postgres"
-        override val dbUsername = "test_postgres"
-        override val dbPassword = "test_postgres"
-        override val redisUri = "redis://localhost:6380"
+        override val postgresJdbcUrl = dotenv["POSTGRES_JDBC_TEST_URL"]
+        override val postgresUsername = dotenv["POSTGRES_TEST_USER"]
+        override val postgresPassword = dotenv["POSTGRES_TEST_PASSWORD"]
+        override val redisUri = dotenv["REDIS_TEST_URI"]
     }
 
     val database = Database.connect(hikariDataSource(config))
@@ -62,9 +67,9 @@ abstract class BaseIntegrationTest {
 
     private fun hikariDataSource(config: ServerConfig): HikariDataSource {
         val hikariConfig = HikariConfig().apply {
-            jdbcUrl = config.dbJdbcUrl
-            username = config.dbUsername
-            password = config.dbPassword
+            jdbcUrl = config.postgresJdbcUrl
+            username = config.postgresUsername
+            password = config.postgresPassword
             driverClassName = "org.postgresql.Driver"
             isAutoCommit = true
             maximumPoolSize = 5
