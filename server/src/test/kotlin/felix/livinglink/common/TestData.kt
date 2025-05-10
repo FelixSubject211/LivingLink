@@ -1,7 +1,6 @@
-package felix.livinglink.groups
+package felix.livinglink.common
 
 import felix.livinglink.auth.RefreshToken
-import felix.livinglink.common.RawUser
 import felix.livinglink.group.Group
 import kotlinx.datetime.Instant
 

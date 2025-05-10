@@ -11,6 +11,9 @@ import felix.livinglink.auth.PostgresUserStore
 import felix.livinglink.auth.UserStore
 import felix.livinglink.event.ChangeDefaultNotifier
 import felix.livinglink.event.ChangeNotifier
+import felix.livinglink.eventSourcing.EventSourcingDefaultStore
+import felix.livinglink.eventSourcing.EventSourcingService
+import felix.livinglink.eventSourcing.EventSourcingStore
 import felix.livinglink.groups.GroupDefaultStore
 import felix.livinglink.groups.GroupService
 import felix.livinglink.groups.GroupStore
@@ -27,6 +30,8 @@ interface AppModule {
     val changeNotifier: ChangeNotifier
     val groupStore: GroupStore
     val groupService: GroupService
+    val eventSourcingStore: EventSourcingStore
+    val eventSourcingService: EventSourcingService
 }
 
 fun defaultAppModule(
@@ -66,6 +71,14 @@ fun defaultAppModule(
         override val groupService = GroupService(
             changeNotifier = changeNotifier,
             groupStore = groupStore
+        )
+        override val eventSourcingStore = EventSourcingDefaultStore(
+            database = database
+        )
+        override val eventSourcingService = EventSourcingService(
+            eventSourcingStore = eventSourcingStore,
+            groupStore = groupStore,
+            timeService = timeService
         )
     }
 }

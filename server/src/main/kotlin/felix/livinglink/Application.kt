@@ -8,6 +8,7 @@ import felix.livinglink.common.UserPrincipal
 import felix.livinglink.common.defaultAppModule
 import felix.livinglink.common.defaultServerConfig
 import felix.livinglink.event.eventRoutes
+import felix.livinglink.eventSourcing.eventSourcingRouts
 import felix.livinglink.groups.groupRoutes
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -22,7 +23,6 @@ import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.routing
-import kotlinx.serialization.json.Json
 
 fun main() {
     embeddedServer(
@@ -42,9 +42,7 @@ fun Application.module(
     DatabaseInitializer.initialize(appModule.database)
 
     install(ContentNegotiation) {
-        json(Json {
-            isLenient = true
-        })
+        json(json)
     }
 
     install(CORS) {
@@ -94,6 +92,7 @@ fun Application.module(
             groupRoutes(
                 groupService = appModule.groupService
             )
+            eventSourcingRouts(eventSourcingService = appModule.eventSourcingService)
         }
     }
 }

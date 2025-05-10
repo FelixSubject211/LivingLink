@@ -2,8 +2,8 @@ package felix.livinglink.eventSourcing
 
 import felix.livinglink.common.EventCountersTable
 import felix.livinglink.common.EventSourcingEventsTable
-import felix.livinglink.common.TimeService
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import kotlinx.datetime.toKotlinInstant
 import org.ktorm.database.Database
 import org.ktorm.dsl.and
@@ -24,10 +24,11 @@ interface EventSourcingStore {
         groupId: String,
         userId: String,
         eventType: String,
+        createdAt: Instant,
         payload: String
     ): Long?
 
-    fun getEventsSince(groupId: String, sinceEventIdExclusive: Long): List<Event>
+    fun getEventsSince(groupId: String, sinceEventIdExclusive: Long?): List<Event>
 
     data class Event(
         val groupId: String,
@@ -39,19 +40,15 @@ interface EventSourcingStore {
     )
 }
 
-class EventSourcingDefaultStore(
-    private val database: Database,
-    private val timeService: TimeService
-) : EventSourcingStore {
+class EventSourcingDefaultStore(private val database: Database) : EventSourcingStore {
 
     override fun appendEvent(
         groupId: String,
         userId: String,
         eventType: String,
+        createdAt: Instant,
         payload: String
     ): Long? {
-        val now = java.time.Instant.ofEpochMilli(timeService.currentTimeMillis())
-
         return database.useTransaction {
             val updated = database.update(EventCountersTable) {
                 set(it.lastEventId, it.lastEventId + 1)
@@ -78,7 +75,7 @@ class EventSourcingDefaultStore(
                 set(it.eventId, nextEventId)
                 set(it.eventType, eventType)
                 set(it.userId, userId)
-                set(it.createdAt, now)
+                set(it.createdAt, createdAt.toJavaInstant())
                 set(it.payload, payload)
             }
 
@@ -89,14 +86,14 @@ class EventSourcingDefaultStore(
 
     override fun getEventsSince(
         groupId: String,
-        sinceEventIdExclusive: Long
+        sinceEventIdExclusive: Long?
     ): List<EventSourcingStore.Event> {
         return database
             .from(EventSourcingEventsTable)
             .select()
             .where {
                 (EventSourcingEventsTable.groupId eq groupId) and
-                        (EventSourcingEventsTable.eventId gt sinceEventIdExclusive)
+                        (EventSourcingEventsTable.eventId gt (sinceEventIdExclusive ?: 0))
             }
             .orderBy(EventSourcingEventsTable.eventId.asc())
             .map { row ->

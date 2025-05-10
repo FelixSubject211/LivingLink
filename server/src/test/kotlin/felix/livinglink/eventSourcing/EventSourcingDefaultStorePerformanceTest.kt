@@ -2,7 +2,6 @@ package felix.livinglink.eventSourcing
 
 import felix.livinglink.common.BaseIntegrationTest
 import felix.livinglink.common.DatabaseInitializer
-import felix.livinglink.common.MockTimeService
 import felix.livinglink.common.RawUser
 import felix.livinglink.common.addSampleGroups
 import felix.livinglink.common.addSampleUsers
@@ -45,14 +44,14 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
         database.addSampleGroups(group = group)
         database.addSampleUsers(users)
 
-        val store = EventSourcingDefaultStore(database, MockTimeService)
+        val store = EventSourcingDefaultStore(database)
 
         val start = System.currentTimeMillis()
 
         val threads = users.map { user ->
             Thread {
                 repeat(writeEventsPerThread) {
-                    store.appendEvent(group.id, user.id, eventType, payload)
+                    store.appendEvent(group.id, user.id, eventType, Clock.System.now(), payload)
                         ?: error("Failed to insert for user ${user.id}")
                 }
             }
@@ -99,7 +98,7 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
             database.addSampleGroups(groups)
             database.addSampleUsers(users)
 
-            val store = EventSourcingDefaultStore(database, MockTimeService)
+            val store = EventSourcingDefaultStore(database)
 
             val start = System.currentTimeMillis()
 
@@ -107,7 +106,7 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
                 val user = users[index]
                 Thread {
                     repeat(writeEventsPerThread) {
-                        store.appendEvent(group.id, user.id, eventType, payload)
+                        store.appendEvent(group.id, user.id, eventType, Clock.System.now(), payload)
                             ?: error("Failed to insert for group ${group.id}")
                     }
                 }
@@ -135,7 +134,7 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
     fun `should read $readEventCount events in one bulk read`() = testApplication {
         prepareSharedGroupWithEvents(readEventCount)
 
-        val store = EventSourcingDefaultStore(database, MockTimeService)
+        val store = EventSourcingDefaultStore(database)
         val start = System.currentTimeMillis()
 
         val events = store.getEventsSince("sharedGroup", 0L)
@@ -161,11 +160,11 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
         database.addSampleGroups(group = group)
         database.addSampleUsers(user = user)
 
-        val store = EventSourcingDefaultStore(database, MockTimeService)
+        val store = EventSourcingDefaultStore(database)
 
         database.useTransaction {
             repeat(eventCount) {
-                store.appendEvent(group.id, user.id, eventType, payload)
+                store.appendEvent(group.id, user.id, eventType, Clock.System.now(), payload)
                     ?: error("Failed at $it")
             }
         }

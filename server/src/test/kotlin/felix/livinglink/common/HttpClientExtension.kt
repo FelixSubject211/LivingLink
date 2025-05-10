@@ -3,6 +3,7 @@ package felix.livinglink.common
 import felix.livinglink.auth.LoginResponse
 import felix.livinglink.auth.RegisterRequest
 import felix.livinglink.auth.RegisterResponse
+import felix.livinglink.json
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete

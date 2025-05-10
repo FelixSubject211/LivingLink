@@ -2,6 +2,7 @@ package felix.livinglink.groups
 
 import felix.livinglink.common.BaseIntegrationTest
 import felix.livinglink.common.GroupInvitesTable
+import felix.livinglink.common.TestData
 import felix.livinglink.common.UuidFactory
 import felix.livinglink.common.addSampleGroups
 import felix.livinglink.common.addSampleUsers
