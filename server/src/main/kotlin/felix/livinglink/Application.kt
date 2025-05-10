@@ -65,11 +65,15 @@ fun Application.module(
                 val userId = credential.payload.getClaim(config.userIdClaim).asString()
                 val username = credential.payload.getClaim(config.usernameClaim).asString()
                 val sessionId = credential.payload.getClaim(config.sessionIdClaim).asString()
+                val groupIds = credential.payload.getClaim(config.groupIdsClaim)
+                    .asList(String::class.java) ?: emptyList()
+
                 if (userId != null && sessionId != null) {
                     UserPrincipal(
                         userId = userId,
                         username = username,
-                        sessionId = sessionId
+                        sessionId = sessionId,
+                        groupIds = groupIds
                     )
                 } else {
                     null
@@ -87,7 +91,8 @@ fun Application.module(
         authenticate(config.authenticationConfig) {
             eventRoutes(
                 config = config,
-                changeNotifier = appModule.changeNotifier
+                changeNotifier = appModule.changeNotifier,
+                groupStore = appModule.groupStore
             )
             groupRoutes(
                 groupService = appModule.groupService

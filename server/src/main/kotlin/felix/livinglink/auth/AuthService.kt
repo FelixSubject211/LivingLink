@@ -2,9 +2,11 @@ package felix.livinglink.auth
 
 import felix.livinglink.common.TimeService
 import felix.livinglink.common.UuidFactory
+import felix.livinglink.groups.GroupStore
 
 class AuthService(
     private val userStore: UserStore,
+    private val groupStore: GroupStore,
     private val passwordHasherService: PasswordHasherService,
     private val jwtService: JwtService,
     private val timeService: TimeService,
@@ -27,7 +29,8 @@ class AuthService(
 
         val accessToken = jwtService.generateToken(
             userId = newUserId,
-            username = request.username
+            username = request.username,
+            groupIds = emptyList()
         )
         val refreshToken = jwtService.generateRefreshToken(
             userId = newUserId,
@@ -48,7 +51,8 @@ class AuthService(
         ) {
             val accessToken = jwtService.generateToken(
                 userId = user.id,
-                username = request.username
+                username = request.username,
+                groupIds = groupStore.getUserIdsInGroup(user.id)
             )
             val refreshToken = jwtService.generateRefreshToken(
                 userId = user.id,
@@ -68,7 +72,8 @@ class AuthService(
         } else {
             val newAccessToken = jwtService.generateToken(
                 userId = storedToken.userId,
-                username = storedToken.username
+                username = storedToken.username,
+                groupIds = groupStore.getUserIdsInGroup(storedToken.userId)
             )
             val newRefreshToken = jwtService.generateRefreshToken(
                 userId = storedToken.userId,

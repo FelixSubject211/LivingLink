@@ -3,11 +3,13 @@ package felix.livinglink.ui.common.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import felix.livinglink.ui.UiModule
 import felix.livinglink.ui.group.GroupScreen
 import felix.livinglink.ui.listGroups.ListGroupsScreen
@@ -32,8 +34,9 @@ fun NavigationHost(
         composable(
             route = "group/{groupId}",
             arguments = listOf(navArgument("groupId") { type = NavType.StringType })
-        ) { backStackEntry ->
-            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+        ) { backStackEntry: NavBackStackEntry ->
+            val screen = backStackEntry.toRoute<LivingLinkScreen.Group>()
+            val groupId = screen.groupId
             val viewModel = remember(groupId) {
                 ViewModelCache.getOrCreate("groupViewModel_$groupId") {
                     uiModule.groupViewModel(groupId)

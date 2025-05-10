@@ -19,6 +19,7 @@ abstract class BaseIntegrationTest {
         override val userIdClaim = "userIdClaim"
         override val usernameClaim = "usernameClaim"
         override val sessionIdClaim = "sessionIdClaim"
+        override val groupIdsClaim = "groupIdsClaim"
         override val accessTokenExpirationMs = 1_000_000
         override val refreshTokenExpirationMs = 1_000_000_000
         override val pollingIntervalSeconds = 5

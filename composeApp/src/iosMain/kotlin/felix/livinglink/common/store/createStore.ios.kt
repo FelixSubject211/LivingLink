@@ -1,5 +1,6 @@
 package felix.livinglink.common.store
 
+import felix.livinglink.json
 import io.github.xxfast.kstore.KStore
 import io.github.xxfast.kstore.file.storeOf
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -22,5 +23,9 @@ actual inline fun <reified T : Any> createStore(path: String, defaultValue: T): 
 
     val filePath = "${documentsUrl.path!!}/${path}"
 
-    return storeOf(file = Path(filePath), defaultValue)
+    return storeOf(
+        file = Path(filePath),
+        default = defaultValue,
+        json = json
+    )
 }

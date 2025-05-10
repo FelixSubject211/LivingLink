@@ -19,7 +19,7 @@ import felix.livinglink.group.UseInviteResponse
 import felix.livinglink.groups.network.GroupsNetworkDataSource
 import felix.livinglink.groups.store.GroupStore
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 
 interface GroupsRepository {
     val groups: Flow<RepositoryState<List<Group>, NetworkError>>
@@ -49,10 +49,11 @@ class GroupsDefaultRepository(
 ) : GroupsRepository {
 
     override val groups = fetchAndStoreDataDefaultHandler(
-        events = eventBus.events.map { event ->
+        events = eventBus.events.mapNotNull { event ->
             when (event) {
                 EventBus.Event.ClearAll -> FetchAndStoreDataEvent.CLEAR
                 EventBus.Event.UpdateGroups -> FetchAndStoreDataEvent.RELOAD
+                is EventBus.Event.GroupStateUpdated -> null
             }
         },
         networkRequest = {

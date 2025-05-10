@@ -6,6 +6,7 @@ import felix.livinglink.common.CommonModule
 import felix.livinglink.common.defaultCommonModule
 import felix.livinglink.common.network.createHttpClientEngine
 import felix.livinglink.event.defaultEventModule
+import felix.livinglink.eventSourcing.defaultEventSourcingModule
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.groups.defaultGroupsModule
 import felix.livinglink.haptics.HapticsModule
@@ -50,6 +51,11 @@ fun defaultAppModule(
         authModule = authModule,
         eventModule = eventModule
     )
+    val eventSourcingModule = defaultEventSourcingModule(
+        commonModule = commonModule,
+        authModule = authModule,
+        eventModule = eventModule
+    )
     val uiModule = defaultUiModule(
         navigator = navigator,
         commonModule = commonModule,
@@ -57,6 +63,8 @@ fun defaultAppModule(
         authModule = authModule,
         groupsModule = groupsModule
     )
+
+    navigator.addObserver(eventModule.eventBus.currentGroupIdObserver)
 
     return object : AppModule {
         override val commonModule = commonModule

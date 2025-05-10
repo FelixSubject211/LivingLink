@@ -12,9 +12,9 @@ enum DesignSystem {}
 
 extension DesignSystem {
     enum Colors {
-        static let primary = Color("Primary")
-        static let onPrimary = Color("OnPrimary")
-        static let labelColor = Color("LabelColor")
+        static let primary = Color("primary")
+        static let onPrimary = Color("onPrimary")
+        static let labelColor = Color("labelColor")
     }
 }
 
@@ -35,8 +35,8 @@ extension DesignSystem {
 extension DesignSystem {
     static let background = LinearGradient(
         gradient: Gradient(colors: [
-            Color("BackgroundFirst"),
-            Color("BackgroundSecond")
+            Color("backgroundFirst"),
+            Color("backgroundSecond")
         ]),
         startPoint: .topLeading,
         endPoint: .bottomTrailing

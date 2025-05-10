@@ -1,6 +1,7 @@
 package felix.livinglink.eventSourcing
 
 import felix.livinglink.common.TimeService
+import felix.livinglink.event.ChangeNotifier
 import felix.livinglink.groups.GroupStore
 import felix.livinglink.json
 import kotlinx.datetime.Instant
@@ -9,6 +10,7 @@ import kotlinx.serialization.PolymorphicSerializer
 class EventSourcingService(
     private val eventSourcingStore: EventSourcingStore,
     private val groupStore: GroupStore,
+    private val changeNotifier: ChangeNotifier,
     private val timeService: TimeService
 ) {
     fun getEvents(
@@ -47,10 +49,12 @@ class EventSourcingService(
             eventType = request.payload::class.qualifiedName!!,
             createdAt = createdAt,
             payload = payloadJson
-        )
+        )!!
+
+        changeNotifier.markEventChangeForGroup(groupId = request.groupId, eventId = newEventId)
 
         val event = EventSourcingEvent(
-            eventId = newEventId!!,
+            eventId = newEventId,
             userId = userId,
             groupId = request.groupId,
             createdAt = createdAt,

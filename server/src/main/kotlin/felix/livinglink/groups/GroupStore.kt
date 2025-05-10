@@ -31,6 +31,7 @@ interface GroupStore {
     fun useInviteCode(code: String, userId: String): Boolean
     fun getUserIdsInGroup(groupId: String): List<String>
     fun isUserIdInGroup(userId: String, groupId: String): Boolean
+    fun getGroupIdsForUser(userId: String): List<String>
 }
 
 class GroupDefaultStore(
@@ -218,5 +219,13 @@ class GroupDefaultStore(
                         (GroupMembersTable.userId eq userId)
             }
             .totalRecordsInAllPages > 0
+    }
+
+    override fun getGroupIdsForUser(userId: String): List<String> {
+        return database
+            .from(GroupMembersTable)
+            .select(GroupMembersTable.groupId)
+            .where { GroupMembersTable.userId eq userId }
+            .map { it[GroupMembersTable.groupId]!! }
     }
 }

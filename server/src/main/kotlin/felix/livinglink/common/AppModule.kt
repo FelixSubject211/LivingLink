@@ -26,10 +26,10 @@ interface AppModule {
     val userStore: UserStore
     val passwordHasherService: PasswordHasherService
     val jwtService: JwtService
-    val authService: AuthService
     val changeNotifier: ChangeNotifier
     val groupStore: GroupStore
     val groupService: GroupService
+    val authService: AuthService
     val eventSourcingStore: EventSourcingStore
     val eventSourcingService: EventSourcingService
 }
@@ -52,13 +52,6 @@ fun defaultAppModule(
             timeService = timeService,
             uuidFactory = uuidFactory
         )
-        override val authService = AuthService(
-            userStore = userStore,
-            passwordHasherService = passwordHasherService,
-            jwtService = jwtService,
-            timeService = timeService,
-            uuidFactory = uuidFactory
-        )
         override val changeNotifier = ChangeDefaultNotifier(
             config = config,
             uuidFactory = uuidFactory
@@ -72,12 +65,21 @@ fun defaultAppModule(
             changeNotifier = changeNotifier,
             groupStore = groupStore
         )
+        override val authService = AuthService(
+            userStore = userStore,
+            groupStore = groupStore,
+            passwordHasherService = passwordHasherService,
+            jwtService = jwtService,
+            timeService = timeService,
+            uuidFactory = uuidFactory
+        )
         override val eventSourcingStore = EventSourcingDefaultStore(
             database = database
         )
         override val eventSourcingService = EventSourcingService(
             eventSourcingStore = eventSourcingStore,
             groupStore = groupStore,
+            changeNotifier = changeNotifier,
             timeService = timeService
         )
     }

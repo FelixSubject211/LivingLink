@@ -7,6 +7,7 @@ interface Config {
     val userIdClaim: String
     val usernameClaim: String
     val sessionIdClaim: String
+    val groupIdsClaim: String
     val accessTokenExpirationMs: Int
     val refreshTokenExpirationMs: Int
     val pollingIntervalSeconds: Int
@@ -21,6 +22,7 @@ fun defaultConfig(): Config {
         override val userIdClaim = "userId"
         override val usernameClaim = "username"
         override val sessionIdClaim = "sessionId"
+        override val groupIdsClaim = "groupIds"
         override val accessTokenExpirationMs = 1000 * 60 * 60
         override val refreshTokenExpirationMs = 1000 * 60 * 60 * 24 * 7
         override val pollingIntervalSeconds = 5

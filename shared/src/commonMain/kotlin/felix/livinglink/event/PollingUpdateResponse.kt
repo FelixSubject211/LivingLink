@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PollingUpdateResponse(
-    val changeId: String?,
+    val membershipChangeId: String?,
+    val latestEventId: Long?,
     val nextPollInSeconds: Int
 )

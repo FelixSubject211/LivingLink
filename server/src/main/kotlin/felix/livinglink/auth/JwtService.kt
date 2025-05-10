@@ -10,7 +10,7 @@ import java.util.Date
 
 interface JwtService {
     val verifier: JWTVerifier
-    fun generateToken(userId: String, username: String): String
+    fun generateToken(userId: String, username: String, groupIds: List<String>): String
     fun generateRefreshToken(userId: String, username: String): RefreshToken
 }
 
@@ -26,13 +26,14 @@ class JwtDefaultService(
         .withAudience(config.jwtAudience)
         .build()
 
-    override fun generateToken(userId: String, username: String): String {
+    override fun generateToken(userId: String, username: String, groupIds: List<String>): String {
         return JWT.create()
             .withIssuer(config.issuer)
             .withAudience(config.jwtAudience)
             .withClaim(config.userIdClaim, userId)
             .withClaim(config.usernameClaim, username)
             .withClaim(config.sessionIdClaim, uuidFactory())
+            .withArrayClaim(config.groupIdsClaim, groupIds.toTypedArray())
             .withExpiresAt(Date(timeService.currentTimeMillis() + config.accessTokenExpirationMs))
             .sign(algorithm)
     }

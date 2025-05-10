@@ -81,7 +81,7 @@ class AuthenticatedHttpDefaultClient(
     override val client: HttpClient by lazy {
         HttpClient(engine) {
             install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true; isLenient = true })
+                json(felix.livinglink.json)
             }
             install(Auth) {
                 bearer {
