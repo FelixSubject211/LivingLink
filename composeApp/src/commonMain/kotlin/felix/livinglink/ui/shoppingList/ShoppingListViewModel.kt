@@ -25,12 +25,12 @@ class ShoppingListViewModel(
 
     override fun closeError() = viewModelState.closeError()
 
-    fun showAddItemAlert() = viewModelState.perform { data ->
-        data.copy(showAddItemAlert = true)
+    fun showAddItem() = viewModelState.perform { data ->
+        data.copy(showAddItem = true)
     }
 
-    fun closeAddItemAlert() = viewModelState.perform { data ->
-        data.copy(showAddItemAlert = false)
+    fun closeAddItem() = viewModelState.perform { data ->
+        data.copy(showAddItem = false)
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -45,7 +45,7 @@ class ShoppingListViewModel(
             )
         },
         onSuccess = { currentData, _ ->
-            LivingLinkResult.Success(currentData.copy(showAddItemAlert = false))
+            LivingLinkResult.Success(currentData.copy(showAddItem = false))
         }
     )
 
@@ -72,11 +72,11 @@ class ShoppingListViewModel(
     )
 
     companion object {
-        val initialState = Data(showAddItemAlert = false)
+        val initialState = Data(showAddItem = false)
     }
 
     data class Data(
-        val showAddItemAlert: Boolean
+        val showAddItem: Boolean
     )
 
     data class LoadableData(

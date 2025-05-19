@@ -9,9 +9,9 @@ import felix.livinglink.ui.common.state.LoadableStatefulView
 fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
     val data = viewModel.data.collectAsState().value
 
-    if (data.showAddItemAlert) {
+    if (data.showAddItem) {
         ShoppingListListAddItemDialog(
-            onDismiss = viewModel::closeAddItemAlert,
+            onDismiss = viewModel::closeAddItem,
             onConfirm = viewModel::addItem
         )
     }
@@ -19,6 +19,11 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
     LoadableStatefulView(
         viewModel = viewModel,
         modifier = Modifier,
+        emptyContent = {
+            ShoppingListEmptyContent(
+                viewModel = viewModel
+            )
+        },
         content = { loadableDate, _ ->
             ShoppingListScreenContent(
                 loadableData = loadableDate,

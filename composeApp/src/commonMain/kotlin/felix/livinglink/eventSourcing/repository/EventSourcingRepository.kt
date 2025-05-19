@@ -101,7 +101,11 @@ class EventSourcingDefaultRepository(
         return eventSourcingStore
             .ofType(groupId, type)
             .map { events ->
-                RepositoryState.Data(events)
+                if (events.isEmpty()) {
+                    RepositoryState.Empty
+                } else {
+                    RepositoryState.Data(events)
+                }
             }
     }
 

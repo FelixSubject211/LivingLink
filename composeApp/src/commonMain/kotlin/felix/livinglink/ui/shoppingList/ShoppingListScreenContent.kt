@@ -47,7 +47,7 @@ fun ShoppingListScreenContent(
         Spacer(modifier = Modifier.height(5.dp))
 
         TextButton(
-            onClick = viewModel::showAddItemAlert,
+            onClick = viewModel::showAddItem,
             modifier = Modifier
                 .fillMaxWidth()
         ) {

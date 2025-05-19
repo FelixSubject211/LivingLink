@@ -22,6 +22,7 @@ struct ShoppingListScreen: View {
                     dismiss: viewModel.closeError
                 )
             },
+            emptyContent: emptyContent,
             content: content
         )
         .fillMaxSize()
@@ -29,6 +30,20 @@ struct ShoppingListScreen: View {
             DesignSystem.background
                 .ignoresSafeArea()
         }
+    }
+    
+    private func emptyContent(data: ShoppingListViewModel.Data) -> AnyView {
+        VStack(spacing: DesignSystem.Spacing.betweenSections) {
+            Text(localizables.emptyScreenText.localized)
+            DesignSystem.PrimaryButton(
+                title: localizables.emptyScreenButton.localized,
+                action: viewModel.showAddItem
+            )
+        }
+        .ignoresSafeArea(.keyboard)
+        .padding(DesignSystem.Padding.large)
+        .withBackgroundAndAlerts(data: data, viewModel: viewModel)
+        .eraseToAnyView()
     }
     
     private func content(
@@ -47,21 +62,13 @@ struct ShoppingListScreen: View {
 
             Spacer()
 
-            Button(action: viewModel.showAddItemAlert) {
+            Button(action: viewModel.showAddItem) {
                 Text(localizables.addItemButton.localized)
                     .frame(maxWidth: .infinity)
             }
         }
         .ignoresSafeArea(.keyboard)
-        .alertWithTextField(
-            title: localizables.addItemDialogTitle.localized,
-            isPresented: data.showAddItemAlert,
-            placeholder: localizables.addItemDialogText.localized,
-            confirmTitle: localizables.addItemDialogCreate.localized,
-            cancelTitle: localizables.addItemDialogCancel.localized,
-            onCancel: viewModel.closeAddItemAlert,
-            onConfirm: viewModel.addItem(name:)
-        )
+        .withBackgroundAndAlerts(data: data, viewModel: viewModel)
         .eraseToAnyView()
     }
 
@@ -93,6 +100,31 @@ struct ShoppingListScreen: View {
                 .labelsHidden()
             }
         }
+    }
+}
+
+private extension View {
+    func withBackgroundAndAlerts(
+        data: ShoppingListViewModel.Data,
+        viewModel: ShoppingListViewModel
+    ) -> some View {
+        let localizables = ShoppingListScreenLocalizables()
+        
+        return self
+            .fillMaxSize()
+            .background {
+                DesignSystem.background
+                    .ignoresSafeArea()
+            }
+            .alertWithTextField(
+                title: localizables.addItemDialogTitle.localized,
+                isPresented: data.showAddItem,
+                placeholder: localizables.addItemDialogText.localized,
+                confirmTitle: localizables.addItemDialogCreate.localized,
+                cancelTitle: localizables.addItemDialogCancel.localized,
+                onCancel: viewModel.closeAddItem,
+                onConfirm: viewModel.addItem(name:)
+            )
     }
 }
 
