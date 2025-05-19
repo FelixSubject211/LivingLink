@@ -1,41 +1,24 @@
 //
-//  LoginScreen.swift
+//  LoginContentScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 23.03.25.
+//  Created by Felix Fischer on 19.05.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
-struct LoginScreen: View {
+struct LoginContentScreen: View {
+    let data: LoginViewModel.Data
     let viewModel: LoginViewModel
     let localizables = LoginScreenLocalizables()
     @FocusState private var focusedField: Field?
-    
+
     var body: some View {
-        StatefulView(
-            viewModel: viewModel,
-            buildAlert: { (error: LoginScreenError) in
-                error.asAlert(
-                    navigator: viewModel.navigator,
-                    dismiss: viewModel.closeError
-                )
-            },
-            content: content(data:)
-        )
-        .navigationTitle(localizables.navigationTitle.localized)
-        .background {
-            DesignSystem.background
-                .ignoresSafeArea()
-        }
-    }
-    
-    private func content(data: LoginViewModel.Data) -> AnyView {
         VStack {
             Spacer()
-            
+
             VStack(spacing: 56) {
                 CustomTextField(
                     label: localizables.usernameLabel.localized,
@@ -59,7 +42,7 @@ struct LoginScreen: View {
                 .submitLabel(.go)
                 .onSubmit(viewModel.login)
 
-                Button(action: { viewModel.navigator.push(screen: LivingLinkScreen.Register()) } ) {
+                Button(action: { viewModel.navigator.push(screen: LivingLinkScreen.Register()) }) {
                     Text(localizables.registerHintText.localized)
                         .font(.footnote)
                 }
@@ -73,13 +56,14 @@ struct LoginScreen: View {
             )
         }
         .padding(DesignSystem.Padding.large)
-        .eraseToAnyView()
+        .background {
+            DesignSystem.background
+                .ignoresSafeArea()
+        }
     }
-    
+
     private enum Field {
         case username
         case password
     }
 }
-
-fileprivate typealias LoginScreenError = ViewModelStateCombinedError<LoginViewModel.Error, NetworkError>

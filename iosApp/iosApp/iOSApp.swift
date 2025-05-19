@@ -1,27 +1,25 @@
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
 import SwiftUI
 
 @main
 struct iOSApp: App {
-    
     let navigator: IosNavigator
     let uiModule: UiModule
-    
+
     init() {
         navigator = IosNavigator()
         uiModule = AppModuleKt.defaultAppModule(navigator: navigator).uiModule
-        
+
         InitI18n4kKt.doInitI18n4k()
-        
+
         UIView.appearance(
             whenContainedInInstancesOf: [UIAlertController.self]
         ).tintColor = UIColor(DesignSystem.Colors.primary)
     }
-    
+
     var body: some Scene {
-        
         WindowGroup {
             NavigationView(
                 uiModule: uiModule,
@@ -32,7 +30,7 @@ struct iOSApp: App {
     }
 }
 
-fileprivate struct NavigationView: View {
+private struct NavigationView: View {
     let uiModule: UiModule
     @StateObject var navigartor: IosNavigator
 

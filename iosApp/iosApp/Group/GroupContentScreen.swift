@@ -1,38 +1,22 @@
 //
-//  GroupScreen.swift
+//  GroupContentScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 08.05.25.
+//  Created by Felix Fischer on 19.05.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
-struct GroupScreen: View {
+struct GroupContentScreen: View {
+    let loadableData: GroupViewModel.LoadableData
+    let data: GroupViewModel.Data
     let groupViewModel: GroupViewModel
     let shoppingListViewModel: ShoppingListViewModel
     let localizables = GroupScreenLocalizables()
-    
+
     var body: some View {
-        LoadableStatefulView(
-            viewModel: groupViewModel,
-            buildAlert: { (error: GroupScreenError) in
-                error.asAlert(
-                    navigator: groupViewModel.navigator,
-                    dismiss: groupViewModel.closeError
-                )
-            },
-            content: content
-        )
-        .fillMaxSize()
-        .background {
-            DesignSystem.background
-                .ignoresSafeArea()
-        }
-    }
-    
-    private func content(loadableData: GroupViewModel.LoadableData, data: GroupViewModel.Data) -> AnyView {
         ShoppingListScreen(viewModel: shoppingListViewModel)
             .navigationTitle(loadableData.group.name)
             .toolbar {
@@ -74,7 +58,7 @@ struct GroupScreen: View {
                         .font(.body)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                    
+
                     Text(data.inviteCode ?? "")
                         .font(.system(.title, design: .monospaced))
                         .fontWeight(.bold)
@@ -89,8 +73,5 @@ struct GroupScreen: View {
                 .presentationDetents([.height(180)])
                 .presentationDragIndicator(.visible)
             }
-            .eraseToAnyView()
     }
 }
-
-fileprivate typealias GroupScreenError = LoadableViewModelStateCombinedError<NetworkError, GroupViewModel.Error, NetworkError>

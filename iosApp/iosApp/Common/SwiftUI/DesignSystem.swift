@@ -24,7 +24,7 @@ extension DesignSystem {
         static let betweenElements: CGFloat = 12
         static let betweenText: CGFloat = 4
     }
-    
+
     enum Padding {
         static let large: CGFloat = 18
         static let regular: CGFloat = 10
@@ -36,7 +36,7 @@ extension DesignSystem {
     static let background = LinearGradient(
         gradient: Gradient(colors: [
             Color("backgroundFirst"),
-            Color("backgroundSecond")
+            Color("backgroundSecond"),
         ]),
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -52,7 +52,7 @@ extension DesignSystem {
         }
         .buttonStyle(PrimaryButtonStyle())
     }
-    
+
     static func SecondaryButton(title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)

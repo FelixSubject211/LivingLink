@@ -1,14 +1,14 @@
 //
-//  KotlinStateFlow+AsObservableObject.swift
+//  KotlinStateFlowExtension.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 22.03.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
+import Combine
 import ComposeApp
 import SwiftUI
-import Combine
 
 extension Kotlinx_coroutines_coreStateFlow {
     func asObservableObject<T>() -> StateFlowObservable<T> {
@@ -22,7 +22,7 @@ class StateFlowObservable<T>: ObservableObject {
 
     init(stateFlow: Kotlinx_coroutines_coreStateFlow) {
         self.stateFlow = stateFlow
-        self.value = stateFlow.value as! T
+        value = stateFlow.value as! T
         observeStateFlow()
     }
 
@@ -38,4 +38,3 @@ class StateFlowObservable<T>: ObservableObject {
         ) { _ in }
     }
 }
-

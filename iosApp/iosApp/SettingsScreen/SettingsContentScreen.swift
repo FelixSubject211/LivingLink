@@ -1,37 +1,21 @@
 //
-//  SettingsScren.swift
+//  SettingsContentScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 26.03.25.
+//  Created by Felix Fischer on 19.05.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
-struct SettingsScreen: View {
+struct SettingsContentScreen: View {
+    let loadableData: SettingsViewModel.LoadableData
+    let data: SettingsViewModel.Data
     let viewModel: SettingsViewModel
     let localizables = SettingsScreenLocalizables()
-    
+
     var body: some View {
-        LoadableStatefulView(
-            viewModel: viewModel,
-            buildAlert: { (error: SettingsScreenError) in
-                error.asAlert(
-                    navigator: viewModel.navigator,
-                    dismiss: viewModel.closeError
-                )
-            },
-            content: content
-        )
-        .navigationTitle(localizables.navigationTitle.localized)
-        .background {
-            DesignSystem.background
-                .ignoresSafeArea()
-        }
-    }
-    
-    private func content(loadableData: SettingsViewModel.LoadableData, data: SettingsViewModel.Data) -> AnyView {
         List {
             Section(localizables.sectionAccountTitle.localized) {
                 switch loadableData.session {
@@ -81,8 +65,9 @@ struct SettingsScreen: View {
         }
         .scrollContentBackground(.hidden)
         .listStyle(.insetGrouped)
-        .eraseToAnyView()
+        .background {
+            DesignSystem.background
+                .ignoresSafeArea()
+        }
     }
 }
-
-fileprivate typealias SettingsScreenError = LoadableViewModelStateCombinedError<KotlinNothing, KotlinNothing, NetworkError>
