@@ -59,7 +59,9 @@ class GroupViewModel(
         request = { groupsRepository.deleteGroup(groupId = groupId) },
         onSuccess = { currentData, _ ->
             navigator.pop()
-            LivingLinkResult.Success(currentData)
+            LivingLinkResult.Success(
+                currentData.copy(showDeleteGroupDialog = false)
+            )
         }
     )
 

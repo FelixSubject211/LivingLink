@@ -8,7 +8,7 @@ import felix.livinglink.eventSourcing.repository.EventSourcingDefaultRepository
 import felix.livinglink.eventSourcing.store.EventSourcingDefaultStore
 
 interface EventSourcingModule {
-    val eventSourcingDefaultRepository: EventSourcingDefaultRepository
+    val eventSourcingRepository: EventSourcingDefaultRepository
 }
 
 fun defaultEventSourcingModule(
@@ -23,7 +23,7 @@ fun defaultEventSourcingModule(
     val eventSourcingStore = EventSourcingDefaultStore()
 
     return object : EventSourcingModule {
-        override val eventSourcingDefaultRepository = EventSourcingDefaultRepository(
+        override val eventSourcingRepository = EventSourcingDefaultRepository(
             eventSourcingNetworkDataSource = eventSourcingNetworkDataSource,
             eventSourcingStore = eventSourcingStore,
             eventBus = eventModule.eventBus,

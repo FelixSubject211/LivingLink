@@ -8,6 +8,7 @@ import felix.livinglink.common.get
 import felix.livinglink.common.loginUser
 import felix.livinglink.common.post
 import felix.livinglink.module
+import felix.livinglink.shoppingList.ShoppingListEvent
 import io.ktor.server.testing.testApplication
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
@@ -25,15 +26,20 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
             database.addSampleUsers(user = TestData.alice)
             database.addSampleGroups(group = TestData.groupOwnedByAlice1)
 
-            val token =
-                client.loginUser(TestData.alice.username, TestData.alice.password).accessToken
+            val payload1 = ShoppingListEvent.ItemAdded(itemId = "itemId1", itemName = "itemName1")
+            val payload2 = ShoppingListEvent.ItemAdded(itemId = "itemId2", itemName = "itemName2")
+
+            val token = client.loginUser(
+                username = TestData.alice.username,
+                password = TestData.alice.password
+            ).accessToken
 
             // Act
             val appendFirst: AppendEventSourcingEventResponse = client.post(
                 urlString = "eventSourcing/append",
                 request = AppendEventSourcingEventRequest(
                     groupId = TestData.groupOwnedByAlice1.id,
-                    payload = Task.TaskCreated("taskName1")
+                    payload = payload1
                 ),
                 token = token
             )
@@ -47,7 +53,7 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
                 urlString = "eventSourcing/append",
                 request = AppendEventSourcingEventRequest(
                     groupId = TestData.groupOwnedByAlice1.id,
-                    payload = Task.TaskCreated("taskName2")
+                    payload = payload2
                 ),
                 token = token
             )
@@ -63,11 +69,11 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
             assertEquals(
                 AppendEventSourcingEventResponse(
                     EventSourcingEvent(
-                        eventId = 1,
+                        eventId = 0,
                         userId = TestData.alice.id,
                         groupId = TestData.groupOwnedByAlice1.id,
                         createdAt = appendFirst.event.createdAt,
-                        payload = Task.TaskCreated("taskName1")
+                        payload = payload1
                     )
                 ),
                 appendFirst
@@ -80,7 +86,7 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
                         userId = TestData.alice.id,
                         groupId = TestData.groupOwnedByAlice1.id,
                         createdAt = appendFirst.event.createdAt,
-                        payload = Task.TaskCreated("taskName1")
+                        payload = payload1
                     )
                 ),
                 allEvents.events
@@ -93,7 +99,7 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
                         userId = TestData.alice.id,
                         groupId = TestData.groupOwnedByAlice1.id,
                         createdAt = appendSecond.event.createdAt,
-                        payload = Task.TaskCreated("taskName2")
+                        payload = payload2
                     )
                 ),
                 appendSecond
@@ -121,7 +127,7 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
                 urlString = "eventSourcing/append",
                 request = AppendEventSourcingEventRequest(
                     groupId = TestData.groupOwnedByAlice1.id,
-                    payload = Task.TaskCreated("unauthorizedTask")
+                    payload = ShoppingListEvent.ItemAdded(itemId = "itemId", itemName = "itemName")
                 ),
                 token = token
             )

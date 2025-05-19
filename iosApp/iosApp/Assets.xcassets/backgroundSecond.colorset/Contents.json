@@ -1,36 +1,36 @@
 {
-  "colors": [
+  "colors" : [
     {
-      "color": {
-        "color-space": "srgb",
-        "components": {
-          "alpha": "0.197",
-          "blue": "0.871",
-          "green": "0.322",
-          "red": "0.686"
+      "color" : {
+        "color-space" : "srgb",
+        "components" : {
+          "alpha" : "0.070",
+          "blue" : "0.871",
+          "green" : "0.322",
+          "red" : "0.686"
         }
       },
-      "idiom": "universal"
+      "idiom" : "universal"
     },
     {
-      "appearances": [
+      "appearances" : [
         {
-          "appearance": "luminosity",
-          "value": "dark"
+          "appearance" : "luminosity",
+          "value" : "dark"
         }
       ],
-      "color": {
-        "platform": "ios",
-        "reference": "systemBackgroundColor"
+      "color" : {
+        "platform" : "ios",
+        "reference" : "systemBackgroundColor"
       },
-      "idiom": "universal"
+      "idiom" : "universal"
     }
   ],
-  "info": {
-    "author": "xcode",
-    "version": 1
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
   },
-  "properties": {
-    "localizable": true
+  "properties" : {
+    "localizable" : true
   }
 }

@@ -103,3 +103,24 @@ extension DesignSystem {
         }
     }
 }
+
+extension DesignSystem {
+    struct CheckboxToggleStyle: ToggleStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            Button(action: {
+                configuration.isOn.toggle()
+            }, label: {
+                HStack {
+                    Image(systemName: configuration.isOn ? "checkmark.square" : "square")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(configuration.isOn ? .accentColor : .secondary)
+
+                    configuration.label
+                        .font(.body)
+                }
+            })
+            .buttonStyle(.plain)
+        }
+    }
+}

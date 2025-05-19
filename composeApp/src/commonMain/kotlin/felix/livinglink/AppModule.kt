@@ -61,7 +61,8 @@ fun defaultAppModule(
         commonModule = commonModule,
         hapticsModule = hapticsModule,
         authModule = authModule,
-        groupsModule = groupsModule
+        groupsModule = groupsModule,
+        eventSourcingModule = eventSourcingModule
     )
 
     navigator.addObserver(eventModule.eventBus.currentGroupIdObserver)

@@ -12,14 +12,5 @@ data class EventSourcingEvent(
     val createdAt: Instant,
     @Polymorphic val payload: Payload
 ) {
-    @Serializable
-    sealed interface Payload
-}
-
-@Serializable
-sealed class Task : EventSourcingEvent.Payload {
-    @Serializable
-    data class TaskCreated(
-        val taskName: String
-    ) : Task()
+    interface Payload
 }

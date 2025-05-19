@@ -10,16 +10,17 @@ import SwiftUI
 import ComposeApp
 
 struct GroupScreen: View {
-    let viewModel: GroupViewModel
+    let groupViewModel: GroupViewModel
+    let shoppingListViewModel: ShoppingListViewModel
     let localizables = GroupScreenLocalizables()
     
     var body: some View {
         LoadableStatefulView(
-            viewModel: viewModel,
+            viewModel: groupViewModel,
             buildAlert: { (error: GroupScreenError) in
                 error.asAlert(
-                    navigator: viewModel.navigator,
-                    dismiss: viewModel.closeError
+                    navigator: groupViewModel.navigator,
+                    dismiss: groupViewModel.closeError
                 )
             },
             content: content
@@ -32,16 +33,16 @@ struct GroupScreen: View {
     }
     
     private func content(loadableData: GroupViewModel.LoadableData, data: GroupViewModel.Data) -> AnyView {
-        Text(loadableData.description())
+        ShoppingListScreen(viewModel: shoppingListViewModel)
             .navigationTitle(loadableData.group.name)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(localizables.menuDeleteGroup.localized) {
-                            viewModel.showDeleteGroupDialog()
+                            groupViewModel.showDeleteGroupDialog()
                         }
                         Button(localizables.menuCreateInvite.localized) {
-                            viewModel.createInviteCode()
+                            groupViewModel.createInviteCode()
                         }
                     } label: {
                         Image(systemName: "ellipsis")
@@ -54,17 +55,17 @@ struct GroupScreen: View {
                 isPresented: .constant(data.showDeleteGroupDialog),
                 actions: {
                     Button(localizables.groupConfirmDeleteButton.localized, role: .destructive) {
-                        viewModel.deleteGroup()
+                        groupViewModel.deleteGroup()
                     }
                     Button(localizables.groupConfirmCancelButton.localized, role: .cancel) {
-                        viewModel.closeDeleteGroupDialog()
+                        groupViewModel.closeDeleteGroupDialog()
                     }
                 },
                 message: {
                     Text(localizables.groupConfirmDeleteDialogText.localized)
                 }
             )
-            .sheet(isPresented: .constant(data.inviteCode != nil, onSetFalse: viewModel.closeInviteCode)) {
+            .sheet(isPresented: .constant(data.inviteCode != nil, onSetFalse: groupViewModel.closeInviteCode)) {
                 VStack(spacing: DesignSystem.Spacing.betweenElements) {
                     Text(localizables.groupInviteDialogTitle.localized)
                         .font(.headline)

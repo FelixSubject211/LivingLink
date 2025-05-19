@@ -45,6 +45,25 @@ interface LoadableViewModelState<
         class Loading<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
         data class Data<LOADABLE_DATA, LOADABLE_ERROR>(val data: LOADABLE_DATA) :
             State<LOADABLE_DATA, LOADABLE_ERROR>()
+
+        fun <LOADABLE_DATA1, LOADABLE_DATA2, LOADABLE_ERROR> mapState(
+            transform: (LOADABLE_DATA1) -> LOADABLE_DATA2
+        ): State<LOADABLE_DATA2, LOADABLE_ERROR> {
+            return when (this) {
+                is Empty<*, *> -> {
+                    Empty()
+                }
+
+                is Loading<*, *> -> {
+                    Loading()
+                }
+
+                is Data<*, *> -> {
+                    val transformedData = transform(this.data as LOADABLE_DATA1)
+                    Data(transformedData)
+                }
+            }
+        }
     }
 
     sealed class CombinedError<out LOADABLE_ERROR, out ERROR, out REQUEST_ERROR> : LivingLinkError {

@@ -65,9 +65,9 @@ class EventSourcingDefaultStore(private val database: Database) : EventSourcingS
             } else {
                 database.insert(EventCountersTable) {
                     set(it.groupId, groupId)
-                    set(it.lastEventId, 1L)
+                    set(it.lastEventId, 0L)
                 }
-                1L
+                0L
             }
 
             val inserted = database.insert(EventSourcingEventsTable) {
