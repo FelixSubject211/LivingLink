@@ -12,9 +12,9 @@ import SwiftUI
 func LoadableStatefulView<LoadableData: AnyObject, Data, Error: LivingLinkError>(
     viewModel: LoadableStatefulViewModel,
     buildAlert: @escaping (Error) -> Alert,
-    emptyContent: @escaping (Data) -> AnyView = { defaultEmptyContent($0) },
-    loadingContent: @escaping () -> AnyView = defaultLoadingContent,
-    content: @escaping (LoadableData, Data) -> AnyView
+    emptyContent: @escaping (Data) -> any View = { defaultEmptyContent($0) },
+    loadingContent: @escaping () -> any View = defaultLoadingContent,
+    content: @escaping (LoadableData, Data) -> any View
 ) -> some View {
     LoadableStatefulViewContent(
         viewModel: viewModel,
@@ -33,7 +33,6 @@ private func defaultEmptyContent<Data>(_ _: Data) -> AnyView {
                 .ignoresSafeArea()
         }
         .eraseToAnyView()
-    
 }
 
 private func defaultLoadingContent() -> AnyView {
@@ -46,80 +45,78 @@ private func defaultLoadingContent() -> AnyView {
         .eraseToAnyView()
 }
 
-fileprivate struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error: LivingLinkError>: View {
+private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error: LivingLinkError>: View {
     let viewModel: LoadableStatefulViewModel
     let buildAlert: (Error) -> Alert
-    let emptyContent: (Data) -> AnyView
-    let loadingContent: () ->  AnyView
-    let content: (LoadableData, Data) ->  AnyView
-    
+    let emptyContent: (Data) -> any View
+    let loadingContent: () -> any View
+    let content: (LoadableData, Data) -> any View
+
     @ObservedObject var loadableData: StateFlowObservable<LoadableViewModelStateState<LoadableData, LivingLinkError>>
     @ObservedObject var data: StateFlowObservable<Data>
     @ObservedObject var error: StateFlowObservable<Error?>
     @ObservedObject var loading: StateFlowObservable<KotlinBoolean>
-    
+
     init(
         viewModel: LoadableStatefulViewModel,
         buildAlert: @escaping (Error) -> Alert,
-        emptyContent: @escaping (Data) -> AnyView,
-        loadingContent: @escaping () -> AnyView,
-        content: @escaping (LoadableData, Data) -> AnyView
-    ){
+        emptyContent: @escaping (Data) -> any View,
+        loadingContent: @escaping () -> any View,
+        content: @escaping (LoadableData, Data) -> any View
+    ) {
         self.viewModel = viewModel
-        self.loadableData = viewModel.loadableData.asObservableObject()
-        self.data = viewModel.data.asObservableObject()
-        self.error = viewModel.error.asObservableObject()
-        self.loading = viewModel.loading.asObservableObject()
-        
+        loadableData = viewModel.loadableData.asObservableObject()
+        data = viewModel.data.asObservableObject()
+        error = viewModel.error.asObservableObject()
+        loading = viewModel.loading.asObservableObject()
+
         self.buildAlert = buildAlert
         self.emptyContent = emptyContent
         self.loadingContent = loadingContent
         self.content = content
     }
-    
+
     @ViewBuilder
     var body: some View {
-        
         ZStack {
             loadableStateContent()
                 .disabled(loading.value.boolValue)
-            
-            if (loading.value.boolValue) {
+
+            if loading.value.boolValue {
                 VStack {
                     ProgressView()
                         .padding()
                 }
             }
-            
+
             EmptyView()
         }
         .alert(isPresented: isErrorAlertPresented) {
             buildAlert(error.value!)
         }
     }
-    
+
     @ViewBuilder
     private func loadableStateContent() -> some View {
         switch loadableData.value {
         case is LoadableViewModelStateStateEmpty<LoadableData, LivingLinkError>:
-            emptyContent(data.value)
-            
+            emptyContent(data.value).eraseToAnyView()
+
         case is LoadableViewModelStateStateLoading<LoadableData, LivingLinkError>:
-            loadingContent()
-            
+            loadingContent().eraseToAnyView()
+
         case let dataState as LoadableViewModelStateStateData<LoadableData, LivingLinkError>:
             if let stateData = dataState.data {
-                content(stateData, data.value)
+                content(stateData, data.value).eraseToAnyView()
             } else {
-                loadingContent()
+                loadingContent().eraseToAnyView()
             }
-            
+
         default:
-            loadingContent()
+            loadingContent().eraseToAnyView()
         }
     }
-    
-    
+
     private var isErrorAlertPresented: Binding<Bool> {
         Binding(
             get: { error.value != nil },

@@ -20,14 +20,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import felix.livinglink.ui.common.state.LoadableStatefulView
 import felix.livinglink.ui.common.state.LoadableViewModelState
+import felix.livinglink.ui.shoppingList.ShoppingListScreen
+import felix.livinglink.ui.shoppingList.ShoppingListViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GroupScreen(viewModel: GroupViewModel) {
+fun GroupScreen(
+    groupViewModel: GroupViewModel,
+    shoppingListViewModel: ShoppingListViewModel
+) {
 
-    val data = viewModel.data.collectAsState().value
+    val data = groupViewModel.data.collectAsState().value
 
-    val groupName = when (val loadableData = viewModel.loadableData.collectAsState().value) {
+    val groupName = when (val loadableData = groupViewModel.loadableData.collectAsState().value) {
         is LoadableViewModelState.State.Data<GroupViewModel.LoadableData, *> -> {
             loadableData.data.group.name
         }
@@ -37,15 +42,15 @@ fun GroupScreen(viewModel: GroupViewModel) {
 
     if (data.showDeleteGroupDialog) {
         GroupConfirmDeleteDialog(
-            onConfirm = viewModel::deleteGroup,
-            onDismiss = viewModel::closeDeleteGroupDialog
+            onConfirm = groupViewModel::deleteGroup,
+            onDismiss = groupViewModel::closeDeleteGroupDialog
         )
     }
 
     if (data.inviteCode != null) {
         GroupInviteDialog(
             inviteCode = data.inviteCode,
-            onDismissRequest = viewModel::closeInviteCode
+            onDismissRequest = groupViewModel::closeInviteCode
         )
     }
 
@@ -62,21 +67,21 @@ fun GroupScreen(viewModel: GroupViewModel) {
                         contentDescription = GroupScreenLocalizables.moreOptionsContentDescription(),
                         modifier = Modifier
                             .padding(16.dp)
-                            .clickable { viewModel.expandMenu() }
+                            .clickable { groupViewModel.expandMenu() }
                     )
 
                     DropdownMenu(
                         expanded = data.menuExpanded,
-                        onDismissRequest = viewModel::closeMenu
+                        onDismissRequest = groupViewModel::closeMenu
                     ) {
                         DropdownMenuItem(
                             text = { Text(GroupScreenLocalizables.menuDeleteGroup()) },
-                            onClick = viewModel::showDeleteGroupDialog
+                            onClick = groupViewModel::showDeleteGroupDialog
                         )
 
                         DropdownMenuItem(
                             text = { Text(GroupScreenLocalizables.menuCreateInvite()) },
-                            onClick = viewModel::createInviteCode
+                            onClick = groupViewModel::createInviteCode
                         )
                     }
                 }
@@ -84,13 +89,10 @@ fun GroupScreen(viewModel: GroupViewModel) {
         }
     ) { innerPadding ->
         LoadableStatefulView(
-            viewModel = viewModel,
+            viewModel = groupViewModel,
             modifier = Modifier.padding(innerPadding),
-            content = { loadableData, _ ->
-                GroupScreenContent(
-                    loadableData = loadableData,
-                    viewModel = viewModel
-                )
+            content = { _, _ ->
+                ShoppingListScreen(shoppingListViewModel)
             }
         )
     }

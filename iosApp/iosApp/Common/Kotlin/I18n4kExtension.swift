@@ -10,13 +10,12 @@ import ComposeApp
 
 extension I18n4k_coreMessageBundleLocalizedStringFactory1 {
     func localized(_ p0: Any) -> String {
-        self.get(p0: p0).invoke()
+        get(p0: p0).invoke()
     }
 }
 
-
 extension I18n4k_coreMessageBundleLocalizedString {
     var localized: String {
-        self.invoke()
+        invoke()
     }
 }

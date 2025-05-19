@@ -60,7 +60,7 @@ class GroupDefaultStore(
                         id = groupId,
                         name = row[GroupsTable.name]!!,
                         createdAt = row[GroupsTable.createdAt]!!.toKotlinInstant(),
-                        groupMemberIdsToName = mutableMapOf() // wird gleich befüllt
+                        groupMemberIdsToName = mutableMapOf()
                     )
                 }
 

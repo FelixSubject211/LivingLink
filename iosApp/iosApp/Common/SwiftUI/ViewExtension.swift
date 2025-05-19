@@ -12,14 +12,13 @@ extension View {
     func fillMaxSize(
         alignment: Alignment = .center
     ) -> some View {
-        self
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
+        frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
     }
-    
+
     func eraseToAnyView() -> AnyView {
         AnyView(self)
     }
-    
+
     func alertWithTextField(
         title: String,
         message: String? = nil,
@@ -30,7 +29,7 @@ extension View {
         onCancel: @escaping () -> Void,
         onConfirm: @escaping (String) -> Void
     ) -> some View {
-        self.modifier(TextFieldAlertModifier(
+        modifier(TextFieldAlertModifier(
             title: title,
             message: message,
             isPresented: isPresented,

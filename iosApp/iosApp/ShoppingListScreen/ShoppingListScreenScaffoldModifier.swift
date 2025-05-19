@@ -1,0 +1,34 @@
+//
+//  ShoppingListScreenScaffoldModifier.swift
+//  iosApp
+//
+//  Created by Felix Fischer on 19.05.25.
+//  Copyright © 2025 orgName. All rights reserved.
+//
+
+import ComposeApp
+import SwiftUI
+
+struct ShoppingListScreenScaffoldModifier: ViewModifier {
+    let data: ShoppingListViewModel.Data
+    let viewModel: ShoppingListViewModel
+    let localizables = ShoppingListScreenLocalizables()
+
+    func body(content: Content) -> some View {
+        content
+            .fillMaxSize()
+            .background {
+                DesignSystem.background
+                    .ignoresSafeArea()
+            }
+            .alertWithTextField(
+                title: localizables.addItemDialogTitle.localized,
+                isPresented: data.showAddItem,
+                placeholder: localizables.addItemDialogText.localized,
+                confirmTitle: localizables.addItemDialogCreate.localized,
+                cancelTitle: localizables.addItemDialogCancel.localized,
+                onCancel: viewModel.closeAddItem,
+                onConfirm: viewModel.addItem(name:)
+            )
+    }
+}

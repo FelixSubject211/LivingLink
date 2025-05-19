@@ -1,47 +1,32 @@
 //
-//  GroupScreen.swift
+//  GroupContentScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 08.05.25.
+//  Created by Felix Fischer on 19.05.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
-struct GroupScreen: View {
-    let viewModel: GroupViewModel
+struct GroupContentScreen: View {
+    let loadableData: GroupViewModel.LoadableData
+    let data: GroupViewModel.Data
+    let groupViewModel: GroupViewModel
+    let shoppingListViewModel: ShoppingListViewModel
     let localizables = GroupScreenLocalizables()
-    
+
     var body: some View {
-        LoadableStatefulView(
-            viewModel: viewModel,
-            buildAlert: { (error: GroupScreenError) in
-                error.asAlert(
-                    navigator: viewModel.navigator,
-                    dismiss: viewModel.closeError
-                )
-            },
-            content: content
-        )
-        .fillMaxSize()
-        .background {
-            DesignSystem.background
-                .ignoresSafeArea()
-        }
-    }
-    
-    private func content(loadableData: GroupViewModel.LoadableData, data: GroupViewModel.Data) -> AnyView {
-        Text(loadableData.description())
+        ShoppingListScreen(viewModel: shoppingListViewModel)
             .navigationTitle(loadableData.group.name)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Menu {
                         Button(localizables.menuDeleteGroup.localized) {
-                            viewModel.showDeleteGroupDialog()
+                            groupViewModel.showDeleteGroupDialog()
                         }
                         Button(localizables.menuCreateInvite.localized) {
-                            viewModel.createInviteCode()
+                            groupViewModel.createInviteCode()
                         }
                     } label: {
                         Image(systemName: "ellipsis")
@@ -54,17 +39,17 @@ struct GroupScreen: View {
                 isPresented: .constant(data.showDeleteGroupDialog),
                 actions: {
                     Button(localizables.groupConfirmDeleteButton.localized, role: .destructive) {
-                        viewModel.deleteGroup()
+                        groupViewModel.deleteGroup()
                     }
                     Button(localizables.groupConfirmCancelButton.localized, role: .cancel) {
-                        viewModel.closeDeleteGroupDialog()
+                        groupViewModel.closeDeleteGroupDialog()
                     }
                 },
                 message: {
                     Text(localizables.groupConfirmDeleteDialogText.localized)
                 }
             )
-            .sheet(isPresented: .constant(data.inviteCode != nil, onSetFalse: viewModel.closeInviteCode)) {
+            .sheet(isPresented: .constant(data.inviteCode != nil, onSetFalse: groupViewModel.closeInviteCode)) {
                 VStack(spacing: DesignSystem.Spacing.betweenElements) {
                     Text(localizables.groupInviteDialogTitle.localized)
                         .font(.headline)
@@ -73,7 +58,7 @@ struct GroupScreen: View {
                         .font(.body)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
-                    
+
                     Text(data.inviteCode ?? "")
                         .font(.system(.title, design: .monospaced))
                         .fontWeight(.bold)
@@ -88,8 +73,5 @@ struct GroupScreen: View {
                 .presentationDetents([.height(180)])
                 .presentationDragIndicator(.visible)
             }
-            .eraseToAnyView()
     }
 }
-
-fileprivate typealias GroupScreenError = LoadableViewModelStateCombinedError<NetworkError, GroupViewModel.Error, NetworkError>

@@ -61,7 +61,7 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
         threads.forEach { it.join() }
 
         val duration = System.currentTimeMillis() - start
-        val events = store.getEventsSince(group.id, 0)
+        val events = store.getEventsSince(group.id, -1)
 
         assertEquals(
             writeEventCount,
@@ -118,7 +118,7 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
             val duration = System.currentTimeMillis() - start
 
             groups.forEach {
-                val events = store.getEventsSince(it.id, 0)
+                val events = store.getEventsSince(it.id, -1)
                 assertEquals(
                     writeEventsPerThread,
                     events.size,
@@ -137,7 +137,7 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
         val store = EventSourcingDefaultStore(database)
         val start = System.currentTimeMillis()
 
-        val events = store.getEventsSince("sharedGroup", 0L)
+        val events = store.getEventsSince("sharedGroup", -1L)
 
         val duration = System.currentTimeMillis() - start
         assertEquals(readEventCount, events.size)

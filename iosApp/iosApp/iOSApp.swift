@@ -1,27 +1,25 @@
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
 import SwiftUI
 
 @main
 struct iOSApp: App {
-    
     let navigator: IosNavigator
     let uiModule: UiModule
-    
+
     init() {
         navigator = IosNavigator()
         uiModule = AppModuleKt.defaultAppModule(navigator: navigator).uiModule
-        
+
         InitI18n4kKt.doInitI18n4k()
-        
+
         UIView.appearance(
             whenContainedInInstancesOf: [UIAlertController.self]
         ).tintColor = UIColor(DesignSystem.Colors.primary)
     }
-    
+
     var body: some Scene {
-        
         WindowGroup {
             NavigationView(
                 uiModule: uiModule,
@@ -32,7 +30,7 @@ struct iOSApp: App {
     }
 }
 
-fileprivate struct NavigationView: View {
+private struct NavigationView: View {
     let uiModule: UiModule
     @StateObject var navigartor: IosNavigator
 
@@ -40,7 +38,10 @@ fileprivate struct NavigationView: View {
         NavigationStack(path: $navigartor.navigationPath) {
             ListGroupsScreen(viewModel: uiModule.listGroupsViewModel)
                 .navigationDestination(for: IosNavigator.Screen.Group.self) { group in
-                    GroupScreen(viewModel: uiModule.groupViewModel(groupId: group.groupId))
+                    GroupScreen(
+                        groupViewModel: uiModule.groupViewModel(groupId: group.groupId),
+                        shoppingListViewModel: uiModule.shoppingListViewModel(groupId: group.groupId)
+                    )
                 }
                 .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in
                     SettingsScreen(viewModel: uiModule.settingsViewModel)

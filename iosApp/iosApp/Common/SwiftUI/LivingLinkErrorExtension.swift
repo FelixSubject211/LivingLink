@@ -6,11 +6,10 @@
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
 extension LivingLinkError {
-    
     var unwrapped: LivingLinkError {
         switch self {
         case let combined as ViewModelStateCombinedError<AnyObject, AnyObject>:
@@ -21,7 +20,7 @@ extension LivingLinkError {
             return self
         }
     }
-    
+
     func asAlert(
         navigator: Navigator,
         dismiss: @escaping () -> Void
@@ -40,7 +39,7 @@ extension LivingLinkError {
                     }
                 )
             )
-            
+
         default:
             if let message = message() {
                 return Alert(
@@ -57,11 +56,10 @@ extension LivingLinkError {
         }
     }
 
-    
     func asBasicErrorView() -> AnyView {
         VStack {
             Text(self.title()).bold()
-            
+
             if let message = self.message() {
                 Text(message)
             }

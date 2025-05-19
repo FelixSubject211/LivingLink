@@ -11,10 +11,12 @@ import io.ktor.client.HttpClient
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.selects.select
 import kotlinx.coroutines.selects.onTimeout
+import kotlinx.coroutines.selects.select
 
 interface ChangeNotifierClient {
     val events: Flow<Event>
@@ -59,8 +61,12 @@ class ChangeNotifierDefaultClient(
                 val currentGroupId = currentGroupIdObserver.currentGroupIdFlow.value
 
                 val query = currentGroupId?.let { "?groupId=$it" } ?: ""
-                val result: LivingLinkResult<PollingUpdateResponse, NetworkError> =
+
+                val result: LivingLinkResult<PollingUpdateResponse, NetworkError>? = try {
                     authenticatedHttpClient.get("event/group-change$query")
+                } catch (e: Exception) {
+                    null
+                }
 
                 val delayMillis = when (result) {
                     is LivingLinkResult.Success -> {
@@ -71,10 +77,10 @@ class ChangeNotifierDefaultClient(
                             _events.emit(ChangeNotifierClient.Event.MembershipChanged)
                         }
 
-                        currentGroupId?.let {
+                        if (currentGroupId != null && data.latestEventId != null) {
                             _events.emit(
                                 ChangeNotifierClient.Event.GroupStateUpdated(
-                                    groupId = it,
+                                    groupId = currentGroupId,
                                     latestEventId = data.latestEventId!!
                                 )
                             )

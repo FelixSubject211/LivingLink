@@ -4,9 +4,12 @@ import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.model.mapState
+import felix.livinglink.eventSourcing.EventSourcingModule
 import felix.livinglink.group.Group
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.haptics.HapticsModule
+import felix.livinglink.shoppingList.ShoppingListDefaultReducer
+import felix.livinglink.shoppingList.ShoppingListEvent
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
 import felix.livinglink.ui.common.state.ViewModelDefaultState
@@ -15,6 +18,7 @@ import felix.livinglink.ui.listGroups.ListGroupsViewModel
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
+import felix.livinglink.ui.shoppingList.ShoppingListViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
@@ -24,6 +28,7 @@ interface UiModule {
     fun registerViewModel(): RegisterViewModel
     val listGroupsViewModel: ListGroupsViewModel
     fun groupViewModel(groupId: String): GroupViewModel
+    fun shoppingListViewModel(groupId: String): ShoppingListViewModel
 }
 
 fun defaultUiModule(
@@ -31,7 +36,8 @@ fun defaultUiModule(
     commonModule: CommonModule,
     hapticsModule: HapticsModule,
     authModule: AuthModule,
-    groupsModule: GroupsModule
+    groupsModule: GroupsModule,
+    eventSourcingModule: EventSourcingModule
 ): UiModule {
     return object : UiModule {
 
@@ -110,5 +116,30 @@ fun defaultUiModule(
                 scope = commonModule.defaultScope
             )
         )
+
+        override fun shoppingListViewModel(groupId: String): ShoppingListViewModel {
+            val reducer = ShoppingListDefaultReducer()
+
+            return ShoppingListViewModel(
+                navigator = navigator,
+                eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
+                groupId = groupId,
+                scope = commonModule.defaultScope,
+                viewModelState = LoadableViewModelDefaultState(
+                    input = eventSourcingModule.eventSourcingRepository
+                        .eventsOfTypeFlowTyped(groupId, ShoppingListEvent::class)
+                        .map { state ->
+                            state.mapState { events ->
+                                ShoppingListViewModel.LoadableData(
+                                    aggregate = reducer(events)
+                                )
+                            }
+                        },
+                    initialState = ShoppingListViewModel.initialState,
+                    hapticsController = hapticsModule.hapticsController,
+                    scope = commonModule.defaultScope,
+                )
+            )
+        }
     }
 }

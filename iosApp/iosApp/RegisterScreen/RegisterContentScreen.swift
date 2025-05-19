@@ -1,41 +1,24 @@
 //
-//  RegisterScreen.swift
+//  RegisterContentScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 27.03.25.
+//  Created by Felix Fischer on 19.05.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
-import SwiftUI
 import ComposeApp
+import SwiftUI
 
-struct RegisterScreen: View {
+struct RegisterContentScreen: View {
+    let data: RegisterViewModel.Data
     let viewModel: RegisterViewModel
     let localizables = RegisterScreenLocalizables()
     @FocusState private var focusedField: Field?
-    
+
     var body: some View {
-        StatefulView(
-            viewModel: viewModel,
-            buildAlert: { (error: RegisterScreenError) in
-                error.asAlert(
-                    navigator: viewModel.navigator,
-                    dismiss: viewModel.closeError
-                )
-            },
-            content: content(data:)
-        )
-        .navigationTitle(localizables.navigationTitle.localized)
-        .background {
-            DesignSystem.background
-                .ignoresSafeArea()
-        }
-    }
-    
-    private func content(data: RegisterViewModel.Data) -> AnyView {
         VStack {
             Spacer()
-            
+
             VStack(spacing: 42) {
                 CustomTextField(
                     label: localizables.usernameLabel.localized,
@@ -60,7 +43,7 @@ struct RegisterScreen: View {
                 .onSubmit {
                     focusedField = .confirmPassword
                 }
-                
+
                 CustomSecureField(
                     label: localizables.confirmPasswordLabel.localized,
                     text: data.confirmPassword,
@@ -80,14 +63,15 @@ struct RegisterScreen: View {
             )
         }
         .padding(DesignSystem.Padding.large)
-        .eraseToAnyView()
+        .background {
+            DesignSystem.background
+                .ignoresSafeArea()
+        }
     }
-    
+
     private enum Field {
         case username
         case password
         case confirmPassword
     }
 }
-
-fileprivate typealias RegisterScreenError = ViewModelStateCombinedError<RegisterViewModel.Error, NetworkError>

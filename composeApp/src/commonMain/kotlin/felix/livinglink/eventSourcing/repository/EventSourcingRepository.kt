@@ -1,6 +1,7 @@
 package felix.livinglink.eventSourcing.repository
 
 import felix.livinglink.common.model.LivingLinkResult
+import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.event.eventbus.EventBus
 import felix.livinglink.eventSourcing.AppendEventSourcingEventRequest
@@ -15,10 +16,10 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 interface EventSourcingRepository {
-    fun <T : EventSourcingEvent.Payload> eventsOfTypeFlow(
+    fun <T : EventSourcingEvent.Payload> eventsOfTypeFlowTyped(
         groupId: String,
         type: KClass<T>
-    ): Flow<List<EventSourcingEvent>>
+    ): Flow<RepositoryState<List<EventSourcingEvent>, Nothing>>
 
     suspend fun addEvent(
         groupId: String,
@@ -54,17 +55,32 @@ class EventSourcingDefaultRepository(
     }
 
     private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long) {
-        val localIds = eventSourcingStore
+        val localEventIds = eventSourcingStore
             .all(groupId)
             .map { it.map { e -> e.eventId } }
             .firstOrNull()
             .orEmpty()
 
-        val firstMissingId = findFirstMissingSequentialId(localIds)
+        val firstMissingId = findFirstMissingSequentialId(localEventIds)
 
-        if (firstMissingId != null && firstMissingId <= latestRemoteId) {
-            val fromId = firstMissingId - 1
-            when (val result = eventSourcingNetworkDataSource.getEvents(groupId, fromId)) {
+        val syncStartExclusiveId: Long? = when {
+            firstMissingId != null && firstMissingId <= latestRemoteId -> {
+                firstMissingId - 1
+            }
+
+            firstMissingId == null && localEventIds.size.toLong() <= latestRemoteId -> {
+                localEventIds.size.toLong() - 1
+            }
+
+            else -> null
+        }
+
+        if (syncStartExclusiveId != null) {
+            when (val result = eventSourcingNetworkDataSource.getEvents(
+                groupId = groupId,
+                sinceEventIdExclusive = syncStartExclusiveId
+            )
+            ) {
                 is LivingLinkResult.Success -> eventSourcingStore.merge(groupId, result.data.events)
                 is LivingLinkResult.Error<*> -> {}
             }
@@ -78,11 +94,19 @@ class EventSourcingDefaultRepository(
         return null
     }
 
-    override fun <T : EventSourcingEvent.Payload> eventsOfTypeFlow(
+    override fun <T : EventSourcingEvent.Payload> eventsOfTypeFlowTyped(
         groupId: String,
         type: KClass<T>
-    ): Flow<List<EventSourcingEvent>> {
-        return eventSourcingStore.ofType(groupId, type)
+    ): Flow<RepositoryState<List<EventSourcingEvent>, Nothing>> {
+        return eventSourcingStore
+            .ofType(groupId, type)
+            .map { events ->
+                if (events.isEmpty()) {
+                    RepositoryState.Empty
+                } else {
+                    RepositoryState.Data(events)
+                }
+            }
     }
 
     override suspend fun addEvent(
