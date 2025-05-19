@@ -82,7 +82,7 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
             assertContentEquals(
                 listOf(
                     EventSourcingEvent(
-                        eventId = 1,
+                        eventId = 0,
                         userId = TestData.alice.id,
                         groupId = TestData.groupOwnedByAlice1.id,
                         createdAt = appendFirst.event.createdAt,
@@ -95,7 +95,7 @@ class EventSourcingRoutesTest : BaseIntegrationTest() {
             assertEquals(
                 AppendEventSourcingEventResponse(
                     EventSourcingEvent(
-                        eventId = 2,
+                        eventId = 1,
                         userId = TestData.alice.id,
                         groupId = TestData.groupOwnedByAlice1.id,
                         createdAt = appendSecond.event.createdAt,

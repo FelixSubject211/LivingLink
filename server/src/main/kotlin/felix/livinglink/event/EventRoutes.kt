@@ -3,7 +3,6 @@ package felix.livinglink.event
 import felix.livinglink.Config
 import felix.livinglink.common.UserPrincipal
 import felix.livinglink.groups.GroupStore
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.principal
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
@@ -21,17 +20,24 @@ fun Route.eventRoutes(
             val userId = principal.userId
             val groupId = call.request.queryParameters["groupId"]
 
+            val membershipChangeId = changeNotifier.getLastGroupChangeIdForUser(userId)
+
             if (groupId != null) {
                 val inToken = principal.groupIds.contains(groupId)
                 val inDatabase = if (!inToken) groupStore.isUserIdInGroup(userId, groupId) else true
 
                 if (!inDatabase) {
-                    return@get call.respond(HttpStatusCode.Forbidden)
+                    return@get call.respond(
+                        PollingUpdateResponse(
+                            membershipChangeId = membershipChangeId,
+                            latestEventId = null,
+                            nextPollInSeconds = config.pollingIntervalSeconds
+                        )
+                    )
                 }
             }
 
-            val membershipChangeId = changeNotifier.getLastGroupChangeIdForUser(userId)
-            val latestEventId = groupId?.let { changeNotifier.getLastEventIdForGroup(it) }
+            val latestEventId: Long? = groupId?.let { changeNotifier.getLastEventIdForGroup(it) }
 
             call.respond(
                 PollingUpdateResponse(

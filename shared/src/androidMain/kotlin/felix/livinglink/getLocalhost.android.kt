@@ -1,3 +1,3 @@
 package felix.livinglink
 
-actual fun getLocalhost() = "10.0.2.2"
+actual fun getLocalhost() = "100.105.28.50"

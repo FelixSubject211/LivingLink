@@ -93,7 +93,7 @@ class EventSourcingDefaultStore(private val database: Database) : EventSourcingS
             .select()
             .where {
                 (EventSourcingEventsTable.groupId eq groupId) and
-                        (EventSourcingEventsTable.eventId gt (sinceEventIdExclusive ?: 0))
+                        (EventSourcingEventsTable.eventId gt (sinceEventIdExclusive ?: -1))
             }
             .orderBy(EventSourcingEventsTable.eventId.asc())
             .map { row ->
