@@ -57,7 +57,6 @@ fun NavigationHost(
             SettingsScreen(uiModule.settingsViewModel)
         }
         composable(route = LivingLinkScreen.Login.route) {
-            ViewModelCache.clearAll()
             val loginViewModel = remember {
                 ViewModelCache.getOrCreate("loginViewModel") {
                     uiModule.loginViewModel()
@@ -66,7 +65,6 @@ fun NavigationHost(
             LoginScreen(loginViewModel)
         }
         composable(route = LivingLinkScreen.Register.route) {
-            ViewModelCache.clearAll()
             val registerViewModel = remember {
                 ViewModelCache.getOrCreate("registerViewModel") {
                     uiModule.registerViewModel()

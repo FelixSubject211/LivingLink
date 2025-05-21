@@ -19,6 +19,8 @@ import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
 import felix.livinglink.ui.shoppingList.ShoppingListViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
@@ -61,7 +63,7 @@ fun defaultUiModule(
                 input = settingsViewModelInput,
                 initialState = SettingsViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope
+                scope = commonModule.defaultScope.newChildScope()
             )
         )
 
@@ -71,7 +73,7 @@ fun defaultUiModule(
             viewModelState = ViewModelDefaultState(
                 initialState = LoginViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope
+                scope = commonModule.defaultScope.newChildScope()
             )
         )
 
@@ -81,7 +83,7 @@ fun defaultUiModule(
             viewModelState = ViewModelDefaultState(
                 initialState = RegisterViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope
+                scope = commonModule.defaultScope.newChildScope()
             )
         )
 
@@ -94,7 +96,7 @@ fun defaultUiModule(
                 },
                 initialState = ListGroupsViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope
+                scope = commonModule.defaultScope.newChildScope()
             )
         )
 
@@ -113,7 +115,7 @@ fun defaultUiModule(
                 },
                 initialState = GroupViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope
+                scope = commonModule.defaultScope.newChildScope()
             )
         )
 
@@ -136,9 +138,14 @@ fun defaultUiModule(
                         },
                     initialState = ShoppingListViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
-                    scope = commonModule.defaultScope,
+                    scope = commonModule.defaultScope.newChildScope(),
                 )
             )
         }
+
+        fun CoroutineScope.newChildScope(): CoroutineScope {
+            return CoroutineScope(this.coroutineContext + SupervisorJob())
+        }
+
     }
 }

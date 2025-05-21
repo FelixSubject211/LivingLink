@@ -51,18 +51,15 @@ private struct NavigationView: View {
                     )
                 }
                 .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in
-                    let _ = ViewModelCache.clearAll()
                     SettingsScreen(viewModel: uiModule.settingsViewModel)
                 }
                 .navigationDestination(for: IosNavigator.Screen.Login.self) { _ in
-                    let _ = ViewModelCache.clearAll()
                     let loginViewModel = ViewModelCache.getOrCreate(key: "loginViewModel") {
                         uiModule.loginViewModel()
                     }
                     LoginScreen(viewModel: loginViewModel)
                 }
                 .navigationDestination(for: IosNavigator.Screen.Register.self) { _ in
-                    let _ = ViewModelCache.clearAll()
                     let registerViewModel = ViewModelCache.getOrCreate(key: "registerViewModel") {
                         uiModule.registerViewModel()
                     }
