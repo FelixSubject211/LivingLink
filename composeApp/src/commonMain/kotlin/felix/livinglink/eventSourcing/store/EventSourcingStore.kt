@@ -3,14 +3,15 @@ package felix.livinglink.eventSourcing.store
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.store.createStore
 import felix.livinglink.eventSourcing.EventSourcingEvent
+import felix.livinglink.json
 import io.github.xxfast.kstore.KStore
 import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
@@ -18,6 +19,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
 interface EventSourcingStore {
@@ -26,11 +28,12 @@ interface EventSourcingStore {
 
     fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
+        aggregationKey: String,
         type: KClass<T>,
         initial: A,
         reduce: (A, EventSourcingEvent) -> A,
         isEmpty: (A) -> Boolean,
-        aggregationKey: String
+        serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>>
 
     suspend fun clearAll()
@@ -43,83 +46,125 @@ interface EventSourcingStore {
 class EventSourcingDefaultStore(
     private val scope: CoroutineScope
 ) : EventSourcingStore {
-    private val store: KStore<Map<String, List<EventSourcingEvent>>> = createStore(
+    private val eventStore: KStore<Map<String, List<EventSourcingEvent>>> = createStore(
         path = "event-sourcing",
+        defaultValue = emptyMap()
+    )
+
+    private val nextExpectedEventIdStore: KStore<Map<String, Long>> = createStore(
+        path = "event-sourcing-next-event-ids",
+        defaultValue = emptyMap()
+    )
+
+    private val aggregateStore: KStore<Map<String, String>> = createStore(
+        path = "event-sourcing-aggregates",
         defaultValue = emptyMap()
     )
 
     private val mutex = Mutex()
 
-    private val eventChannels = ConcurrentMap<String, Channel<EventSourcingEvent>>()
+    private val eventChannels = ConcurrentMap<String, Channel<List<EventSourcingEvent>>>()
     private val aggregateFlows = ConcurrentMap<String, MutableStateFlow<Any>>()
-    private val initializedAggregates = mutableSetOf<String>()
     private val loadingFlows = ConcurrentMap<String, MutableStateFlow<Boolean>>()
+    private val timeoutFlows = ConcurrentMap<String, MutableStateFlow<Boolean>>()
+    private val initializedAggregates = mutableSetOf<String>()
 
     override fun eventsForGroup(groupId: String): Flow<List<EventSourcingEvent>> {
-        return store.updates.map { it?.get(groupId).orEmpty() }
+        return eventStore.updates.map { it?.get(groupId).orEmpty() }
     }
 
     override fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
+        aggregationKey: String,
         type: KClass<T>,
         initial: A,
         reduce: (A, EventSourcingEvent) -> A,
         isEmpty: (A) -> Boolean,
-        aggregationKey: String
+        serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>> {
         val cacheKey = "$groupId:${type.qualifiedName}:$aggregationKey"
 
         @Suppress("UNCHECKED_CAST")
-        val stateFlow = aggregateFlows.getOrPut(cacheKey) {
+        val aggregateStateFlow = aggregateFlows.getOrPut(cacheKey) {
             MutableStateFlow(initial as Any)
         } as MutableStateFlow<A>
 
         val isLoadingFlow = loadingFlows.getOrPut(cacheKey) {
-            MutableStateFlow(true)
+            MutableStateFlow(false)
         }
+
+        val timeoutFlow = timeoutFlows.getOrPut(cacheKey) { MutableStateFlow(false) }
 
         scope.launch {
             mutex.withLock {
-                if (cacheKey !in initializedAggregates) {
-                    initializedAggregates += cacheKey
-                    val events = store.get()?.get(groupId).orEmpty()
-                    val relevant = events.filter { type.isInstance(it.payload) }
-                    val result = relevant.fold(initial, reduce)
-                    stateFlow.value = result
-                    isLoadingFlow.value = false
+                val storedJsonString = aggregateStore.get()?.get(cacheKey)
+                val cachedAggregate: A? = runCatching {
+                    storedJsonString?.let { json.decodeFromString(serializer, it) }
+                }.getOrNull()
 
-                    val channel = eventChannels.getOrPut(groupId) {
-                        Channel(Channel.BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
+                if (cachedAggregate != null) {
+                    aggregateStateFlow.value = cachedAggregate
+                } else {
+                    isLoadingFlow.value = true
+
+                    val allEvents = eventStore.get()?.get(groupId).orEmpty()
+                    val relevantEvents = allEvents.filter { type.isInstance(it.payload) }
+                    val foldedAggregate = relevantEvents.fold(initial, reduce)
+                    aggregateStateFlow.value = foldedAggregate
+
+                    val serializedAggregate = json.encodeToString(serializer, foldedAggregate)
+                    aggregateStore.update { current ->
+                        (current ?: emptyMap()) + (cacheKey to serializedAggregate)
                     }
+                }
 
-                    scope.launch {
-                        channel.receiveAsFlow()
-                            .filter { type.isInstance(it.payload) }
-                            .collect { event ->
-                                stateFlow.value = reduce(stateFlow.value, event)
+                val receivedUpdate = MutableStateFlow(false)
+
+                scope.launch {
+                    delay(5000)
+                    if (!receivedUpdate.value) {
+                        timeoutFlow.value = true
+                    }
+                }
+
+                val liveEventChannel = eventChannels.getOrPut(groupId) {
+                    Channel(Channel.BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
+                }
+                scope.launch {
+                    liveEventChannel.receiveAsFlow()
+                        .filter { type.isInstance(it.firstOrNull()?.payload) }
+                        .collect { eventBatch ->
+                            mutex.withLock {
+                                val updated = eventBatch.fold(aggregateStateFlow.value, reduce)
+                                aggregateStateFlow.value = updated
+                                val serialized = json.encodeToString(serializer, updated)
+                                aggregateStore.update { it.orEmpty() + (cacheKey to serialized) }
                             }
-                    }
+                        }
                 }
             }
         }
 
-        return stateFlow
-            .asStateFlow()
-            .combine(isLoadingFlow) { current, loading ->
-                when {
-                    loading -> RepositoryState.Loading(null)
-                    isEmpty(current) -> RepositoryState.Empty
-                    else -> RepositoryState.Data(current)
-                }
+        return combine(
+            aggregateStateFlow, isLoadingFlow, timeoutFlow
+        ) { aggregate, isLoading, timeout ->
+            when {
+                isLoading && !timeout -> RepositoryState.Loading(aggregate)
+                isEmpty(aggregate) -> RepositoryState.Empty
+                else -> RepositoryState.Data(aggregate)
             }
+        }
     }
 
-    override suspend fun clearAll() {
-        store.update { emptyMap() }
+    override suspend fun clearAll() = mutex.withLock {
+        eventStore.update { emptyMap() }
+        nextExpectedEventIdStore.update { emptyMap() }
+        aggregateStore.update { emptyMap() }
         aggregateFlows.clear()
         initializedAggregates.clear()
         loadingFlows.clear()
         eventChannels.clear()
+        timeoutFlows.clear()
     }
 
     override suspend fun appendEvents(
@@ -127,40 +172,42 @@ class EventSourcingDefaultStore(
         newEvents: List<EventSourcingEvent>
     ) = mutex.withLock {
         val expectedNextId = getNextExpectedEventId(groupId)
+        val firstIncomingId = newEvents.first().eventId
+        val offset = firstIncomingId - expectedNextId
 
-        val sortedIncoming = newEvents.sortedBy { it.eventId }
-
-        val firstId = sortedIncoming.first().eventId
-        if (firstId != expectedNextId) {
-            println("Expected eventId=$expectedNextId, got $firstId")
+        if (offset > 0) {
+            println("Expected eventId=$expectedNextId, got $firstIncomingId")
             return@withLock
         }
 
-        for (i in sortedIncoming.indices) {
-            val expectedId = expectedNextId + i
-            val actualId = sortedIncoming[i].eventId
-            if (actualId != expectedId) {
-                println("Event sequence mismatch at index $i: expected $expectedId, got $actualId")
-                return@withLock
-            }
+        val newOnly = newEvents.drop(-offset.toInt())
+
+        if (newOnly.isEmpty()) {
+            return@withLock
         }
 
-        store.update { current ->
+        eventStore.update { current ->
             val map = current ?: emptyMap()
             val existing = map[groupId].orEmpty()
-            val updated = (existing + sortedIncoming).sortedBy { it.eventId }
+            val updated = existing + newOnly
             map + (groupId to updated)
         }
 
-        val channel = eventChannels.getOrPut(groupId) {
+        newOnly.lastOrNull()?.let { lastEvent ->
+            nextExpectedEventIdStore.update { current ->
+                val map = current ?: emptyMap()
+                map + (groupId to lastEvent.eventId + 1)
+            }
+        }
+
+        val eventChannel = eventChannels.getOrPut(groupId) {
             Channel(capacity = Channel.UNLIMITED, onBufferOverflow = BufferOverflow.SUSPEND)
         }
 
-        sortedIncoming.forEach { channel.send(it) }
+        eventChannel.send(newOnly)
     }
 
     override suspend fun getNextExpectedEventId(groupId: String): Long {
-        val events = store.get()?.get(groupId) ?: return 0
-        return events.maxOfOrNull { it.eventId }?.plus(1) ?: 0
+        return nextExpectedEventIdStore.get()?.get(groupId) ?: 0
     }
 }

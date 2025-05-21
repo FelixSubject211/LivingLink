@@ -11,16 +11,18 @@ import felix.livinglink.eventSourcing.store.EventSourcingStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
 interface EventSourcingRepository {
     fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
+        aggregationKey: String,
         type: KClass<T>,
         initial: A,
         reduce: (A, EventSourcingEvent) -> A,
-        isEmpty: (A) -> Boolean = { false },
-        aggregationKey: String
+        isEmpty: (A) -> Boolean,
+        serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>>
 
     suspend fun addEvent(
@@ -57,9 +59,11 @@ class EventSourcingDefaultRepository(
     }
 
     private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long) {
-        val expectedLocalId = eventSourcingStore.getNextExpectedEventId(groupId) ?: 0
+        val expectedLocalId = eventSourcingStore.getNextExpectedEventId(groupId)
 
-        if (expectedLocalId > latestRemoteId) return
+        if (expectedLocalId > latestRemoteId) {
+            return
+        }
 
         val syncStartExclusiveId = expectedLocalId - 1
 
@@ -67,10 +71,12 @@ class EventSourcingDefaultRepository(
             groupId = groupId,
             sinceEventIdExclusive = syncStartExclusiveId
         )) {
-            is LivingLinkResult.Success -> eventSourcingStore.appendEvents(
-                groupId = groupId,
-                newEvents = result.data.events
-            )
+            is LivingLinkResult.Success -> {
+                eventSourcingStore.appendEvents(
+                    groupId = groupId,
+                    newEvents = result.data.events
+                )
+            }
 
             is LivingLinkResult.Error<*> -> {}
         }
@@ -78,19 +84,21 @@ class EventSourcingDefaultRepository(
 
     override fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
+        aggregationKey: String,
         type: KClass<T>,
         initial: A,
         reduce: (A, EventSourcingEvent) -> A,
         isEmpty: (A) -> Boolean,
-        aggregationKey: String
+        serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>> {
         return eventSourcingStore.aggregateState(
             groupId = groupId,
+            aggregationKey = aggregationKey,
             type = type,
             initial = initial,
             reduce = reduce,
             isEmpty = isEmpty,
-            aggregationKey = aggregationKey
+            serializer = serializer
         )
     }
 

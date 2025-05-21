@@ -128,11 +128,12 @@ fun defaultUiModule(
                 viewModelState = LoadableViewModelDefaultState(
                     input = eventSourcingModule.eventSourcingRepository.aggregateState(
                         groupId = groupId,
+                        aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                         type = ShoppingListEvent::class,
                         initial = ShoppingListAggregate(linkedMapOf()),
                         reduce = ShoppingListDefaultReducer()::invoke,
                         isEmpty = { it.items.isEmpty() },
-                        aggregationKey = ShoppingListAggregate::class.qualifiedName!!
+                        serializer = ShoppingListAggregate.serializer()
                     ).mapState { ShoppingListViewModel.LoadableData(it) },
                     initialState = ShoppingListViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
