@@ -10,7 +10,7 @@ import ComposeApp
 import SwiftUI
 
 struct ShoppingListItemCard: View {
-    let item: SharedShoppingListAggregate.Item
+    let item: ShoppingListAggregate.Item
     let onCompleteItem: () -> Void
     let onUnCompleteItem: () -> Void
 

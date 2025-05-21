@@ -20,7 +20,7 @@ fun defaultEventSourcingModule(
         authenticatedHttpClient = authModule.authenticatedHttpClient.client
     )
 
-    val eventSourcingStore = EventSourcingDefaultStore()
+    val eventSourcingStore = EventSourcingDefaultStore(commonModule.defaultScope)
 
     return object : EventSourcingModule {
         override val eventSourcingRepository = EventSourcingDefaultRepository(

@@ -17,7 +17,7 @@ struct ShoppingListContentScreen: View {
 
     var body: some View {
         VStack {
-            List(loadableData.aggregate.items, id: \.id) { item in
+            List(loadableData.aggregate.asReversedList(), id: \.id) { item in
                 ShoppingListItemCard(
                     item: item,
                     onCompleteItem: { viewModel.completeItem(itemId: item.id) },

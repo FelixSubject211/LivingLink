@@ -10,16 +10,18 @@ import felix.livinglink.eventSourcing.network.EventSourcingNetworkDataSource
 import felix.livinglink.eventSourcing.store.EventSourcingStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 interface EventSourcingRepository {
-    fun <T : EventSourcingEvent.Payload> eventsOfTypeFlowTyped(
+    fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
-        type: KClass<T>
-    ): Flow<RepositoryState<List<EventSourcingEvent>, Nothing>>
+        type: KClass<T>,
+        initial: A,
+        reduce: (A, EventSourcingEvent) -> A,
+        isEmpty: (A) -> Boolean = { false },
+        aggregationKey: String
+    ): Flow<RepositoryState<A, Nothing>>
 
     suspend fun addEvent(
         groupId: String,
@@ -46,7 +48,7 @@ class EventSourcingDefaultRepository(
                         handleGroupStateUpdate(event.groupId, event.latestEventId)
                     }
                     is EventBus.Event.ClearAll -> {
-                        eventSourcingStore.clear()
+                        eventSourcingStore.clearAll()
                     }
                     else -> {}
                 }
@@ -55,58 +57,41 @@ class EventSourcingDefaultRepository(
     }
 
     private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long) {
-        val localEventIds = eventSourcingStore
-            .all(groupId)
-            .map { it.map { e -> e.eventId } }
-            .firstOrNull()
-            .orEmpty()
+        val expectedLocalId = eventSourcingStore.getNextExpectedEventId(groupId) ?: 0
 
-        val firstMissingId = findFirstMissingSequentialId(localEventIds)
+        if (expectedLocalId > latestRemoteId) return
 
-        val syncStartExclusiveId: Long? = when {
-            firstMissingId != null && firstMissingId <= latestRemoteId -> {
-                firstMissingId - 1
-            }
+        val syncStartExclusiveId = expectedLocalId - 1
 
-            firstMissingId == null && localEventIds.size.toLong() <= latestRemoteId -> {
-                localEventIds.size.toLong() - 1
-            }
-
-            else -> null
-        }
-
-        if (syncStartExclusiveId != null) {
-            when (val result = eventSourcingNetworkDataSource.getEvents(
+        when (val result = eventSourcingNetworkDataSource.getEvents(
+            groupId = groupId,
+            sinceEventIdExclusive = syncStartExclusiveId
+        )) {
+            is LivingLinkResult.Success -> eventSourcingStore.appendEvents(
                 groupId = groupId,
-                sinceEventIdExclusive = syncStartExclusiveId
+                newEvents = result.data.events
             )
-            ) {
-                is LivingLinkResult.Success -> eventSourcingStore.merge(groupId, result.data.events)
-                is LivingLinkResult.Error<*> -> {}
-            }
+
+            is LivingLinkResult.Error<*> -> {}
         }
     }
 
-    private fun findFirstMissingSequentialId(ids: List<Long>): Long? {
-        for (i in ids.indices) {
-            if (ids[i] != i.toLong()) return i.toLong()
-        }
-        return null
-    }
-
-    override fun <T : EventSourcingEvent.Payload> eventsOfTypeFlowTyped(
+    override fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
-        type: KClass<T>
-    ): Flow<RepositoryState<List<EventSourcingEvent>, Nothing>> {
-        return eventSourcingStore
-            .ofType(groupId, type)
-            .map { events ->
-                if (events.isEmpty()) {
-                    RepositoryState.Empty
-                } else {
-                    RepositoryState.Data(events)
-                }
-            }
+        type: KClass<T>,
+        initial: A,
+        reduce: (A, EventSourcingEvent) -> A,
+        isEmpty: (A) -> Boolean,
+        aggregationKey: String
+    ): Flow<RepositoryState<A, Nothing>> {
+        return eventSourcingStore.aggregateState(
+            groupId = groupId,
+            type = type,
+            initial = initial,
+            reduce = reduce,
+            isEmpty = isEmpty,
+            aggregationKey = aggregationKey
+        )
     }
 
     override suspend fun addEvent(
@@ -117,7 +102,7 @@ class EventSourcingDefaultRepository(
             AppendEventSourcingEventRequest(groupId, payload)
         )) {
             is LivingLinkResult.Success -> {
-                eventSourcingStore.merge(groupId, listOf(result.data.event))
+                eventSourcingStore.appendEvents(groupId, listOf(result.data.event))
                 LivingLinkResult.Success(Unit)
             }
             is LivingLinkResult.Error -> result
