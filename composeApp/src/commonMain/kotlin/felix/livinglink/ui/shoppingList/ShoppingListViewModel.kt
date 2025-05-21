@@ -5,7 +5,6 @@ import felix.livinglink.eventSourcing.repository.EventSourcingRepository
 import felix.livinglink.shoppingList.ShoppingListAggregate
 import felix.livinglink.shoppingList.ShoppingListEvent
 import felix.livinglink.ui.common.navigation.Navigator
-import kotlinx.coroutines.CoroutineScope
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
@@ -14,16 +13,14 @@ class ShoppingListViewModel(
     override val navigator: Navigator,
     private val eventSourcingRepository: EventSourcingRepository,
     private val groupId: String,
-    private val scope: CoroutineScope,
     private val viewModelState: ShoppingListViewModelState
 ) : ShoppingListStatefulViewModel {
-
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
     override val error = viewModelState.error
     override val loading = viewModelState.loading
-
     override fun closeError() = viewModelState.closeError()
+    override fun cancel() = viewModelState.cancel()
 
     fun showAddItem() = viewModelState.perform { data ->
         data.copy(showAddItem = true)

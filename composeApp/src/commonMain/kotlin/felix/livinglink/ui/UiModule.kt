@@ -124,7 +124,6 @@ fun defaultUiModule(
                 navigator = navigator,
                 eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
                 groupId = groupId,
-                scope = commonModule.defaultScope,
                 viewModelState = LoadableViewModelDefaultState(
                     input = eventSourcingModule.eventSourcingRepository
                         .eventsOfTypeFlowTyped(groupId, ShoppingListEvent::class)

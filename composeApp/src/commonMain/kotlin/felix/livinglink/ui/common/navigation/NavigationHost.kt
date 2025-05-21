@@ -11,6 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.toRoute
 import felix.livinglink.ui.UiModule
+import felix.livinglink.ui.common.state.LoadableStatefulViewModel
+import felix.livinglink.ui.common.state.StatefulViewModel
 import felix.livinglink.ui.group.GroupScreen
 import felix.livinglink.ui.listGroups.ListGroupsScreen
 import felix.livinglink.ui.login.LoginScreen
@@ -20,7 +22,7 @@ import felix.livinglink.ui.settings.SettingsScreen
 @Composable
 fun NavigationHost(
     navController: NavHostController,
-    uiModule: UiModule
+    uiModule: UiModule,
 ) {
     NavHost(
         navController = navController,
@@ -56,11 +58,21 @@ fun NavigationHost(
         }
         composable(route = LivingLinkScreen.Login.route) {
             ViewModelCache.clearAll()
-            LoginScreen(uiModule.loginViewModel())
+            val loginViewModel = remember {
+                ViewModelCache.getOrCreate("loginViewModel") {
+                    uiModule.loginViewModel()
+                }
+            }
+            LoginScreen(loginViewModel)
         }
         composable(route = LivingLinkScreen.Register.route) {
             ViewModelCache.clearAll()
-            RegisterScreen(uiModule.registerViewModel())
+            val registerViewModel = remember {
+                ViewModelCache.getOrCreate("registerViewModel") {
+                    uiModule.registerViewModel()
+                }
+            }
+            RegisterScreen(registerViewModel)
         }
     }
 }
@@ -83,6 +95,12 @@ private object ViewModelCache {
     }
 
     fun clearAll() {
+        cache.values.forEach { viewModel ->
+            when (viewModel) {
+                is StatefulViewModel<*, *, *> -> viewModel.cancel()
+                is LoadableStatefulViewModel<*, *, *, *, *> -> viewModel.cancel()
+            }
+        }
         cache.clear()
     }
 }

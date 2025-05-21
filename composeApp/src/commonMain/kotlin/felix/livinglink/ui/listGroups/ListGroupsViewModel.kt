@@ -20,8 +20,8 @@ class ListGroupsViewModel(
     override val data = viewModelState.data
     override val error = viewModelState.error
     override val loading = viewModelState.loading
-
     override fun closeError() = viewModelState.closeError()
+    override fun cancel() = viewModelState.cancel()
 
     fun showAddGroupDialog() = viewModelState.perform { data ->
         data.copy(showAddGroupDialog = true)

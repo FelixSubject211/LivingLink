@@ -12,7 +12,7 @@ import SwiftUI
 class IosNavigator: Navigator, ObservableObject {
     @Published var navigationPath = NavigationPath()
 
-    private var currentGroupIdObserver: EventBusCurrentGroupIdObserver?
+    var currentGroupIdObserver: EventBusCurrentGroupIdObserver?
 
     func addObserver(currentGroupIdObserver: EventBusCurrentGroupIdObserver) {
         self.currentGroupIdObserver = currentGroupIdObserver
@@ -49,6 +49,10 @@ class IosNavigator: Navigator, ObservableObject {
             default: break
             }
         }
+    }
+
+    func canNavigateBack() -> Bool {
+        navigationPath.count > 0
     }
 
     enum Screen {

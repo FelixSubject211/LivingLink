@@ -14,8 +14,8 @@ class SettingsViewModel(
     override val data = viewModelState.data
     override val error = viewModelState.error
     override val loading = viewModelState.loading
-
     override fun closeError() = viewModelState.closeError()
+    override fun cancel() = viewModelState.cancel()
 
     fun showDeleteUserAlert() = viewModelState.perform { current ->
         current.copy(showDeleteUserAlert = true)

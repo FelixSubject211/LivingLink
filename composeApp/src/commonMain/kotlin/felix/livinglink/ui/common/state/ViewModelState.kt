@@ -5,6 +5,7 @@ import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.haptics.controller.HapticsController
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,8 @@ interface ViewModelState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : LivingLi
         }
     )
 
+    fun cancel()
+
     sealed class CombinedError<out ERROR, out REQUEST_ERROR> : LivingLinkError {
         abstract val value: LivingLinkError
 
@@ -58,6 +61,9 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
     private val hapticsController: HapticsController,
     private val scope: CoroutineScope,
 ) : ViewModelState<DATA, ERROR, REQUEST_ERROR> {
+    private val job = Job(scope.coroutineContext[Job])
+    private val internalScope = CoroutineScope(context = scope.coroutineContext + job)
+
     private val taskCount = MutableStateFlow(0)
 
     override val data = MutableStateFlow(initialState)
@@ -70,7 +76,7 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
     override val loading = taskCount.map { taskCount ->
         taskCount > 0
     }.debounce(timeoutMillis = 200).stateIn(
-        scope = scope,
+        scope = internalScope,
         started = SharingStarted.Lazily,
         initialValue = false
     )
@@ -91,7 +97,7 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
         request: suspend (currentData: DATA) -> LivingLinkResult<RESULT, REQUEST_ERROR>,
         onSuccess: (currentData: DATA, result: RESULT) -> LivingLinkResult<DATA, ERROR>
     ) {
-        if (loading.value) {
+        if (taskCount.value > 0) {
             return
         }
 
@@ -104,7 +110,7 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
             else -> {}
         }
 
-        scope.launch {
+        internalScope.launch {
             taskCount.update { it + 1 }
 
             hapticsController.performLightImpact()
@@ -131,5 +137,9 @@ class ViewModelDefaultState<DATA, ERROR : LivingLinkError, REQUEST_ERROR : Livin
 
             taskCount.update { it - 1 }
         }
+    }
+
+    override fun cancel() {
+        job.cancel()
     }
 }

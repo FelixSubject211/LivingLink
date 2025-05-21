@@ -11,6 +11,7 @@ interface Navigator {
     fun pop()
     fun popAll()
     fun addObserver(currentGroupIdObserver: EventBus.CurrentGroupIdObserver)
+    fun canNavigateBack(): Boolean
 }
 
 class DefaultNavigator(
@@ -49,5 +50,9 @@ class DefaultNavigator(
 
     override fun addObserver(currentGroupIdObserver: EventBus.CurrentGroupIdObserver) {
         _observer = currentGroupIdObserver
+    }
+
+    override fun canNavigateBack(): Boolean {
+        return navHostController.previousBackStackEntry != null
     }
 }

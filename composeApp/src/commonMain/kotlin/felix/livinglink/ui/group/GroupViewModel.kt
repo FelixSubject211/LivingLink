@@ -17,8 +17,8 @@ class GroupViewModel(
     override val data = viewModelState.data
     override val error = viewModelState.error
     override val loading = viewModelState.loading
-
     override fun closeError() = viewModelState.closeError()
+    override fun cancel() = viewModelState.cancel()
 
     fun expandMenu() = viewModelState.perform { data ->
         data.copy(menuExpanded = true)

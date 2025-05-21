@@ -9,4 +9,5 @@ interface StatefulViewModel<DATA, ERROR, REQUEST_ERROR> {
     val error: StateFlow<ViewModelState.CombinedError<ERROR, REQUEST_ERROR>?>
     val loading: StateFlow<Boolean>
     fun closeError()
+    fun cancel()
 }

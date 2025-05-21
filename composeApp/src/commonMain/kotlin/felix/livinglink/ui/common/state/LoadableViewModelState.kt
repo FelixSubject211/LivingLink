@@ -5,6 +5,7 @@ import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.haptics.controller.HapticsController
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +40,8 @@ interface LoadableViewModelState<
             LivingLinkResult.Success(data)
         }
     )
+
+    fun cancel()
 
     sealed class State<LOADABLE_DATA, LOADABLE_ERROR> {
         class Empty<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
@@ -101,6 +104,8 @@ class LoadableViewModelDefaultState<
     hapticsController: HapticsController,
     scope: CoroutineScope,
 ) : LoadableViewModelState<LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> {
+    private val job = Job(scope.coroutineContext[Job])
+    private val internalScope = CoroutineScope(context = scope.coroutineContext + job)
 
     private val _error = MutableStateFlow<LOADABLE_ERROR?>(null)
     private val _loading = MutableStateFlow(false)
@@ -140,7 +145,7 @@ class LoadableViewModelDefaultState<
             }
         }
     }.stateIn(
-        scope = scope,
+        scope = internalScope,
         started = SharingStarted.Lazily,
         initialValue = LoadableViewModelState.State.Loading()
     )
@@ -162,7 +167,7 @@ class LoadableViewModelDefaultState<
             }
         }
         .stateIn(
-            scope = scope,
+            scope = internalScope,
             started = SharingStarted.Lazily,
             initialValue = null
         )
@@ -173,7 +178,7 @@ class LoadableViewModelDefaultState<
                 viewModelLoading || loadableLoading
             }
             .stateIn(
-                scope = scope,
+                scope = internalScope,
                 started = SharingStarted.Lazily,
                 initialValue = false
             )
@@ -192,4 +197,9 @@ class LoadableViewModelDefaultState<
     ) = viewModelState.perform(request = request, onSuccess = onSuccess)
 
     override fun perform(action: (DATA) -> DATA) = viewModelState.perform(action = action)
+
+    override fun cancel() {
+        viewModelState.cancel()
+        job.cancel()
+    }
 }

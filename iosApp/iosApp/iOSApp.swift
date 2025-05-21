@@ -38,20 +38,75 @@ private struct NavigationView: View {
         NavigationStack(path: $navigartor.navigationPath) {
             ListGroupsScreen(viewModel: uiModule.listGroupsViewModel)
                 .navigationDestination(for: IosNavigator.Screen.Group.self) { group in
+                    let groupId = group.groupId
+                    let groupViewModel = ViewModelCache.getOrCreate(key: "groupViewModel_\(groupId)") {
+                        uiModule.groupViewModel(groupId: groupId)
+                    }
+                    let shoppingListViewModel = ViewModelCache.getOrCreate(key: "shoppingListViewModel_\(groupId)") {
+                        uiModule.shoppingListViewModel(groupId: groupId)
+                    }
                     GroupScreen(
-                        groupViewModel: uiModule.groupViewModel(groupId: group.groupId),
-                        shoppingListViewModel: uiModule.shoppingListViewModel(groupId: group.groupId)
+                        groupViewModel: groupViewModel,
+                        shoppingListViewModel: shoppingListViewModel
                     )
                 }
                 .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in
+                    let _ = ViewModelCache.clearAll()
                     SettingsScreen(viewModel: uiModule.settingsViewModel)
                 }
                 .navigationDestination(for: IosNavigator.Screen.Login.self) { _ in
-                    LoginScreen(viewModel: uiModule.loginViewModel())
+                    let _ = ViewModelCache.clearAll()
+                    let loginViewModel = ViewModelCache.getOrCreate(key: "loginViewModel") {
+                        uiModule.loginViewModel()
+                    }
+                    LoginScreen(viewModel: loginViewModel)
                 }
                 .navigationDestination(for: IosNavigator.Screen.Register.self) { _ in
-                    RegisterScreen(viewModel: uiModule.registerViewModel())
+                    let _ = ViewModelCache.clearAll()
+                    let registerViewModel = ViewModelCache.getOrCreate(key: "registerViewModel") {
+                        uiModule.registerViewModel()
+                    }
+                    RegisterScreen(viewModel: registerViewModel)
                 }
+        }
+        .onChange(of: navigartor.navigationPath, initial: false) { oldPath, newPath in
+            let oldCount = oldPath.count
+            let newCount = newPath.count
+
+            if newCount == 0 {
+                ViewModelCache.clearAll()
+            }
+
+            if newCount < oldCount {
+                for _ in newCount ..< oldCount {
+                    navigartor.currentGroupIdObserver?.pop()
+                }
+            }
+        }
+    }
+
+    class ViewModelCache {
+        private static var cache: [String: Any] = [:]
+
+        static func getOrCreate<T>(key: String, factory: () -> T) -> T {
+            if let existing = cache[key] as? T {
+                return existing
+            } else {
+                let instance = factory()
+                cache[key] = instance
+                return instance
+            }
+        }
+
+        static func clearAll() {
+            for value in cache.values {
+                if let cancellable = value as? StatefulViewModel {
+                    cancellable.cancel()
+                } else if let cancellable = value as? LoadableStatefulViewModel {
+                    cancellable.cancel()
+                }
+            }
+            cache.removeAll()
         }
     }
 }

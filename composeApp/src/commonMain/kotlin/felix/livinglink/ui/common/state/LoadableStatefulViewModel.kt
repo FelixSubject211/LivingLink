@@ -10,4 +10,5 @@ interface LoadableStatefulViewModel<LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, 
     val error: StateFlow<LoadableViewModelState.CombinedError<LOADABLE_ERROR, ERROR, REQUEST_ERROR>?>
     val loading: StateFlow<Boolean>
     fun closeError()
+    fun cancel()
 }

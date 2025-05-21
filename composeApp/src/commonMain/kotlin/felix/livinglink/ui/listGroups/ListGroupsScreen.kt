@@ -5,21 +5,15 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import felix.livinglink.ui.common.BackAwareScaffold
 import felix.livinglink.ui.common.navigation.LivingLinkScreen
 import felix.livinglink.ui.common.state.LoadableStatefulView
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
 
@@ -39,31 +33,25 @@ fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
         )
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(ListGroupsScreenLocalizables.navigationTitle()) },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                ),
-                actions = {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = ListGroupsScreenLocalizables
-                            .showSettingsIconContentDescription(),
-                        modifier = Modifier
-                            .padding(16.dp)
-                            .clickable(onClick = {
-                                viewModel.navigator.push(LivingLinkScreen.Settings)
-                            })
-                    )
-                }
+    BackAwareScaffold(
+        navigator = viewModel.navigator,
+        title = ListGroupsScreenLocalizables.navigationTitle(),
+        actions = {
+            Icon(
+                imageVector = Icons.Default.Settings,
+                contentDescription = ListGroupsScreenLocalizables
+                    .showSettingsIconContentDescription(),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clickable(onClick = {
+                        viewModel.navigator.push(LivingLinkScreen.Settings)
+                    })
             )
         }
     ) { innerPadding ->
         LoadableStatefulView(
             viewModel = viewModel,
-            modifier = Modifier.padding(innerPadding),
+            modifier = innerPadding,
             emptyContent = {
                 ListGroupsEmptyContent(viewModel)
             },

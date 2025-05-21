@@ -18,8 +18,8 @@ class LoginViewModel(
     override val data = viewModelState.data
     override val error = viewModelState.error
     override val loading = viewModelState.loading
-
     override fun closeError() = viewModelState.closeError()
+    override fun cancel() = viewModelState.cancel()
 
     fun updateUsername(username: String) = viewModelState.perform { current ->
         current.copy(username = username)
