@@ -1,5 +1,6 @@
 package felix.livinglink.eventSourcing
 
+import felix.livinglink.Config
 import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.event.EventModule
@@ -12,6 +13,7 @@ interface EventSourcingModule {
 }
 
 fun defaultEventSourcingModule(
+    config: Config,
     commonModule: CommonModule,
     authModule: AuthModule,
     eventModule: EventModule
@@ -20,7 +22,10 @@ fun defaultEventSourcingModule(
         authenticatedHttpClient = authModule.authenticatedHttpClient.client
     )
 
-    val eventSourcingStore = EventSourcingDefaultStore(commonModule.defaultScope)
+    val eventSourcingStore = EventSourcingDefaultStore(
+        config = config,
+        scope = commonModule.defaultScope
+    )
 
     return object : EventSourcingModule {
         override val eventSourcingRepository = EventSourcingDefaultRepository(

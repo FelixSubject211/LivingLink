@@ -12,6 +12,7 @@ interface Config {
     val refreshTokenExpirationMs: Int
     val pollingIntervalSeconds: Int
     val pollingRetryDelaySeconds: Int
+    val aggregateTimeoutSeconds: Int
 }
 
 fun defaultConfig(): Config {
@@ -25,7 +26,8 @@ fun defaultConfig(): Config {
         override val groupIdsClaim = "groupIds"
         override val accessTokenExpirationMs = 1000 * 60 * 60
         override val refreshTokenExpirationMs = 1000 * 60 * 60 * 24 * 7
-        override val pollingIntervalSeconds = 1
+        override val pollingIntervalSeconds = 5
         override val pollingRetryDelaySeconds = 10
+        override val aggregateTimeoutSeconds = 5
     }
 }

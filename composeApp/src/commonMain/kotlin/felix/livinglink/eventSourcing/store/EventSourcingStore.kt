@@ -1,5 +1,6 @@
 package felix.livinglink.eventSourcing.store
 
+import felix.livinglink.Config
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.store.createStore
 import felix.livinglink.eventSourcing.EventSourcingEvent
@@ -44,6 +45,7 @@ interface EventSourcingStore {
 }
 
 class EventSourcingDefaultStore(
+    private val config: Config,
     private val scope: CoroutineScope
 ) : EventSourcingStore {
     private val eventStore: KStore<Map<String, List<EventSourcingEvent>>> = createStore(
@@ -121,7 +123,7 @@ class EventSourcingDefaultStore(
                 val receivedUpdate = MutableStateFlow(false)
 
                 scope.launch {
-                    delay(5000)
+                    delay(config.aggregateTimeoutSeconds.toLong() * 1000)
                     if (!receivedUpdate.value) {
                         timeoutFlow.value = true
                     }
@@ -135,10 +137,14 @@ class EventSourcingDefaultStore(
                         .filter { type.isInstance(it.firstOrNull()?.payload) }
                         .collect { eventBatch ->
                             mutex.withLock {
+                                receivedUpdate.value = true
+
                                 val updated = eventBatch.fold(aggregateStateFlow.value, reduce)
                                 aggregateStateFlow.value = updated
                                 val serialized = json.encodeToString(serializer, updated)
                                 aggregateStore.update { it.orEmpty() + (cacheKey to serialized) }
+
+                                isLoadingFlow.value = false
                             }
                         }
                 }

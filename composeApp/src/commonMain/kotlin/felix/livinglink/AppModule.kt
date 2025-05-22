@@ -52,6 +52,7 @@ fun defaultAppModule(
         eventModule = eventModule
     )
     val eventSourcingModule = defaultEventSourcingModule(
+        config = config,
         commonModule = commonModule,
         authModule = authModule,
         eventModule = eventModule
