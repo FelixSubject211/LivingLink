@@ -58,10 +58,11 @@ class EventSourcingDefaultRepository(
         }
     }
 
-    private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long) {
+    private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long?) {
         val expectedLocalId = eventSourcingStore.getNextExpectedEventId(groupId)
 
-        if (expectedLocalId > latestRemoteId) {
+        if (latestRemoteId == null || expectedLocalId > latestRemoteId) {
+            eventSourcingStore.triggerGroupUpdateCallback(groupId)
             return
         }
 

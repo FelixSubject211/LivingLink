@@ -28,7 +28,7 @@ interface EventBus {
         data object UpdateGroups : Event()
         data class GroupStateUpdated(
             val groupId: String,
-            val latestEventId: Long
+            val latestEventId: Long?
         ) : Event()
     }
 

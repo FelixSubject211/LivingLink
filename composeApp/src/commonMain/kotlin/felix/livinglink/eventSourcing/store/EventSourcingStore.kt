@@ -1,5 +1,6 @@
 package felix.livinglink.eventSourcing.store
 
+import androidx.compose.animation.core.updateTransition
 import felix.livinglink.Config
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.store.createStore
@@ -37,6 +38,8 @@ interface EventSourcingStore {
         serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>>
 
+    suspend fun triggerGroupUpdateCallback(groupId: String)
+
     suspend fun clearAll()
 
     suspend fun appendEvents(groupId: String, newEvents: List<EventSourcingEvent>)
@@ -70,6 +73,7 @@ class EventSourcingDefaultStore(
     private val loadingFlows = ConcurrentMap<String, MutableStateFlow<Boolean>>()
     private val timeoutFlows = ConcurrentMap<String, MutableStateFlow<Boolean>>()
     private val initializedAggregates = mutableSetOf<String>()
+    private val groupUpdateCallbacks = ConcurrentMap<String, MutableList<() -> Unit>>()
 
     override fun eventsForGroup(groupId: String): Flow<List<EventSourcingEvent>> {
         return eventStore.updates.map { it?.get(groupId).orEmpty() }
@@ -97,6 +101,15 @@ class EventSourcingDefaultStore(
 
         val timeoutFlow = timeoutFlows.getOrPut(cacheKey) { MutableStateFlow(false) }
 
+        val receivedUpdate = MutableStateFlow(false)
+
+        groupUpdateCallbacks.getOrPut(groupId) { mutableListOf() }
+            .add {
+                if (!receivedUpdate.value) {
+                    isLoadingFlow.value = false
+                }
+            }
+
         scope.launch {
             mutex.withLock {
                 val storedJsonString = aggregateStore.get()?.get(cacheKey)
@@ -119,8 +132,6 @@ class EventSourcingDefaultStore(
                         (current ?: emptyMap()) + (cacheKey to serializedAggregate)
                     }
                 }
-
-                val receivedUpdate = MutableStateFlow(false)
 
                 scope.launch {
                     delay(config.aggregateTimeoutSeconds.toLong() * 1000)
@@ -160,6 +171,11 @@ class EventSourcingDefaultStore(
                 else -> RepositoryState.Data(aggregate)
             }
         }
+    }
+
+    override suspend fun triggerGroupUpdateCallback(groupId: String) {
+        delay(500)
+        groupUpdateCallbacks.remove(groupId)?.forEach { it() }
     }
 
     override suspend fun clearAll() = mutex.withLock {
