@@ -30,7 +30,7 @@ fun ShoppingListScreenContent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(loadableData.aggregate.items) { item ->
+            items(loadableData.aggregate.asReversedList()) { item ->
                 ShoppingListItem(
                     item = item,
                     onCompleteItem = { viewModel.completeItem(item.id) },

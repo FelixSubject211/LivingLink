@@ -20,8 +20,8 @@ import felix.livinglink.event.network.ChangeNotifierClient
 import felix.livinglink.eventSourcing.EventSourcingModule
 import felix.livinglink.eventSourcing.network.EventSourcingNetworkDataSource
 import felix.livinglink.eventSourcing.repository.EventSourcingDefaultRepository
-import felix.livinglink.eventSourcing.store.EventSourcingDefaultStore
-import felix.livinglink.eventSourcing.store.EventSourcingStore
+import felix.livinglink.eventSourcing.store.AggregateStore
+import felix.livinglink.eventSourcing.store.EventStore
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.groups.network.GroupsNetworkDataSource
 import felix.livinglink.groups.repository.GroupsDefaultRepository
@@ -68,7 +68,8 @@ fun defaultAppTestModule(
         every { groups } returns emptyFlow()
     },
     eventSourcingNetworkDataSource: EventSourcingNetworkDataSource = mock(mode = MockMode.autofill),
-    eventSourcingStore: EventSourcingStore = mock(mode = MockMode.autofill)
+    eventStore: EventStore = mock(mode = MockMode.autofill),
+    aggregateStore: AggregateStore = mock(mode = MockMode.autofill)
 ): AppTestModule {
     val authenticatedHttpClient = AuthenticatedHttpDefaultClient(
         config = config,
@@ -111,7 +112,8 @@ fun defaultAppTestModule(
         eventSourcingModule = object : EventSourcingModule {
             override val eventSourcingRepository = EventSourcingDefaultRepository(
                 eventSourcingNetworkDataSource = eventSourcingNetworkDataSource,
-                eventSourcingStore = eventSourcingStore,
+                eventStore = eventStore,
+                aggregateStore = aggregateStore,
                 eventBus = eventBus,
                 scope = CoroutineScope(Dispatchers.Default)
             )

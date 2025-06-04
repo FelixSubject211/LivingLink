@@ -8,6 +8,7 @@ import felix.livinglink.eventSourcing.EventSourcingModule
 import felix.livinglink.group.Group
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.haptics.HapticsModule
+import felix.livinglink.shoppingList.ShoppingListAggregate
 import felix.livinglink.shoppingList.ShoppingListDefaultReducer
 import felix.livinglink.shoppingList.ShoppingListEvent
 import felix.livinglink.ui.common.navigation.Navigator
@@ -120,22 +121,20 @@ fun defaultUiModule(
         )
 
         override fun shoppingListViewModel(groupId: String): ShoppingListViewModel {
-            val reducer = ShoppingListDefaultReducer()
-
             return ShoppingListViewModel(
                 navigator = navigator,
                 eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
                 groupId = groupId,
                 viewModelState = LoadableViewModelDefaultState(
-                    input = eventSourcingModule.eventSourcingRepository
-                        .eventsOfTypeFlowTyped(groupId, ShoppingListEvent::class)
-                        .map { state ->
-                            state.mapState { events ->
-                                ShoppingListViewModel.LoadableData(
-                                    aggregate = reducer(events)
-                                )
-                            }
-                        },
+                    input = eventSourcingModule.eventSourcingRepository.aggregateState(
+                        groupId = groupId,
+                        aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
+                        type = ShoppingListEvent::class,
+                        initial = ShoppingListAggregate.empty,
+                        reduce = ShoppingListDefaultReducer()::invoke,
+                        isEmpty = { it.items.isEmpty() },
+                        serializer = ShoppingListAggregate.serializer()
+                    ).mapState { ShoppingListViewModel.LoadableData(it) },
                     initialState = ShoppingListViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
                     scope = commonModule.defaultScope.newChildScope(),

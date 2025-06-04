@@ -7,19 +7,36 @@ import felix.livinglink.event.eventbus.EventBus
 import felix.livinglink.eventSourcing.AppendEventSourcingEventRequest
 import felix.livinglink.eventSourcing.EventSourcingEvent
 import felix.livinglink.eventSourcing.network.EventSourcingNetworkDataSource
-import felix.livinglink.eventSourcing.store.EventSourcingStore
+import felix.livinglink.eventSourcing.store.AggregateStore
+import felix.livinglink.eventSourcing.store.EventStore
+import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
 interface EventSourcingRepository {
-    fun <T : EventSourcingEvent.Payload> eventsOfTypeFlowTyped(
+    fun <T : EventSourcingEvent.Payload, A> aggregateState(
         groupId: String,
-        type: KClass<T>
-    ): Flow<RepositoryState<List<EventSourcingEvent>, Nothing>>
+        aggregationKey: String,
+        type: KClass<T>,
+        initial: A,
+        reduce: (A, EventSourcingEvent) -> A,
+        isEmpty: (A) -> Boolean,
+        serializer: KSerializer<A>
+    ): Flow<RepositoryState<A, Nothing>>
 
     suspend fun addEvent(
         groupId: String,
@@ -29,10 +46,17 @@ interface EventSourcingRepository {
 
 class EventSourcingDefaultRepository(
     private val eventSourcingNetworkDataSource: EventSourcingNetworkDataSource,
-    private val eventSourcingStore: EventSourcingStore,
+    private val eventStore: EventStore,
+    private val aggregateStore: AggregateStore,
     private val eventBus: EventBus,
     private val scope: CoroutineScope
 ) : EventSourcingRepository {
+
+    private val mutex = Mutex()
+    private val eventChannels = ConcurrentMap<String, Channel<List<EventSourcingEvent>>>()
+    private val aggregateFlows = ConcurrentMap<String, MutableStateFlow<Any?>>()
+    private val loadingFlows = ConcurrentMap<String, MutableStateFlow<Boolean?>>()
+    private val setLoadingFalseCallsBacks = mutableSetOf<() -> Unit>()
 
     init {
         observeEventBus()
@@ -46,7 +70,7 @@ class EventSourcingDefaultRepository(
                         handleGroupStateUpdate(event.groupId, event.latestEventId)
                     }
                     is EventBus.Event.ClearAll -> {
-                        eventSourcingStore.clear()
+                        clearAll()
                     }
                     else -> {}
                 }
@@ -54,59 +78,148 @@ class EventSourcingDefaultRepository(
         }
     }
 
-    private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long) {
-        val localEventIds = eventSourcingStore
-            .all(groupId)
-            .map { it.map { e -> e.eventId } }
-            .firstOrNull()
-            .orEmpty()
+    private suspend fun clearAll() {
+        eventStore.clearAll()
+        aggregateStore.clearAll()
+        eventChannels.clear()
+        aggregateFlows.clear()
+        loadingFlows.clear()
+        setLoadingFalseCallsBacks.clear()
+    }
 
-        val firstMissingId = findFirstMissingSequentialId(localEventIds)
+    private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long?) {
+        val expectedLocalId = eventStore.getNextExpectedEventId(groupId)
 
-        val syncStartExclusiveId: Long? = when {
-            firstMissingId != null && firstMissingId <= latestRemoteId -> {
-                firstMissingId - 1
-            }
-
-            firstMissingId == null && localEventIds.size.toLong() <= latestRemoteId -> {
-                localEventIds.size.toLong() - 1
-            }
-
-            else -> null
+        if (latestRemoteId == null || expectedLocalId > latestRemoteId) {
+            setLoadingFalseCallsBacks.forEach { callback -> callback() }
+            setLoadingFalseCallsBacks.clear()
+            return
         }
 
-        if (syncStartExclusiveId != null) {
-            when (val result = eventSourcingNetworkDataSource.getEvents(
-                groupId = groupId,
-                sinceEventIdExclusive = syncStartExclusiveId
-            )
-            ) {
-                is LivingLinkResult.Success -> eventSourcingStore.merge(groupId, result.data.events)
-                is LivingLinkResult.Error<*> -> {}
+        val syncStartExclusiveId = expectedLocalId - 1
+
+        when (val result = eventSourcingNetworkDataSource.getEvents(
+            groupId = groupId,
+            sinceEventIdExclusive = syncStartExclusiveId
+        )) {
+            is LivingLinkResult.Success -> {
+                appendEvents(groupId = groupId, newEvents = result.data.events)
             }
+
+            is LivingLinkResult.Error<*> -> {}
         }
     }
 
-    private fun findFirstMissingSequentialId(ids: List<Long>): Long? {
-        for (i in ids.indices) {
-            if (ids[i] != i.toLong()) return i.toLong()
-        }
-        return null
-    }
-
-    override fun <T : EventSourcingEvent.Payload> eventsOfTypeFlowTyped(
+    private suspend fun appendEvents(
         groupId: String,
-        type: KClass<T>
-    ): Flow<RepositoryState<List<EventSourcingEvent>, Nothing>> {
-        return eventSourcingStore
-            .ofType(groupId, type)
-            .map { events ->
-                if (events.isEmpty()) {
-                    RepositoryState.Empty
+        newEvents: List<EventSourcingEvent>
+    ) = mutex.withLock {
+        val expectedNextId = eventStore.getNextExpectedEventId(groupId)
+
+        val firstIncomingId = newEvents.first().eventId
+        val offset = firstIncomingId - expectedNextId
+
+        if (offset > 0) {
+            println("Expected eventId=$expectedNextId, got $firstIncomingId")
+            return@withLock
+        }
+
+        val newOnly = newEvents.drop(-offset.toInt())
+
+        if (newOnly.isEmpty()) {
+            return@withLock
+        }
+
+        eventStore.storeEvents(groupId = groupId, events = newOnly)
+
+        val eventChannel = eventChannels.getOrPut(groupId) {
+            Channel(capacity = Channel.UNLIMITED, onBufferOverflow = BufferOverflow.SUSPEND)
+        }
+
+        eventChannel.send(newOnly)
+    }
+
+    @OptIn(FlowPreview::class)
+    override fun <T : EventSourcingEvent.Payload, A> aggregateState(
+        groupId: String,
+        aggregationKey: String,
+        type: KClass<T>,
+        initial: A,
+        reduce: (A, EventSourcingEvent) -> A,
+        isEmpty: (A) -> Boolean,
+        serializer: KSerializer<A>
+    ): Flow<RepositoryState<A, Nothing>> {
+        val cacheKey = "$groupId:${type.qualifiedName}:$aggregationKey"
+
+        @Suppress("UNCHECKED_CAST")
+        val aggregateFlow = aggregateFlows.getOrPut(cacheKey) {
+            MutableStateFlow(value = null)
+        } as MutableStateFlow<A?>
+
+        val loadingFlow = loadingFlows.getOrPut(cacheKey) {
+            MutableStateFlow(value = null)
+        }
+
+        val setLoadingFalseCallback = {
+            if (loadingFlow.value != false) {
+                loadingFlow.value = false
+            }
+        }
+
+        scope.launch {
+            mutex.withLock {
+                val aggregate = aggregateStore.get(cacheKey, serializer)
+
+                if (aggregate != null) {
+                    aggregateFlow.value = aggregate
+                    loadingFlow.value = false
                 } else {
-                    RepositoryState.Data(events)
+                    val allEvents = eventStore.getEvents(groupId)
+                    val relevantEvents = allEvents.filter { type.isInstance(it.payload) }
+                    val foldedAggregate = relevantEvents.fold(initial, reduce)
+                    aggregateFlow.value = foldedAggregate
+                    aggregateStore.store(cacheKey, serializer, foldedAggregate)
+
+                    if (allEvents.isEmpty()) {
+                        setLoadingFalseCallsBacks.add { setLoadingFalseCallback() }
+                    } else {
+                        loadingFlow.value = false
+                    }
+                }
+
+                val liveEventChannel = eventChannels.getOrPut(groupId) {
+                    Channel(Channel.BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
+                }
+
+                scope.launch {
+                    liveEventChannel.receiveAsFlow()
+                        .filter { type.isInstance(it.firstOrNull()?.payload) }
+                        .collect { eventBatch ->
+                            mutex.withLock {
+                                val currentOrInitial = aggregateFlow.value ?: initial
+                                val updated = eventBatch.fold(currentOrInitial, reduce)
+                                aggregateFlow.value = updated
+                                aggregateStore.store(cacheKey, serializer, updated)
+                                setLoadingFalseCallback()
+                            }
+                        }
                 }
             }
+        }
+
+        return combine(aggregateFlow, loadingFlow) { aggregate, loading ->
+            if (aggregate == null || loading == null) {
+                null
+            } else if (loading) {
+                RepositoryState.Loading(aggregate)
+            } else {
+                if (isEmpty(aggregate)) {
+                    RepositoryState.Empty
+                } else {
+                    RepositoryState.Data(aggregate)
+                }
+            }
+        }.filter { it != null }.map { it!! }.debounce(200)
     }
 
     override suspend fun addEvent(
@@ -117,7 +230,7 @@ class EventSourcingDefaultRepository(
             AppendEventSourcingEventRequest(groupId, payload)
         )) {
             is LivingLinkResult.Success -> {
-                eventSourcingStore.merge(groupId, listOf(result.data.event))
+                appendEvents(groupId, listOf(result.data.event))
                 LivingLinkResult.Success(Unit)
             }
             is LivingLinkResult.Error -> result
