@@ -9,7 +9,6 @@ import felix.livinglink.group.Group
 import felix.livinglink.groups.GroupsModule
 import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.shoppingList.ShoppingListAggregate
-import felix.livinglink.shoppingList.ShoppingListDefaultReducer
 import felix.livinglink.shoppingList.ShoppingListEvent
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
@@ -131,7 +130,6 @@ fun defaultUiModule(
                         aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                         type = ShoppingListEvent::class,
                         initial = ShoppingListAggregate.empty,
-                        reduce = ShoppingListDefaultReducer()::invoke,
                         isEmpty = { it.items.isEmpty() },
                         serializer = ShoppingListAggregate.serializer()
                     ).mapState { ShoppingListViewModel.LoadableData(it) },

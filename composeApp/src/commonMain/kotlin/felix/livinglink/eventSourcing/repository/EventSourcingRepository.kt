@@ -11,7 +11,6 @@ import felix.livinglink.eventSourcing.store.AggregateStore
 import felix.livinglink.eventSourcing.store.EventStore
 import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -27,12 +26,11 @@ import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
 interface EventSourcingRepository {
-    fun <T : EventSourcingEvent.Payload, A> aggregateState(
+    fun <T : EventSourcingEvent.Payload, A : Aggregate<A>> aggregateState(
         groupId: String,
         aggregationKey: String,
         type: KClass<T>,
         initial: A,
-        reduce: (A, EventSourcingEvent) -> A,
         isEmpty: (A) -> Boolean,
         serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>>
@@ -56,6 +54,7 @@ class EventSourcingDefaultRepository(
     private val aggregateFlows = ConcurrentMap<String, MutableStateFlow<Any?>>()
     private val loadingFlows = ConcurrentMap<String, MutableStateFlow<Boolean?>>()
     private val setLoadingFalseCallsBacks = mutableSetOf<() -> Unit>()
+    private val channelCollectors = ConcurrentMap<String, kotlinx.coroutines.Job>()
 
     init {
         observeEventBus()
@@ -77,13 +76,14 @@ class EventSourcingDefaultRepository(
         }
     }
 
-    private suspend fun clearAll() {
+    private suspend fun clearAll() = mutex.withLock {
         eventStore.clearAll()
         aggregateStore.clearAll()
         eventChannels.clear()
         aggregateFlows.clear()
         loadingFlows.clear()
         setLoadingFalseCallsBacks.clear()
+        channelCollectors.clear()
     }
 
     private suspend fun handleGroupStateUpdate(groupId: String, latestRemoteId: Long?) {
@@ -138,13 +138,11 @@ class EventSourcingDefaultRepository(
         eventChannel.send(newOnly)
     }
 
-    @OptIn(FlowPreview::class)
-    override fun <T : EventSourcingEvent.Payload, A> aggregateState(
+    override fun <T : EventSourcingEvent.Payload, A : Aggregate<A>> aggregateState(
         groupId: String,
         aggregationKey: String,
         type: KClass<T>,
         initial: A,
-        reduce: (A, EventSourcingEvent) -> A,
         isEmpty: (A) -> Boolean,
         serializer: KSerializer<A>
     ): Flow<RepositoryState<A, Nothing>> {
@@ -181,7 +179,9 @@ class EventSourcingDefaultRepository(
                         loadingFlow.value = false
                     }
                     val relevantEvents = allEvents.filter { type.isInstance(it.payload) }
-                    val foldedAggregate = relevantEvents.fold(initial, reduce)
+                    val foldedAggregate = relevantEvents.fold(initial) { acc, event ->
+                        acc.applyEvent(event)
+                    }
                     aggregateFlow.value = foldedAggregate
                     aggregateStore.store(cacheKey, serializer, foldedAggregate)
                 }
@@ -190,18 +190,22 @@ class EventSourcingDefaultRepository(
                     Channel(Channel.BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
                 }
 
-                scope.launch {
-                    liveEventChannel.receiveAsFlow()
-                        .filter { type.isInstance(it.firstOrNull()?.payload) }
-                        .collect { eventBatch ->
-                            mutex.withLock {
-                                val currentOrInitial = aggregateFlow.value ?: initial
-                                val updated = eventBatch.fold(currentOrInitial, reduce)
-                                aggregateFlow.value = updated
-                                aggregateStore.store(cacheKey, serializer, updated)
-                                setLoadingFalseCallback()
+                channelCollectors.getOrPut(cacheKey) {
+                    scope.launch {
+                        liveEventChannel.receiveAsFlow()
+                            .filter { type.isInstance(it.firstOrNull()?.payload) }
+                            .collect { eventBatch ->
+                                mutex.withLock {
+                                    val currentOrInitial = aggregateFlow.value ?: initial
+                                    val updated = eventBatch.fold(currentOrInitial) { acc, event ->
+                                        acc.applyEvent(event)
+                                    }
+                                    aggregateFlow.value = updated
+                                    aggregateStore.store(cacheKey, serializer, updated)
+                                    setLoadingFalseCallback()
+                                }
                             }
-                        }
+                    }.also { job -> channelCollectors[cacheKey] = job }
                 }
             }
         }

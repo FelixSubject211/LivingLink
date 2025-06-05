@@ -20,7 +20,6 @@ import felix.livinglink.eventSourcing.repository.EventSourcingDefaultRepository
 import felix.livinglink.eventSourcing.store.AggregateStore
 import felix.livinglink.eventSourcing.store.EventStore
 import felix.livinglink.shoppingList.ShoppingListAggregate
-import felix.livinglink.shoppingList.ShoppingListDefaultReducer
 import felix.livinglink.shoppingList.ShoppingListEvent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -91,7 +90,6 @@ class EventSourcingDefaultRepositoryTest {
             aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
             type = ShoppingListEvent::class,
             initial = ShoppingListAggregate.empty,
-            reduce = ShoppingListDefaultReducer()::invoke,
             isEmpty = { it.items.isEmpty() },
             serializer = ShoppingListAggregate.serializer()
         ).test {
@@ -129,7 +127,6 @@ class EventSourcingDefaultRepositoryTest {
                 aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                 type = ShoppingListEvent::class,
                 initial = ShoppingListAggregate.empty,
-                reduce = ShoppingListDefaultReducer()::invoke,
                 isEmpty = { it.items.isEmpty() },
                 serializer = ShoppingListAggregate.serializer()
             ).test {
@@ -158,7 +155,6 @@ class EventSourcingDefaultRepositoryTest {
             aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
             type = ShoppingListEvent::class,
             initial = ShoppingListAggregate.empty,
-            reduce = ShoppingListDefaultReducer()::invoke,
             isEmpty = { it.items.isEmpty() },
             serializer = ShoppingListAggregate.serializer()
         ).test {
@@ -195,7 +191,6 @@ class EventSourcingDefaultRepositoryTest {
                 aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                 type = ShoppingListEvent::class,
                 initial = ShoppingListAggregate.empty,
-                reduce = ShoppingListDefaultReducer()::invoke,
                 isEmpty = { it.items.isEmpty() },
                 serializer = ShoppingListAggregate.serializer()
             ).test {
@@ -232,6 +227,6 @@ class EventSourcingDefaultRepositoryTest {
             }
         }
 
-    private fun reduce(vararg events: EventSourcingEvent): ShoppingListAggregate =
-        events.fold(ShoppingListAggregate.empty, ShoppingListDefaultReducer()::invoke)
+    private fun reduce(vararg events: EventSourcingEvent) =
+        events.fold(ShoppingListAggregate.empty, ShoppingListAggregate::applyEvent)
 }
