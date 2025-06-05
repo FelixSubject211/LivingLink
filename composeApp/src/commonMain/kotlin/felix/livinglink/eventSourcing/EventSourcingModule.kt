@@ -1,6 +1,5 @@
 package felix.livinglink.eventSourcing
 
-import felix.livinglink.Config
 import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.event.EventModule

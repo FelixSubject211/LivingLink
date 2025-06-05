@@ -17,9 +17,8 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -175,16 +174,16 @@ class EventSourcingDefaultRepository(
                     loadingFlow.value = false
                 } else {
                     val allEvents = eventStore.getEvents(groupId)
-                    val relevantEvents = allEvents.filter { type.isInstance(it.payload) }
-                    val foldedAggregate = relevantEvents.fold(initial, reduce)
-                    aggregateFlow.value = foldedAggregate
-                    aggregateStore.store(cacheKey, serializer, foldedAggregate)
-
                     if (allEvents.isEmpty()) {
+                        loadingFlow.value = true
                         setLoadingFalseCallsBacks.add { setLoadingFalseCallback() }
                     } else {
                         loadingFlow.value = false
                     }
+                    val relevantEvents = allEvents.filter { type.isInstance(it.payload) }
+                    val foldedAggregate = relevantEvents.fold(initial, reduce)
+                    aggregateFlow.value = foldedAggregate
+                    aggregateStore.store(cacheKey, serializer, foldedAggregate)
                 }
 
                 val liveEventChannel = eventChannels.getOrPut(groupId) {
@@ -208,9 +207,9 @@ class EventSourcingDefaultRepository(
         }
 
         return combine(aggregateFlow, loadingFlow) { aggregate, loading ->
-            if (aggregate == null || loading == null) {
+            if (aggregate == null) {
                 null
-            } else if (loading) {
+            } else if (loading == true) {
                 RepositoryState.Loading(aggregate)
             } else {
                 if (isEmpty(aggregate)) {
@@ -219,7 +218,7 @@ class EventSourcingDefaultRepository(
                     RepositoryState.Data(aggregate)
                 }
             }
-        }.filter { it != null }.map { it!! }.debounce(200)
+        }.mapNotNull { it }
     }
 
     override suspend fun addEvent(

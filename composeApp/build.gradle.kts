@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlinPluginSerialization)
     alias(libs.plugins.i18n4k)
     alias(libs.plugins.mokkery)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -28,7 +29,7 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
-            isStatic = true
+            isStatic = false
         }
     }
 
@@ -65,6 +66,7 @@ kotlin {
             implementation(libs.kvault)
             implementation(libs.ktor.client.darwin)
             implementation(libs.kstore.file)
+            implementation(libs.sqlDelight.native.driver)
         }
         androidMain.dependencies {
             implementation(compose.preview)
@@ -72,6 +74,7 @@ kotlin {
             implementation(libs.kvault)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.kstore.file)
+            implementation(libs.sqlDelight.android.driver)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -94,6 +97,7 @@ kotlin {
             implementation(libs.navigation.compose)
             implementation(libs.kstore)
             implementation(projects.shared)
+            implementation(libs.sqlDelight.runtime)
         }
         commonTest.dependencies {
             implementation(libs.ktor.client.mock)
@@ -129,6 +133,14 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+sqldelight {
+    databases {
+        create("AppDatabase") {
+            packageName.set("felix.livinglink.db")
+        }
     }
 }
 

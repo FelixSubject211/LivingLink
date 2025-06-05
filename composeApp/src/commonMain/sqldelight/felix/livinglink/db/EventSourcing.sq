@@ -1,0 +1,32 @@
+CREATE TABLE event_sourcing_event (
+    event_id INTEGER NOT NULL,
+    user_id TEXT NOT NULL,
+    group_id TEXT NOT NULL,
+    created_at TEXT NOT NULL,
+    payload_json TEXT NOT NULL,
+
+    PRIMARY KEY (group_id, event_id)
+);
+
+CREATE INDEX IF NOT EXISTS event_sourcing_event_group_index
+ON event_sourcing_event(group_id);
+
+CREATE INDEX IF NOT EXISTS event_sourcing_event_group_event_index
+ON event_sourcing_event(group_id, event_id);
+
+insertEvent:
+INSERT INTO event_sourcing_event(
+    event_id, user_id, group_id, created_at, payload_json
+) VALUES (?, ?, ?, ?, ?);
+
+getEventsByGroup:
+SELECT * FROM event_sourcing_event
+WHERE group_id = ?
+ORDER BY event_id ASC;
+
+getNextExpectedEventId:
+SELECT IFNULL(MAX(event_id), 0) + 1 FROM event_sourcing_event
+WHERE group_id = ?;
+
+clearAll:
+DELETE FROM event_sourcing_event;
