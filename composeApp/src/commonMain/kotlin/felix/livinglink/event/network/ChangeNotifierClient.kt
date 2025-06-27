@@ -26,7 +26,7 @@ interface ChangeNotifierClient {
 
         data class GroupStateUpdated(
             val groupId: String,
-            val latestEventId: Long
+            val latestEventId: Long?
         ) : Event()
     }
 
@@ -77,11 +77,11 @@ class ChangeNotifierDefaultClient(
                             _events.emit(ChangeNotifierClient.Event.MembershipChanged)
                         }
 
-                        if (currentGroupId != null && data.latestEventId != null) {
+                        if (currentGroupId != null) {
                             _events.emit(
                                 ChangeNotifierClient.Event.GroupStateUpdated(
                                     groupId = currentGroupId,
-                                    latestEventId = data.latestEventId!!
+                                    latestEventId = data.latestEventId
                                 )
                             )
                         }

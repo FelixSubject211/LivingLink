@@ -1,5 +1,8 @@
 package felix.livinglink.common.model
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+
 sealed class RepositoryState<out DATA, out ERROR> {
     data object Empty : RepositoryState<Nothing, Nothing>()
     data class Loading<out DATA>(val data: DATA?) : RepositoryState<DATA, Nothing>()
@@ -14,6 +17,12 @@ fun <DATA, ERROR> RepositoryState<DATA, ERROR>.dataOrNull(): DATA? {
         is RepositoryState.Loading -> this.data
         is RepositoryState.Data -> this.data
     }
+}
+
+fun <DATA1, DATA2, ERROR> Flow<RepositoryState<DATA1, ERROR>>.mapState(
+    transform: (DATA1) -> DATA2?
+): Flow<RepositoryState<DATA2, ERROR>> {
+    return this.map { it.mapState(transform) }
 }
 
 fun <DATA1, DATA2, ERROR> RepositoryState<DATA1, ERROR>.mapState(
