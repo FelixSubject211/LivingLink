@@ -36,4 +36,4 @@ struct ShoppingListScreen: View {
     }
 }
 
-private typealias ShoppingListScreenError = LoadableViewModelStateCombinedError<NetworkError, KotlinNothing, NetworkError>
+private typealias ShoppingListScreenError = LoadableViewModelStateCombinedError<LivingLinkError, KotlinNothing, NetworkError>

@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ShoppingListAggregate(
-    val items: LinkedHashMap<String, Item> = linkedMapOf(),
-    val lastEventId: Long? = null
+    private val items: LinkedHashMap<String, Item> = linkedMapOf(),
+    private val lastEventId: Long? = null
 ) : Aggregate<ShoppingListAggregate> {
     @Serializable
     data class Item(
@@ -19,9 +19,6 @@ data class ShoppingListAggregate(
     fun asReversedList(): List<Item> = items.values.reversed()
 
     override fun applyEvent(event: EventSourcingEvent): ShoppingListAggregate {
-        if (event.eventId != (lastEventId ?: -1) + 1) {
-            throw IllegalStateException("Stale eventId=${event.eventId}, last=${lastEventId}")
-        }
         val payload = event.payload as? ShoppingListEvent ?: return this
         val newItems = LinkedHashMap(items)
         when (payload) {
@@ -43,6 +40,14 @@ data class ShoppingListAggregate(
             }
         }
         return copy(items = newItems, lastEventId = event.eventId)
+    }
+
+    override fun getLastEventId(): Long? {
+        return lastEventId
+    }
+
+    override fun isEmpty(): Boolean {
+        return items.isEmpty()
     }
 
     companion object {

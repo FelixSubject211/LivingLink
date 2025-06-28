@@ -89,10 +89,18 @@ private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error:
                 }
             }
 
-            EmptyView()
-        }
-        .alert(isPresented: isErrorAlertPresented) {
-            buildAlert(error.value!)
+            InvisibleAlertHost(
+                error: Binding(
+                    get: { error.value },
+                    set: { newValue in
+                        if newValue == nil {
+                            viewModel.closeError()
+                        }
+                    }
+                ),
+                buildAlert: buildAlert,
+                onDismiss: viewModel.closeError
+            )
         }
     }
 
@@ -115,16 +123,5 @@ private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error:
         default:
             loadingContent().eraseToAnyView()
         }
-    }
-
-    private var isErrorAlertPresented: Binding<Bool> {
-        Binding(
-            get: { error.value != nil },
-            set: { show in
-                if !show {
-                    viewModel.closeError()
-                }
-            }
-        )
     }
 }

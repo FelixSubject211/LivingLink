@@ -16,6 +16,7 @@ import felix.livinglink.event.eventbus.EventBus
 import felix.livinglink.eventSourcing.EventSourcingEvent
 import felix.livinglink.eventSourcing.GetEventSourcingEventsResponse
 import felix.livinglink.eventSourcing.network.EventSourcingNetworkDataSource
+import felix.livinglink.eventSourcing.repository.CacheKey
 import felix.livinglink.eventSourcing.repository.EventSourcingDefaultRepository
 import felix.livinglink.eventSourcing.store.AggregateStore
 import felix.livinglink.eventSourcing.store.EventStore
@@ -38,8 +39,11 @@ class EventSourcingDefaultRepositoryTest {
 
     private lateinit var eventBusEvents: MutableSharedFlow<EventBus.Event>
 
-    private val cacheKey =
-        "${TestData.group1.id}:${ShoppingListEvent::class.qualifiedName}:${ShoppingListAggregate::class.qualifiedName}"
+    private val cacheKey = CacheKey(
+        groupId = TestData.group1.id,
+        qualifiedTypeName = ShoppingListEvent::class.qualifiedName!!,
+        aggregationKey = ShoppingListAggregate::class.qualifiedName!!
+    )
 
     @BeforeTest
     fun setup() {
@@ -90,7 +94,6 @@ class EventSourcingDefaultRepositoryTest {
             aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
             type = ShoppingListEvent::class,
             initial = ShoppingListAggregate.empty,
-            isEmpty = { it.items.isEmpty() },
             serializer = ShoppingListAggregate.serializer()
         ).test {
             assertEquals(RepositoryState.Data(aggregate1), awaitItem())
@@ -127,7 +130,6 @@ class EventSourcingDefaultRepositoryTest {
                 aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                 type = ShoppingListEvent::class,
                 initial = ShoppingListAggregate.empty,
-                isEmpty = { it.items.isEmpty() },
                 serializer = ShoppingListAggregate.serializer()
             ).test {
                 eventBusEvents.emit(
@@ -155,7 +157,6 @@ class EventSourcingDefaultRepositoryTest {
             aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
             type = ShoppingListEvent::class,
             initial = ShoppingListAggregate.empty,
-            isEmpty = { it.items.isEmpty() },
             serializer = ShoppingListAggregate.serializer()
         ).test {
             assertEquals(RepositoryState.Data(cachedAggregate), awaitItem())
@@ -191,7 +192,6 @@ class EventSourcingDefaultRepositoryTest {
                 aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                 type = ShoppingListEvent::class,
                 initial = ShoppingListAggregate.empty,
-                isEmpty = { it.items.isEmpty() },
                 serializer = ShoppingListAggregate.serializer()
             ).test {
                 eventBusEvents.emit(

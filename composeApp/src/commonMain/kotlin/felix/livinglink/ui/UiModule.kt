@@ -130,7 +130,6 @@ fun defaultUiModule(
                         aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                         type = ShoppingListEvent::class,
                         initial = ShoppingListAggregate.empty,
-                        isEmpty = { it.items.isEmpty() },
                         serializer = ShoppingListAggregate.serializer()
                     ).mapState { ShoppingListViewModel.LoadableData(it) },
                     initialState = ShoppingListViewModel.initialState,
@@ -143,6 +142,5 @@ fun defaultUiModule(
         fun CoroutineScope.newChildScope(): CoroutineScope {
             return CoroutineScope(this.coroutineContext + SupervisorJob())
         }
-
     }
 }

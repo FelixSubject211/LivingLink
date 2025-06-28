@@ -44,19 +44,19 @@ struct StatefulView<Data, Error: LivingLinkError>: View {
                         .padding()
                 }
             }
-        }.alert(isPresented: isErrorAlertPresented) {
-            buildAlert(error.value!)
-        }
-    }
 
-    private var isErrorAlertPresented: Binding<Bool> {
-        Binding(
-            get: { error.value != nil },
-            set: { show in
-                if !show {
-                    viewModel.closeError()
-                }
-            }
-        )
+            InvisibleAlertHost(
+                error: Binding(
+                    get: { error.value },
+                    set: { newValue in
+                        if newValue == nil {
+                            viewModel.closeError()
+                        }
+                    }
+                ),
+                buildAlert: buildAlert,
+                onDismiss: viewModel.closeError
+            )
+        }
     }
 }

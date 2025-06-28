@@ -24,13 +24,6 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
 
     Box(modifier = modifier) {
         Column {
-            if (loadingState) {
-                LinearProgressIndicator(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                )
-            }
-
             when (loadableData) {
                 is LoadableViewModelState.State.Empty -> {
                     emptyContent()
@@ -44,6 +37,14 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
                     content(loadableData.data, dataState)
                 }
             }
+        }
+
+        if (loadingState) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(androidx.compose.ui.Alignment.TopCenter)
+            )
         }
 
         errorState?.toAlert(

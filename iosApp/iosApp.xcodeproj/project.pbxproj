@@ -36,6 +36,7 @@
 		3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */; };
 		3EBEBF712D90706C003DF183 /* DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF702D90706B003DF183 /* DesignSystem.swift */; };
 		3EC4CD082DCC56120044A642 /* GroupScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EC4CD072DCC560D0044A642 /* GroupScreen.swift */; };
+		3ECB4A092E10061D00E5C540 /* InvisibleAlertHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECB4A082E10061C00E5C540 /* InvisibleAlertHost.swift */; };
 		3ECD5E0E2DB62ADB00CA329F /* TextFieldAlertModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */; };
 		3EEC02402DB3685F0059D973 /* StateFlowCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEC023F2DB3685D0059D973 /* StateFlowCollector.swift */; };
 		3EEEF8182D8F53B100FE7D80 /* KotlinStateFlowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */; };
@@ -74,6 +75,7 @@
 		3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
 		3EBEBF702D90706B003DF183 /* DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesignSystem.swift; sourceTree = "<group>"; };
 		3EC4CD072DCC560D0044A642 /* GroupScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupScreen.swift; sourceTree = "<group>"; };
+		3ECB4A082E10061C00E5C540 /* InvisibleAlertHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InvisibleAlertHost.swift; sourceTree = "<group>"; };
 		3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldAlertModifier.swift; sourceTree = "<group>"; };
 		3EEC023F2DB3685D0059D973 /* StateFlowCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateFlowCollector.swift; sourceTree = "<group>"; };
 		3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinStateFlowExtension.swift; sourceTree = "<group>"; };
@@ -169,6 +171,7 @@
 		3EEC02432DB37DFF0059D973 /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				3ECB4A082E10061C00E5C540 /* InvisibleAlertHost.swift */,
 				3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */,
 				3EEEF8192D8F540700FE7D80 /* StatefulView.swift */,
 				3EEEF81D2D8F6C3700FE7D80 /* CustomTextField.swift */,
@@ -395,6 +398,7 @@
 				3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */,
 				3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */,
 				3E36EA112DDBC14F00369930 /* ListGroupsGroupCard.swift in Sources */,
+				3ECB4A092E10061D00E5C540 /* InvisibleAlertHost.swift in Sources */,
 				3EEEF8202D8F6C5D00FE7D80 /* CustomSecureField.swift in Sources */,
 				3E773E932D94388000434B2D /* ViewExtension.swift in Sources */,
 				3EEEF81E2D8F6C3800FE7D80 /* CustomTextField.swift in Sources */,
