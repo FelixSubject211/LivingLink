@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -28,13 +27,13 @@ import kotlinx.serialization.KSerializer
 import kotlin.reflect.KClass
 
 interface EventSourcingRepository {
-    fun <T : EventSourcingEvent.Payload, A : Aggregate<A>> aggregateState(
+    fun <PAYLOAD : EventSourcingEvent.Payload, AGGREGATE : Aggregate<AGGREGATE, PAYLOAD>> aggregateState(
         groupId: String,
         aggregationKey: String,
-        type: KClass<T>,
-        initial: A,
-        serializer: KSerializer<A>
-    ): Flow<RepositoryState<A, LivingLinkError>>
+        payloadType: KClass<PAYLOAD>,
+        initial: AGGREGATE,
+        serializer: KSerializer<AGGREGATE>
+    ): Flow<RepositoryState<AGGREGATE, LivingLinkError>>
 
     suspend fun addEvent(
         groupId: String,
@@ -51,7 +50,7 @@ class EventSourcingDefaultRepository(
 ) : EventSourcingRepository {
 
     private val mutex = Mutex()
-    private val eventFlows = ConcurrentMap<String, MutableSharedFlow<List<EventSourcingEvent>>>()
+    private val eventFlows = ConcurrentMap<String, MutableSharedFlow<List<EventSourcingEvent<*>>>>()
     private val aggregateFlows = ConcurrentMap<CacheKey, MutableStateFlow<Any?>>()
     private val loadingFlows = ConcurrentMap<CacheKey, MutableStateFlow<Boolean?>>()
     private val errorFlows = ConcurrentMap<CacheKey, MutableStateFlow<LivingLinkError?>>()
@@ -135,7 +134,7 @@ class EventSourcingDefaultRepository(
 
     private suspend fun storeEventsAndSendToChannel(
         groupId: String,
-        newEvents: List<EventSourcingEvent>
+        newEvents: List<EventSourcingEvent<*>>
     ) = mutex.withLock {
         val expectedNextId = eventStore.getNextExpectedEventId(groupId)
 
@@ -164,23 +163,23 @@ class EventSourcingDefaultRepository(
         flow.emit(newOnly)
     }
 
-    override fun <T : EventSourcingEvent.Payload, A : Aggregate<A>> aggregateState(
+    override fun <PAYLOAD : EventSourcingEvent.Payload, AGGREGATE : Aggregate<AGGREGATE, PAYLOAD>> aggregateState(
         groupId: String,
         aggregationKey: String,
-        type: KClass<T>,
-        initial: A,
-        serializer: KSerializer<A>
-    ): Flow<RepositoryState<A, LivingLinkError>> {
+        payloadType: KClass<PAYLOAD>,
+        initial: AGGREGATE,
+        serializer: KSerializer<AGGREGATE>
+    ): Flow<RepositoryState<AGGREGATE, LivingLinkError>> {
         val cacheKey = CacheKey(
             groupId = groupId,
-            qualifiedTypeName = type.qualifiedName!!,
+            qualifiedTypeName = payloadType.qualifiedName!!,
             aggregationKey = aggregationKey
         )
 
         @Suppress("UNCHECKED_CAST")
         val aggregateFlow = aggregateFlows.getOrPut(cacheKey) {
             MutableStateFlow(value = null)
-        } as MutableStateFlow<A?>
+        } as MutableStateFlow<AGGREGATE?>
 
         val loadingFlow = loadingFlows.getOrPut(cacheKey) {
             MutableStateFlow(value = null)
@@ -202,7 +201,7 @@ class EventSourcingDefaultRepository(
                     loadAndObserveAggregate(
                         groupId = groupId,
                         cacheKey = cacheKey,
-                        type = type,
+                        payloadType = payloadType,
                         initial = initial,
                         serializer = serializer,
                         aggregateFlow = aggregateFlow,
@@ -235,13 +234,13 @@ class EventSourcingDefaultRepository(
         }.mapNotNull { it }.also { errorFlow.value = null }
     }
 
-    private suspend fun <T : EventSourcingEvent.Payload, A : Aggregate<A>> loadAndObserveAggregate(
+    private suspend fun <PAYLOAD : EventSourcingEvent.Payload, AGGREGATE : Aggregate<AGGREGATE, PAYLOAD>> loadAndObserveAggregate(
         groupId: String,
         cacheKey: CacheKey,
-        type: KClass<T>,
-        initial: A,
-        serializer: KSerializer<A>,
-        aggregateFlow: MutableStateFlow<A?>,
+        payloadType: KClass<PAYLOAD>,
+        initial: AGGREGATE,
+        serializer: KSerializer<AGGREGATE>,
+        aggregateFlow: MutableStateFlow<AGGREGATE?>,
         loadingFlow: MutableStateFlow<Boolean?>,
         postReductionAction: PostReductionAction
     ) {
@@ -258,7 +257,10 @@ class EventSourcingDefaultRepository(
             } else {
                 loadingFlow.value = false
             }
-            val relevantEvents = allEvents.filter { type.isInstance(it.payload) }
+            @Suppress("UNCHECKED_CAST")
+            val relevantEvents = allEvents
+                .filter { payloadType.isInstance(it.payload) }
+                .map { it as EventSourcingEvent<PAYLOAD> }
             val foldedAggregate = reduceEvents(initial, relevantEvents)
             aggregateFlow.value = foldedAggregate
             aggregateStore.store(cacheKey, serializer, foldedAggregate)
@@ -275,13 +277,16 @@ class EventSourcingDefaultRepository(
         channelCollectors.getOrPut(cacheKey) {
             scope.launch {
                 liveEventFlow
-                    .filter { type.isInstance(it.firstOrNull()?.payload) }
                     .collect { eventBatch ->
                         mutex.withLock {
                             try {
                                 postReductionAction.setReducingState(true)
+                                @Suppress("UNCHECKED_CAST")
+                                val relevantEvents = eventBatch
+                                    .filter { payloadType.isInstance(it.payload) }
+                                    .map { it as EventSourcingEvent<PAYLOAD> }
                                 val currentOrInitial = aggregateFlow.value ?: initial
-                                val updated = reduceEvents(currentOrInitial, eventBatch)
+                                val updated = reduceEvents(currentOrInitial, relevantEvents)
                                 aggregateFlow.value = updated
                                 aggregateStore.store(cacheKey, serializer, updated)
                                 postReductionAction.run()
@@ -298,10 +303,10 @@ class EventSourcingDefaultRepository(
         }
     }
 
-    private fun <A : Aggregate<A>> reduceEvents(
-        initial: A,
-        eventBatch: List<EventSourcingEvent>
-    ): A {
+    private fun <PAYLOAD : EventSourcingEvent.Payload, AGGREGATE : Aggregate<AGGREGATE, PAYLOAD>> reduceEvents(
+        initial: AGGREGATE,
+        eventBatch: List<EventSourcingEvent<PAYLOAD>>
+    ): AGGREGATE {
         var aggregate = initial
         for (event in eventBatch) {
             val expectedId = (aggregate.getLastEventId() ?: -1) + 1

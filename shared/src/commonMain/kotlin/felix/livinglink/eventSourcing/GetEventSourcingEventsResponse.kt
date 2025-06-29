@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 class GetEventSourcingEventsResponse(
-    val events: List<EventSourcingEvent>
+    val events: List<EventSourcingEvent<*>>
 )

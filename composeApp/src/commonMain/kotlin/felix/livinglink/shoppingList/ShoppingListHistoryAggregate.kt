@@ -8,21 +8,21 @@ import kotlinx.serialization.Serializable
 data class ShoppingListItemHistoryAggregate(
     val itemId: String,
     val itemName: String? = null,
-    private val events: List<EventSourcingEvent> = emptyList(),
+    private val events: List<EventSourcingEvent<ShoppingListEvent>> = emptyList(),
     private val lastEventId: Long? = null
-) : Aggregate<ShoppingListItemHistoryAggregate> {
+) : Aggregate<ShoppingListItemHistoryAggregate, ShoppingListEvent> {
 
-    fun history(): List<EventSourcingEvent> = events
+    fun history(): List<EventSourcingEvent<ShoppingListEvent>> = events
 
-    override fun applyEvent(event: EventSourcingEvent): ShoppingListItemHistoryAggregate {
-        val payload = event.payload as? ShoppingListEvent ?: return this
-
-        return if (payload.itemId != itemId) {
+    override fun applyEvent(
+        event: EventSourcingEvent<ShoppingListEvent>
+    ): ShoppingListItemHistoryAggregate {
+        return if (event.payload.itemId != itemId) {
             copy(
                 lastEventId = event.eventId
             )
         } else {
-            when (payload) {
+            when (val payload = event.payload) {
                 is ShoppingListEvent.ItemAdded -> {
                     copy(
                         itemName = payload.itemName,

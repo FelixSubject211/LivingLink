@@ -5,12 +5,12 @@ import kotlinx.serialization.Polymorphic
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class EventSourcingEvent(
+data class EventSourcingEvent<PAYLOAD : EventSourcingEvent.Payload>(
     val eventId: Long,
     val userId: String,
     val groupId: String,
     val createdAt: Instant,
-    @Polymorphic val payload: Payload
+    @Polymorphic val payload: PAYLOAD
 ) {
     interface Payload
 }

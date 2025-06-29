@@ -29,7 +29,7 @@ import kotlinx.coroutines.flow.Flow
 @Composable
 fun ShoppingListItemEventHistoryItem(
     userNameFlow: Flow<String?>,
-    event: EventSourcingEvent
+    event: EventSourcingEvent<ShoppingListEvent>
 ) {
     val userName by userNameFlow.collectAsState(initial = null)
     val displayName = userName ?: ShoppingListItemScreenLocalizables.eventPerformedByUnknown()

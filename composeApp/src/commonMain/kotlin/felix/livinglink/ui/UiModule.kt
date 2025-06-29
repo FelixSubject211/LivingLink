@@ -125,7 +125,7 @@ fun defaultUiModule(
                     input = eventSourcingModule.eventSourcingRepository.aggregateState(
                         groupId = groupId,
                         aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
-                        type = ShoppingListEvent::class,
+                        payloadType = ShoppingListEvent::class,
                         initial = ShoppingListAggregate.empty,
                         serializer = ShoppingListAggregate.serializer()
                     ).mapState { ShoppingListViewModel.LoadableData(it) },
@@ -150,7 +150,7 @@ fun defaultUiModule(
                     input = eventSourcingModule.eventSourcingRepository.aggregateState(
                         groupId = groupId,
                         aggregationKey = "$aggregateName:$itemId",
-                        type = ShoppingListEvent::class,
+                        payloadType = ShoppingListEvent::class,
                         initial = ShoppingListItemHistoryAggregate.empty(itemId),
                         serializer = ShoppingListItemHistoryAggregate.serializer()
                     ).mapState { ShoppingListItemViewModel.LoadableData(it) },
