@@ -15,13 +15,12 @@ import io.ktor.util.collections.ConcurrentMap
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -52,7 +51,7 @@ class EventSourcingDefaultRepository(
 ) : EventSourcingRepository {
 
     private val mutex = Mutex()
-    private val eventChannels = ConcurrentMap<String, Channel<List<EventSourcingEvent>>>()
+    private val eventFlows = ConcurrentMap<String, MutableSharedFlow<List<EventSourcingEvent>>>()
     private val aggregateFlows = ConcurrentMap<CacheKey, MutableStateFlow<Any?>>()
     private val loadingFlows = ConcurrentMap<CacheKey, MutableStateFlow<Boolean?>>()
     private val errorFlows = ConcurrentMap<CacheKey, MutableStateFlow<LivingLinkError?>>()
@@ -84,7 +83,7 @@ class EventSourcingDefaultRepository(
     private suspend fun clearAll() = mutex.withLock {
         eventStore.clearAll()
         aggregateStore.clearAll()
-        eventChannels.clear()
+        eventFlows.clear()
         aggregateFlows.clear()
         loadingFlows.clear()
         errorFlows.clear()
@@ -155,11 +154,14 @@ class EventSourcingDefaultRepository(
 
         eventStore.storeEvents(groupId = groupId, events = newOnly)
 
-        val eventChannel = eventChannels.getOrPut(groupId) {
-            Channel(capacity = Channel.UNLIMITED, onBufferOverflow = BufferOverflow.SUSPEND)
+        val flow = eventFlows.getOrPut(groupId) {
+            MutableSharedFlow(
+                replay = 0,
+                extraBufferCapacity = Int.MAX_VALUE,
+                onBufferOverflow = BufferOverflow.SUSPEND
+            )
         }
-
-        eventChannel.send(newOnly)
+        flow.emit(newOnly)
     }
 
     override fun <T : EventSourcingEvent.Payload, A : Aggregate<A>> aggregateState(
@@ -262,13 +264,17 @@ class EventSourcingDefaultRepository(
             aggregateStore.store(cacheKey, serializer, foldedAggregate)
         }
 
-        val liveEventChannel = eventChannels.getOrPut(groupId) {
-            Channel(Channel.BUFFERED, onBufferOverflow = BufferOverflow.SUSPEND)
+        val liveEventFlow = eventFlows.getOrPut(groupId) {
+            MutableSharedFlow(
+                replay = 0,
+                extraBufferCapacity = Int.MAX_VALUE,
+                onBufferOverflow = BufferOverflow.SUSPEND
+            )
         }
 
         channelCollectors.getOrPut(cacheKey) {
             scope.launch {
-                liveEventChannel.receiveAsFlow()
+                liveEventFlow
                     .filter { type.isInstance(it.firstOrNull()?.payload) }
                     .collect { eventBatch ->
                         mutex.withLock {

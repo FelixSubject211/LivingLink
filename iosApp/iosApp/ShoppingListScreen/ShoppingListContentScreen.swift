@@ -21,7 +21,13 @@ struct ShoppingListContentScreen: View {
                 ShoppingListItemCard(
                     item: item,
                     onCompleteItem: { viewModel.completeItem(itemId: item.id) },
-                    onUnCompleteItem: { viewModel.unCompleteItem(itemId: item.id) }
+                    onUnCompleteItem: { viewModel.unCompleteItem(itemId: item.id) },
+                    onClick: {
+                        viewModel.navigator.push(screen: LivingLinkScreen.ShoppingListItem(
+                            groupId: viewModel.groupId,
+                            itemId: item.id
+                        ))
+                    }
                 )
             }
             .scrollContentBackground(.hidden)

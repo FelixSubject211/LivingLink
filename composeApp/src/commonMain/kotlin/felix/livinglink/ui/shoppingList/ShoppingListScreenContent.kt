@@ -15,6 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import felix.livinglink.ui.common.navigation.LivingLinkScreen
 
 @Composable
 fun ShoppingListScreenContent(
@@ -35,7 +36,14 @@ fun ShoppingListScreenContent(
                     item = item,
                     onCompleteItem = { viewModel.completeItem(item.id) },
                     onUnCompleteItem = { viewModel.unCompleteItem(item.id) },
-                    onItemClicked = {}
+                    onItemClicked = {
+                        viewModel.navigator.push(
+                            LivingLinkScreen.ShoppingListItem(
+                                groupId = viewModel.groupId,
+                                itemId = item.id
+                            )
+                        )
+                    }
                 )
             }
 

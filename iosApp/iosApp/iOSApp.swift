@@ -65,6 +65,14 @@ private struct NavigationView: View {
                     }
                     RegisterScreen(viewModel: registerViewModel)
                 }
+                .navigationDestination(for: IosNavigator.Screen.ShoppingListItem.self) {
+                    let groupId = $0.groupId
+                    let itemId = $0.itemId
+                    let viewModel = ViewModelCache.getOrCreate(key: "shoppingListItemViewModel_\(groupId)_\(itemId)") {
+                        uiModule.shoppingListItemViewModel(groupId: groupId, itemId: itemId)
+                    }
+                    ShoppingListItemScreen(viewModel: viewModel)
+                }
         }
         .onChange(of: navigartor.navigationPath, initial: false) { oldPath, newPath in
             let oldCount = oldPath.count
