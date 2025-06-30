@@ -101,6 +101,7 @@ fun defaultAppTestModule(
                 groupsNetworkDataSource = groupNetworkDataSource,
                 groupStore = groupStore,
                 eventBus = eventBus,
+                scope = CoroutineScope(Dispatchers.Default),
                 fetchAndStoreDataDefaultHandler = FetchAndStoreDataDefaultHandler(
                     scope = CoroutineScope(Dispatchers.Default)
                 )

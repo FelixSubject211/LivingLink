@@ -13,6 +13,7 @@ struct ShoppingListItemCard: View {
     let item: ShoppingListAggregate.Item
     let onCompleteItem: () -> Void
     let onUnCompleteItem: () -> Void
+    let onClick: () -> Void // <-- NEU
 
     var body: some View {
         HStack {
@@ -34,6 +35,11 @@ struct ShoppingListItemCard: View {
             ))
             .toggleStyle(DesignSystem.CheckboxToggleStyle())
             .labelsHidden()
+            .onTapGesture {}
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            onClick()
         }
     }
 }

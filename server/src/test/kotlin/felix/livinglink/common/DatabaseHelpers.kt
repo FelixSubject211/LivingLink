@@ -1,12 +1,16 @@
 package felix.livinglink.common
 
 import felix.livinglink.auth.RefreshToken
+import felix.livinglink.eventSourcing.EventSourcingStore
 import felix.livinglink.group.Group
 import kotlinx.datetime.toJavaInstant
 import org.ktorm.database.Database
+import org.ktorm.dsl.eq
 import org.ktorm.dsl.from
 import org.ktorm.dsl.insert
+import org.ktorm.dsl.plus
 import org.ktorm.dsl.select
+import org.ktorm.dsl.update
 import org.ktorm.schema.BaseTable
 import org.mindrot.jbcrypt.BCrypt
 import kotlin.test.assertEquals
@@ -94,6 +98,33 @@ fun Database.addSampleGroups(
                 set(it.groupId, singleGroup.id)
                 set(it.userId, memberId)
                 set(it.createdAt, singleGroup.createdAt.toJavaInstant())
+            }
+        }
+    }
+}
+
+fun Database.addSampleEventSourcingEvents(
+    events: List<EventSourcingStore.Event>
+) {
+    events.forEach { event ->
+        this.insert(EventSourcingEventsTable) {
+            set(it.groupId, event.groupId)
+            set(it.eventId, event.eventId)
+            set(it.eventType, event.eventType)
+            set(it.userId, event.userId)
+            set(it.createdAt, event.createdAt.toJavaInstant())
+            set(it.payload, event.payload)
+        }
+
+        val updated = this.update(EventCountersTable) {
+            set(it.lastEventId, it.lastEventId + 1)
+            where { it.groupId eq event.groupId }
+        }
+
+        if (updated <= 0) {
+            this.insert(EventCountersTable) {
+                set(it.groupId, event.groupId)
+                set(it.lastEventId, 0L)
             }
         }
     }

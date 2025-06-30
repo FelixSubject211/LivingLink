@@ -35,6 +35,7 @@ fun defaultGroupsModule(
             groupsNetworkDataSource = groupsNetworkDataSource,
             groupStore = groupStore,
             eventBus = eventModule.eventBus,
+            scope = commonModule.defaultScope,
             fetchAndStoreDataDefaultHandler = fetchAndStoreDataDefaultHandler
         )
     }

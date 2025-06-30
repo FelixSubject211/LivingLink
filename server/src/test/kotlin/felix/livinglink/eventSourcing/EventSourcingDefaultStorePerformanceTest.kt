@@ -3,6 +3,7 @@ package felix.livinglink.eventSourcing
 import felix.livinglink.common.BaseIntegrationTest
 import felix.livinglink.common.DatabaseInitializer
 import felix.livinglink.common.RawUser
+import felix.livinglink.common.UuidDefaultFactory
 import felix.livinglink.common.addSampleGroups
 import felix.livinglink.common.addSampleUsers
 import felix.livinglink.common.defaultAppModule
@@ -21,6 +22,8 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
     private val writeEventsPerThread = writeEventCount / threadCount
     private val eventType = "event"
     private val payload = """{"some":"data"}"""
+
+    private val uuidFactory = UuidDefaultFactory()
 
     @Test
     fun `should append $writeEventCount events in parallel into one group`() = testApplication {

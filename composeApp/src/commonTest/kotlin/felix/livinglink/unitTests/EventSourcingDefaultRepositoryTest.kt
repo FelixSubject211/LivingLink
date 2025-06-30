@@ -87,12 +87,12 @@ class EventSourcingDefaultRepositoryTest {
             mockEventStore.getEvents(any())
         } returns eventsInStore
 
-        val aggregate1 = reduce(TestData.event1FromGroup1)
+        val aggregate1 = reduce(listOf(TestData.event1FromGroup1))
 
         sut.aggregateState(
             groupId = TestData.group1.id,
             aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
-            type = ShoppingListEvent::class,
+            payloadType = ShoppingListEvent::class,
             initial = ShoppingListAggregate.empty,
             serializer = ShoppingListAggregate.serializer()
         ).test {
@@ -122,13 +122,13 @@ class EventSourcingDefaultRepositoryTest {
                 )
             )
 
-            val aggregate1 = reduce(TestData.event1FromGroup1)
-            val aggregate2 = reduce(TestData.event1FromGroup1, TestData.event2FromGroup1)
+            val aggregate1 = reduce(listOf(TestData.event1FromGroup1))
+            val aggregate2 = reduce(listOf(TestData.event1FromGroup1, TestData.event2FromGroup1))
 
             sut.aggregateState(
                 groupId = TestData.group1.id,
                 aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
-                type = ShoppingListEvent::class,
+                payloadType = ShoppingListEvent::class,
                 initial = ShoppingListAggregate.empty,
                 serializer = ShoppingListAggregate.serializer()
             ).test {
@@ -146,7 +146,7 @@ class EventSourcingDefaultRepositoryTest {
 
     @Test
     fun `aggregateState should use aggregateStore if aggregate already exists`() = runTest {
-        val cachedAggregate = reduce(TestData.event1FromGroup1)
+        val cachedAggregate = reduce(listOf(TestData.event1FromGroup1))
 
         everySuspend {
             mockAggregateStore.get<ShoppingListAggregate>(any(), any())
@@ -155,7 +155,7 @@ class EventSourcingDefaultRepositoryTest {
         sut.aggregateState(
             groupId = TestData.group1.id,
             aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
-            type = ShoppingListEvent::class,
+            payloadType = ShoppingListEvent::class,
             initial = ShoppingListAggregate.empty,
             serializer = ShoppingListAggregate.serializer()
         ).test {
@@ -185,12 +185,12 @@ class EventSourcingDefaultRepositoryTest {
                 )
             )
 
-            val aggregate1 = reduce(TestData.event1FromGroup1)
+            val aggregate1 = reduce(listOf(TestData.event1FromGroup1))
 
             sut.aggregateState(
                 groupId = TestData.group1.id,
                 aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
-                type = ShoppingListEvent::class,
+                payloadType = ShoppingListEvent::class,
                 initial = ShoppingListAggregate.empty,
                 serializer = ShoppingListAggregate.serializer()
             ).test {
@@ -227,6 +227,13 @@ class EventSourcingDefaultRepositoryTest {
             }
         }
 
-    private fun reduce(vararg events: EventSourcingEvent) =
-        events.fold(ShoppingListAggregate.empty, ShoppingListAggregate::applyEvent)
+    private fun reduce(events: List<EventSourcingEvent<out ShoppingListEvent>>): ShoppingListAggregate {
+        var aggregate = ShoppingListAggregate.empty
+        for (event in events) {
+            @Suppress("UNCHECKED_CAST")
+            val upcasted = event as EventSourcingEvent<ShoppingListEvent>
+            aggregate = aggregate.applyEvent(upcasted)
+        }
+        return aggregate
+    }
 }

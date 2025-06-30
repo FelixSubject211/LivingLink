@@ -7,9 +7,16 @@ import io.github.xxfast.kstore.KStore
 import kotlinx.serialization.KSerializer
 
 interface AggregateStore {
-    suspend fun <A> get(cacheKey: CacheKey, serializer: KSerializer<A>): A?
+    suspend fun <AGGREGATE> get(
+        cacheKey: CacheKey,
+        serializer: KSerializer<AGGREGATE>
+    ): AGGREGATE?
 
-    suspend fun <A> store(cacheKey: CacheKey, serializer: KSerializer<A>, aggregate: A)
+    suspend fun <AGGREGATE> store(
+        cacheKey: CacheKey,
+        serializer: KSerializer<AGGREGATE>,
+        aggregate: Any
+    )
 
     suspend fun clear(cacheKey: CacheKey)
 
@@ -22,15 +29,23 @@ class AggregateDefaultStore : AggregateStore {
         defaultValue = emptyMap()
     )
 
-    override suspend fun <A> get(cacheKey: CacheKey, serializer: KSerializer<A>): A? {
+    override suspend fun <AGGREGATE> get(
+        cacheKey: CacheKey,
+        serializer: KSerializer<AGGREGATE>
+    ): AGGREGATE? {
         val storedJsonString = store.get()?.get(cacheKey)
         return runCatching {
             storedJsonString?.let { json.decodeFromString(serializer, it) }
         }.getOrNull()
     }
 
-    override suspend fun <A> store(cacheKey: CacheKey, serializer: KSerializer<A>, aggregate: A) {
-        val serializedAggregate = json.encodeToString(serializer, aggregate)
+    @Suppress("UNCHECKED_CAST")
+    override suspend fun <AGGREGATE> store(
+        cacheKey: CacheKey,
+        serializer: KSerializer<AGGREGATE>,
+        aggregate: Any
+    ) {
+        val serializedAggregate = json.encodeToString(serializer, aggregate as AGGREGATE)
         store.update { current ->
             (current ?: emptyMap()) + (cacheKey to serializedAggregate)
         }

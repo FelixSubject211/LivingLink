@@ -2,13 +2,15 @@ package felix.livinglink.shoppingList
 
 import felix.livinglink.eventSourcing.EventSourcingEvent
 import felix.livinglink.eventSourcing.repository.Aggregate
+import kotlinx.serialization.InternalSerializationApi
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.serializer
 
 @Serializable
 data class ShoppingListAggregate(
-    private val items: LinkedHashMap<String, Item> = linkedMapOf(),
-    private val lastEventId: Long? = null
-) : Aggregate<ShoppingListAggregate> {
+    private val items: LinkedHashMap<String, Item> = linkedMapOf()
+) : Aggregate<ShoppingListAggregate, ShoppingListEvent> {
     @Serializable
     data class Item(
         val id: String,
@@ -18,10 +20,9 @@ data class ShoppingListAggregate(
 
     fun asReversedList(): List<Item> = items.values.reversed()
 
-    override fun applyEvent(event: EventSourcingEvent): ShoppingListAggregate {
-        val payload = event.payload as? ShoppingListEvent ?: return this
+    override fun applyEvent(event: EventSourcingEvent<ShoppingListEvent>): ShoppingListAggregate {
         val newItems = LinkedHashMap(items)
-        when (payload) {
+        when (val payload = event.payload) {
             is ShoppingListEvent.ItemAdded -> {
                 newItems[payload.itemId] = Item(
                     id = payload.itemId,
@@ -36,18 +37,23 @@ data class ShoppingListAggregate(
                     newItems[payload.itemId] = it.copy(
                         isCompleted = payload is ShoppingListEvent.ItemCompleted
                     )
-                } ?: return copy(lastEventId = event.eventId)
+                } ?: return this
             }
         }
-        return copy(items = newItems, lastEventId = event.eventId)
-    }
-
-    override fun getLastEventId(): Long? {
-        return lastEventId
+        return copy(items = newItems)
     }
 
     override fun isEmpty(): Boolean {
         return items.isEmpty()
+    }
+
+    override fun anonymizeUser(originalUserId: String): ShoppingListAggregate {
+        return this
+    }
+
+    @OptIn(InternalSerializationApi::class)
+    override fun serializer(): KSerializer<out ShoppingListAggregate> {
+        return this::class.serializer()
     }
 
     companion object {

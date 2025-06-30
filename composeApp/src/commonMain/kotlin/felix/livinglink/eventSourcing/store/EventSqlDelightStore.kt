@@ -14,7 +14,7 @@ class EventSqlDelightStore(
     private val queries = AppDatabase(driver).eventSourcingQueries
     private val payloadSerializer = PolymorphicSerializer(EventSourcingEvent.Payload::class)
 
-    override suspend fun storeEvents(groupId: String, events: List<EventSourcingEvent>) {
+    override suspend fun storeEvents(groupId: String, events: List<EventSourcingEvent<*>>) {
         queries.transaction {
             events.forEach { event ->
                 queries.insertEvent(
@@ -32,7 +32,7 @@ class EventSqlDelightStore(
         return queries.getNextExpectedEventId(groupId).executeAsOne()
     }
 
-    override suspend fun getEvents(groupId: String): List<EventSourcingEvent> {
+    override suspend fun getEvents(groupId: String): List<EventSourcingEvent<*>> {
         return queries.getEventsByGroup(groupId).executeAsList().map {
             EventSourcingEvent(
                 eventId = it.event_id,
@@ -46,5 +46,12 @@ class EventSqlDelightStore(
 
     override suspend fun clearAll() {
         queries.clearAll()
+    }
+
+    override suspend fun anonymizeUserIdsIndividually(groupId: String, originalUserId: String) {
+        queries.updateUserIdForEvent(
+            groupId = groupId,
+            originalUserId = originalUserId
+        )
     }
 }

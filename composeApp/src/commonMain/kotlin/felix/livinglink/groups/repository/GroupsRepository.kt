@@ -3,7 +3,9 @@ package felix.livinglink.groups.repository
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.model.alsoIfIsSuccess
+import felix.livinglink.common.model.dataOrNull
 import felix.livinglink.common.model.map
+import felix.livinglink.common.model.mapState
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.common.repository.FetchAndStoreDataDefaultHandler
 import felix.livinglink.common.repository.FetchAndStoreDataEvent
@@ -18,11 +20,20 @@ import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 import felix.livinglink.groups.network.GroupsNetworkDataSource
 import felix.livinglink.groups.store.GroupStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 
 interface GroupsRepository {
     val groups: Flow<RepositoryState<List<Group>, NetworkError>>
+
+    fun group(groupId: String): Flow<RepositoryState<Group, NetworkError>>
+
+    fun resolveUserName(groupId: String, userId: String): Flow<String?>
 
     suspend fun createGroup(
         request: CreateGroupRequest
@@ -45,7 +56,8 @@ class GroupsDefaultRepository(
     private val groupsNetworkDataSource: GroupsNetworkDataSource,
     private val groupStore: GroupStore,
     private val eventBus: EventBus,
-    private val fetchAndStoreDataDefaultHandler: FetchAndStoreDataDefaultHandler<Group, NetworkError>
+    private val scope: CoroutineScope,
+    private val fetchAndStoreDataDefaultHandler: FetchAndStoreDataDefaultHandler<Group, NetworkError>,
 ) : GroupsRepository {
 
     override val groups = fetchAndStoreDataDefaultHandler(
@@ -64,6 +76,25 @@ class GroupsDefaultRepository(
         saveToDb = { groupStore.update(it) },
         loadFromDb = { groupStore.groups }
     )
+
+    private val groupsIndexedById: StateFlow<RepositoryState<Map<String, Group>, NetworkError>> =
+        groups.map { state ->
+            state.mapState { it.associateBy { it.id } }
+        }.stateIn(
+            scope = scope,
+            started = SharingStarted.Eagerly,
+            initialValue = RepositoryState.Empty
+        )
+
+    override fun group(groupId: String): Flow<RepositoryState<Group, NetworkError>> {
+        return groupsIndexedById.mapState { it[groupId] }
+    }
+
+    override fun resolveUserName(groupId: String, userId: String): Flow<String?> {
+        return groupsIndexedById.map {
+            it.dataOrNull()?.get(groupId)?.groupMemberIdsToName?.get(userId)
+        }
+    }
 
     override suspend fun createGroup(
         request: CreateGroupRequest

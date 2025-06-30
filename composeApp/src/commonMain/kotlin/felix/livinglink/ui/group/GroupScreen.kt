@@ -34,6 +34,8 @@ fun GroupScreen(
         else -> ""
     }
 
+    val title = GroupScreenLocalizables.navigationTitle(groupName)
+
     if (data.showDeleteGroupDialog) {
         GroupConfirmDeleteDialog(
             onConfirm = groupViewModel::deleteGroup,
@@ -50,7 +52,7 @@ fun GroupScreen(
 
     BackAwareScaffold(
         navigator = groupViewModel.navigator,
-        title = groupName,
+        title = title,
         actions = {
             Icon(
                 imageVector = Icons.Default.MoreVert,

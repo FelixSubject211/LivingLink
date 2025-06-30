@@ -64,7 +64,7 @@ class EventSourcingService(
         return AppendEventSourcingEventResponse(event)
     }
 
-    private fun EventSourcingStore.Event.toDomain(): EventSourcingEvent {
+    private fun EventSourcingStore.Event.toDomain(): EventSourcingEvent<*> {
         val payload = json.decodeFromString(
             PolymorphicSerializer(EventSourcingEvent.Payload::class),
             this.payload

@@ -10,9 +10,9 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 class ShoppingListViewModel(
+    val groupId: String,
     override val navigator: Navigator,
     private val eventSourcingRepository: EventSourcingRepository,
-    private val groupId: String,
     private val viewModelState: ShoppingListViewModelState
 ) : ShoppingListStatefulViewModel {
     override val loadableData = viewModelState.loadableData
@@ -69,7 +69,9 @@ class ShoppingListViewModel(
     )
 
     companion object {
-        val initialState = Data(showAddItem = false)
+        val initialState = Data(
+            showAddItem = false
+        )
     }
 
     data class Data(
