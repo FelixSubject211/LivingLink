@@ -5,7 +5,7 @@ import felix.livinglink.eventSourcing.EventSourcingEvent
 import io.github.xxfast.kstore.KStore
 
 actual class EventDefaultStore : EventStore {
-    private val eventStore: KStore<Map<String, List<EventSourcingEvent>>> = createStore(
+    private val eventStore: KStore<Map<String, List<EventSourcingEvent<*>>>> = createStore(
         path = "events",
         defaultValue = emptyMap()
     )
@@ -15,7 +15,7 @@ actual class EventDefaultStore : EventStore {
         defaultValue = emptyMap()
     )
 
-    override suspend fun storeEvents(groupId: String, events: List<EventSourcingEvent>) {
+    override suspend fun storeEvents(groupId: String, events: List<EventSourcingEvent<*>>) {
         eventStore.update { current ->
             val map = current ?: emptyMap()
             val existing = map[groupId].orEmpty()
@@ -32,8 +32,25 @@ actual class EventDefaultStore : EventStore {
         return nextExpectedEventIdStore.get()?.get(groupId) ?: 0
     }
 
-    override suspend fun getEvents(groupId: String): List<EventSourcingEvent> {
+    override suspend fun getEvents(groupId: String): List<EventSourcingEvent<*>> {
         return eventStore.get()?.get(groupId) ?: emptyList()
+    }
+
+    override suspend fun anonymizeUserIdsIndividually(groupId: String, originalUserId: String) {
+        eventStore.update { current ->
+            val map = current ?: return@update emptyMap()
+
+            val existingEvents = map[groupId].orEmpty()
+            val updatedEvents = existingEvents.map { event ->
+                if (event.userId == originalUserId) {
+                    event.copy(userId = null)
+                } else {
+                    event
+                }
+            }
+
+            map + (groupId to updatedEvents)
+        }
     }
 
     override suspend fun clearAll() {

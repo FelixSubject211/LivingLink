@@ -30,17 +30,21 @@ interface EventSourcingStore {
 
     fun getEventsSince(groupId: String, sinceEventIdExclusive: Long?): List<Event>
 
+    fun anonymizeEventsByUser(userId: String)
+
     data class Event(
         val groupId: String,
         val eventId: Long,
         val eventType: String,
-        val userId: String,
+        val userId: String?,
         val createdAt: Instant,
         val payload: String
     )
 }
 
-class EventSourcingDefaultStore(private val database: Database) : EventSourcingStore {
+class EventSourcingDefaultStore(
+    private val database: Database
+) : EventSourcingStore {
 
     override fun appendEvent(
         groupId: String,
@@ -101,10 +105,19 @@ class EventSourcingDefaultStore(private val database: Database) : EventSourcingS
                     groupId = row[EventSourcingEventsTable.groupId]!!,
                     eventId = row[EventSourcingEventsTable.eventId]!!,
                     eventType = row[EventSourcingEventsTable.eventType]!!,
-                    userId = row[EventSourcingEventsTable.userId]!!,
+                    userId = row[EventSourcingEventsTable.userId],
                     createdAt = row[EventSourcingEventsTable.createdAt]!!.toKotlinInstant(),
                     payload = row[EventSourcingEventsTable.payload]!!
                 )
             }
+    }
+
+    override fun anonymizeEventsByUser(userId: String) {
+        database.useTransaction {
+            database.update(EventSourcingEventsTable) {
+                set(it.userId, null)
+                where { it.userId eq userId }
+            }
+        }
     }
 }

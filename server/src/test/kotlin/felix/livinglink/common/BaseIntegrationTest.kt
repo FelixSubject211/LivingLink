@@ -48,6 +48,14 @@ abstract class BaseIntegrationTest {
         }
     }
 
+    protected fun assertRedisChangeSet(groupId: String, expectedEventId: Long) {
+        val key = "group:$groupId:lastEventId"
+        val value = redis.get(key)
+        check(value == expectedEventId.toString()) {
+            "Expected lastEventId for group '$groupId' to be '$expectedEventId', but was '$value'"
+        }
+    }
+
     protected fun assertNoRedisChangeSet(userId: String) {
         val key = "user:$userId:lastChangeId"
         val value = redis.get(key)

@@ -19,7 +19,7 @@ struct ShoppingListItemEventHistoryItem: View {
     init(event: SharedEventSourcingEvent<SharedShoppingListEvent>, viewModel: ShoppingListItemViewModel) {
         self.event = event
         self.viewModel = viewModel
-        userName = viewModel.resolveUserName(userId: event.userId).asObservableObject()
+        userName = viewModel.resolveUserName(userId: event.userId ?? "").asObservableObject()
     }
 
     var body: some View {

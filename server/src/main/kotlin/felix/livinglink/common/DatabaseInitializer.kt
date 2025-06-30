@@ -86,7 +86,7 @@ object DatabaseInitializer {
             group_id VARCHAR(36) NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
             event_id BIGINT NOT NULL,
             event_type VARCHAR(255) NOT NULL,
-            user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+            user_id VARCHAR(36),
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             payload TEXT NOT NULL,
             PRIMARY KEY (group_id, event_id)

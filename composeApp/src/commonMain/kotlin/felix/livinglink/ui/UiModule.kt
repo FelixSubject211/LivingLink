@@ -126,8 +126,7 @@ fun defaultUiModule(
                         groupId = groupId,
                         aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                         payloadType = ShoppingListEvent::class,
-                        initial = ShoppingListAggregate.empty,
-                        serializer = ShoppingListAggregate.serializer()
+                        initial = ShoppingListAggregate.empty
                     ).mapState { ShoppingListViewModel.LoadableData(it) },
                     initialState = ShoppingListViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
@@ -151,8 +150,7 @@ fun defaultUiModule(
                         groupId = groupId,
                         aggregationKey = "$aggregateName:$itemId",
                         payloadType = ShoppingListEvent::class,
-                        initial = ShoppingListItemHistoryAggregate.empty(itemId),
-                        serializer = ShoppingListItemHistoryAggregate.serializer()
+                        initial = ShoppingListItemHistoryAggregate.empty(itemId)
                     ).mapState { ShoppingListItemViewModel.LoadableData(it) },
                     initialState = Unit,
                     hapticsController = hapticsModule.hapticsController,

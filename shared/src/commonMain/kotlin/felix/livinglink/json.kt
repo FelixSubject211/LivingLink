@@ -1,6 +1,7 @@
 package felix.livinglink
 
 import felix.livinglink.eventSourcing.EventSourcingEvent
+import felix.livinglink.eventSourcing.UserAnonymized
 import felix.livinglink.shoppingList.ShoppingListEvent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
@@ -8,6 +9,7 @@ import kotlinx.serialization.modules.polymorphic
 
 private val eventSerializersModule = SerializersModule {
     polymorphic(EventSourcingEvent.Payload::class) {
+        subclass(UserAnonymized::class, UserAnonymized.serializer())
         subclass(ShoppingListEvent.ItemAdded::class, ShoppingListEvent.ItemAdded.serializer())
         subclass(
             ShoppingListEvent.ItemCompleted::class,

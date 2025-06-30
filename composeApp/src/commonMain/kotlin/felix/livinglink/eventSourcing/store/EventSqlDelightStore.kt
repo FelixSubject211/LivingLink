@@ -47,4 +47,11 @@ class EventSqlDelightStore(
     override suspend fun clearAll() {
         queries.clearAll()
     }
+
+    override suspend fun anonymizeUserIdsIndividually(groupId: String, originalUserId: String) {
+        queries.updateUserIdForEvent(
+            groupId = groupId,
+            originalUserId = originalUserId
+        )
+    }
 }

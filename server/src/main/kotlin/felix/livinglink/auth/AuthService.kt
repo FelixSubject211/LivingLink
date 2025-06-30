@@ -2,13 +2,22 @@ package felix.livinglink.auth
 
 import felix.livinglink.common.TimeService
 import felix.livinglink.common.UuidFactory
+import felix.livinglink.event.ChangeNotifier
+import felix.livinglink.eventSourcing.EventSourcingEvent
+import felix.livinglink.eventSourcing.EventSourcingStore
+import felix.livinglink.eventSourcing.UserAnonymized
 import felix.livinglink.groups.GroupStore
+import felix.livinglink.json
+import kotlinx.datetime.Instant
+import kotlinx.serialization.PolymorphicSerializer
 
 class AuthService(
     private val userStore: UserStore,
     private val groupStore: GroupStore,
+    private val eventSourcingStore: EventSourcingStore,
     private val passwordHasherService: PasswordHasherService,
     private val jwtService: JwtService,
+    private val changeNotifier: ChangeNotifier,
     private val timeService: TimeService,
     private val uuidFactory: UuidFactory
 ) {
@@ -96,6 +105,31 @@ class AuthService(
     }
 
     fun deleteUser(userId: String): DeleteUserResponse {
+        val now = Instant.fromEpochMilliseconds(timeService.currentTimeMillis())
+
+        val payloadJson = json.encodeToString(
+            PolymorphicSerializer(EventSourcingEvent.Payload::class),
+            UserAnonymized(originalUserId = userId)
+        )
+
+        groupStore.getGroupsForUser(userId).forEach { group ->
+            val newEventId = eventSourcingStore.appendEvent(
+                groupId = group.id,
+                userId = userId,
+                eventType = UserAnonymized::class.qualifiedName!!,
+                createdAt = now,
+                payload = payloadJson
+            )!!
+
+            changeNotifier.markEventChangeForGroup(groupId = group.id, eventId = newEventId)
+
+            group.groupMemberIdsToName.keys.forEach { userId ->
+                changeNotifier.markGroupChangeForUser(userId = userId)
+            }
+        }
+
+        eventSourcingStore.anonymizeEventsByUser(userId = userId)
+
         return if (userStore.deleteUser(userId)) {
             DeleteUserResponse.Success
         } else {

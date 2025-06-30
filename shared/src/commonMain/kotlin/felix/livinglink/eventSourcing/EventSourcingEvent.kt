@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EventSourcingEvent<PAYLOAD : EventSourcingEvent.Payload>(
     val eventId: Long,
-    val userId: String,
+    val userId: String?,
     val groupId: String,
     val createdAt: Instant,
     @Polymorphic val payload: PAYLOAD

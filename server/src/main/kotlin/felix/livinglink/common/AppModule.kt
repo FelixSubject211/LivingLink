@@ -65,16 +65,18 @@ fun defaultAppModule(
             changeNotifier = changeNotifier,
             groupStore = groupStore
         )
+        override val eventSourcingStore = EventSourcingDefaultStore(
+            database = database
+        )
         override val authService = AuthService(
             userStore = userStore,
             groupStore = groupStore,
+            eventSourcingStore = eventSourcingStore,
             passwordHasherService = passwordHasherService,
             jwtService = jwtService,
+            changeNotifier = changeNotifier,
             timeService = timeService,
             uuidFactory = uuidFactory
-        )
-        override val eventSourcingStore = EventSourcingDefaultStore(
-            database = database
         )
         override val eventSourcingService = EventSourcingService(
             eventSourcingStore = eventSourcingStore,
