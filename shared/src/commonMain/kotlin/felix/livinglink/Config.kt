@@ -13,6 +13,8 @@ interface Config {
     val pollingIntervalSeconds: Int
     val pollingRetryDelaySeconds: Int
     val aggregateTimeoutSeconds: Int
+    val eventSourcingAppendRetryCount: Int
+    val eventSourcingAppendRetryDelayMs: Long
 }
 
 fun defaultConfig(): Config {
@@ -29,5 +31,7 @@ fun defaultConfig(): Config {
         override val pollingIntervalSeconds = 5
         override val pollingRetryDelaySeconds = 10
         override val aggregateTimeoutSeconds = 5
+        override val eventSourcingAppendRetryCount = 10
+        override val eventSourcingAppendRetryDelayMs = 500L
     }
 }

@@ -9,8 +9,10 @@ import kotlinx.serialization.serializer
 
 @Serializable
 data class ShoppingListAggregate(
-    private val items: LinkedHashMap<String, Item> = linkedMapOf()
+    private val openItems: LinkedHashMap<String, Item> = linkedMapOf(),
+    private val completedItems: LinkedHashMap<String, Item> = linkedMapOf()
 ) : Aggregate<ShoppingListAggregate, ShoppingListEvent> {
+
     @Serializable
     data class Item(
         val id: String,
@@ -18,38 +20,39 @@ data class ShoppingListAggregate(
         val isCompleted: Boolean
     )
 
-    fun asReversedList(): List<Item> = items.values.reversed()
+    fun openItemsReversed(): List<Item> = openItems.values.reversed()
+    fun completedItemsReversed(): List<Item> = completedItems.values.reversed()
 
     override fun applyEvent(event: EventSourcingEvent<ShoppingListEvent>): ShoppingListAggregate {
-        val newItems = LinkedHashMap(items)
+        val newOpenItems = LinkedHashMap(openItems)
+        val newCompletedItems = LinkedHashMap(completedItems)
+
         when (val payload = event.payload) {
             is ShoppingListEvent.ItemAdded -> {
-                newItems[payload.itemId] = Item(
-                    id = payload.itemId,
-                    name = payload.itemName,
-                    isCompleted = false
-                )
+                val item = Item(id = payload.itemId, name = payload.itemName, isCompleted = false)
+                newOpenItems[payload.itemId] = item
+                newCompletedItems.remove(payload.itemId)
             }
 
-            is ShoppingListEvent.ItemCompleted,
+            is ShoppingListEvent.ItemCompleted -> {
+                newOpenItems.remove(payload.itemId)?.let {
+                    newCompletedItems[payload.itemId] = it.copy(isCompleted = true)
+                }
+            }
+
             is ShoppingListEvent.ItemUncompleted -> {
-                newItems[payload.itemId]?.let {
-                    newItems[payload.itemId] = it.copy(
-                        isCompleted = payload is ShoppingListEvent.ItemCompleted
-                    )
-                } ?: return this
+                newCompletedItems.remove(payload.itemId)?.let {
+                    newOpenItems[payload.itemId] = it.copy(isCompleted = false)
+                }
             }
         }
-        return copy(items = newItems)
+
+        return copy(openItems = newOpenItems, completedItems = newCompletedItems)
     }
 
-    override fun isEmpty(): Boolean {
-        return items.isEmpty()
-    }
+    override fun isEmpty(): Boolean = openItems.isEmpty() && completedItems.isEmpty()
 
-    override fun anonymizeUser(originalUserId: String): ShoppingListAggregate {
-        return this
-    }
+    override fun anonymizeUser(originalUserId: String): ShoppingListAggregate = this
 
     @OptIn(InternalSerializationApi::class)
     override fun serializer(): KSerializer<out ShoppingListAggregate> {

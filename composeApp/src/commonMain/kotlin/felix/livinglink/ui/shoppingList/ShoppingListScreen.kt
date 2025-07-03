@@ -27,6 +27,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
         content = { loadableDate, _ ->
             ShoppingListScreenContent(
                 loadableData = loadableDate,
+                data = data,
                 viewModel = viewModel
             )
         }

@@ -13,7 +13,8 @@ class ShoppingListViewModel(
     val groupId: String,
     override val navigator: Navigator,
     private val eventSourcingRepository: EventSourcingRepository,
-    private val viewModelState: ShoppingListViewModelState
+    private val viewModelState: ShoppingListViewModelState,
+    private val completedItemsDisplayChunk: Int = 10
 ) : ShoppingListStatefulViewModel {
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
@@ -68,14 +69,34 @@ class ShoppingListViewModel(
         }
     )
 
+    fun toggleShowCompletedItems() = viewModelState.perform { data ->
+        if (!data.showCompletedItems) {
+            data.copy(
+                showCompletedItems = true,
+                completedItemsLimit = completedItemsDisplayChunk
+            )
+        } else {
+            data.copy(showCompletedItems = false)
+        }
+    }
+
+    fun showMoreCompletedItems() = viewModelState.perform { data ->
+        val current = data.completedItemsLimit ?: 0
+        data.copy(completedItemsLimit = current + completedItemsDisplayChunk)
+    }
+
     companion object {
         val initialState = Data(
-            showAddItem = false
+            showAddItem = false,
+            showCompletedItems = false,
+            completedItemsLimit = null
         )
     }
 
     data class Data(
-        val showAddItem: Boolean
+        val showAddItem: Boolean,
+        val showCompletedItems: Boolean,
+        val completedItemsLimit: Int?
     )
 
     data class LoadableData(

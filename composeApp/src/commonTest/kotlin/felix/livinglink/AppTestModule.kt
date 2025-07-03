@@ -19,6 +19,7 @@ import felix.livinglink.event.eventbus.DefaultEventBus
 import felix.livinglink.event.network.ChangeNotifierClient
 import felix.livinglink.eventSourcing.EventSourcingModule
 import felix.livinglink.eventSourcing.network.EventSourcingNetworkDataSource
+import felix.livinglink.eventSourcing.repository.EventDefaultSynchronizer
 import felix.livinglink.eventSourcing.repository.EventSourcingDefaultRepository
 import felix.livinglink.eventSourcing.store.AggregateStore
 import felix.livinglink.eventSourcing.store.EventStore
@@ -112,9 +113,13 @@ fun defaultAppTestModule(
         },
         eventSourcingModule = object : EventSourcingModule {
             override val eventSourcingRepository = EventSourcingDefaultRepository(
+                config = config,
                 eventSourcingNetworkDataSource = eventSourcingNetworkDataSource,
                 eventStore = eventStore,
                 aggregateStore = aggregateStore,
+                eventSynchronizer = EventDefaultSynchronizer(
+                    eventStore = eventStore
+                ),
                 eventBus = eventBus,
                 scope = CoroutineScope(Dispatchers.Default)
             )

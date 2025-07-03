@@ -1,5 +1,6 @@
 package felix.livinglink.eventSourcing.repository
 
+import felix.livinglink.Config
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.common.model.RepositoryState
@@ -13,6 +14,7 @@ import felix.livinglink.eventSourcing.store.AggregateStore
 import felix.livinglink.eventSourcing.store.EventStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -37,6 +39,7 @@ interface EventSourcingRepository {
 }
 
 class EventSourcingDefaultRepository(
+    private val config: Config,
     private val eventSourcingNetworkDataSource: EventSourcingNetworkDataSource,
     private val eventStore: EventStore,
     private val aggregateStore: AggregateStore,
@@ -93,7 +96,7 @@ class EventSourcingDefaultRepository(
         val syncStartExclusiveId = expectedLocalId - 1
         when (
             val result = eventSourcingNetworkDataSource.getEvents(
-                groupId,
+                groupId = groupId,
                 sinceEventIdExclusive = syncStartExclusiveId
             )
         ) {
@@ -144,13 +147,12 @@ class EventSourcingDefaultRepository(
             )
         } as AggregateManager<PAYLOAD, AGGREGATE>
 
-        return combine(manager.output, error) { output, error ->
-            if (error != null) {
-                RepositoryState.Error(error)
-            } else {
-                output
-            }
-        }.also { this.error.value = null }
+        return combine(manager.output, error) { output, err ->
+            err?.let {
+                error.value = null
+                RepositoryState.Error(it)
+            } ?: output
+        }
     }
 
     override suspend fun addEvent(
@@ -163,19 +165,41 @@ class EventSourcingDefaultRepository(
             )
         ) {
             is LivingLinkResult.Success -> {
-                mutex.withLock {
-                    try {
-                        eventSynchronizer.storeEventsAndPublish(groupId, listOf(result.data.event))
-                    } catch (e: Exception) {
-                        error.value = UnknownError(e)
-                    }
-                    LivingLinkResult.Success(Unit)
-                }
+                retryStoreEventWithBackoff(
+                    groupId = groupId,
+                    event = result.data.event,
+                    remainingAttempts = config.eventSourcingAppendRetryCount
+                )
             }
 
             is LivingLinkResult.Error -> {
                 error.value = result.error
                 result
+            }
+        }
+    }
+
+    private suspend fun retryStoreEventWithBackoff(
+        groupId: String,
+        event: EventSourcingEvent<*>,
+        remainingAttempts: Int
+    ): LivingLinkResult<Unit, NetworkError> {
+        return try {
+            mutex.withLock {
+                eventSynchronizer.storeEventsAndPublish(groupId, listOf(event))
+            }
+            LivingLinkResult.Success(Unit)
+        } catch (e: Exception) {
+            if (remainingAttempts > 1) {
+                delay(config.eventSourcingAppendRetryDelayMs)
+                retryStoreEventWithBackoff(
+                    groupId = groupId,
+                    event = event,
+                    remainingAttempts = remainingAttempts - 1
+                )
+            } else {
+                error.value = UnknownError(e)
+                LivingLinkResult.Error(NetworkError.Unknown(e))
             }
         }
     }
