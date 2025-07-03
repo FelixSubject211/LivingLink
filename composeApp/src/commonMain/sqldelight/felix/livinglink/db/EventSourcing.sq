@@ -19,9 +19,10 @@ INSERT INTO event_sourcing_event(
     event_id, user_id, group_id, created_at, payload_json
 ) VALUES (?, ?, ?, ?, ?);
 
-getEventsByGroup:
+getEventsByGroupSince:
 SELECT * FROM event_sourcing_event
-WHERE group_id = ?
+WHERE group_id = :groupId
+  AND event_id > :eventIdExclusive
 ORDER BY event_id ASC;
 
 getNextExpectedEventId:

@@ -63,9 +63,9 @@ class GroupsDefaultRepository(
     override val groups = fetchAndStoreDataDefaultHandler(
         events = eventBus.events.mapNotNull { event ->
             when (event) {
-                EventBus.Event.ClearAll -> FetchAndStoreDataEvent.CLEAR
-                EventBus.Event.UpdateGroups -> FetchAndStoreDataEvent.RELOAD
-                is EventBus.Event.GroupStateUpdated -> null
+                is EventBus.Event.ClearAll -> FetchAndStoreDataEvent.CLEAR
+                is EventBus.Event.UpdateGroups -> FetchAndStoreDataEvent.RELOAD
+                else -> null
             }
         },
         networkRequest = {

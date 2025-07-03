@@ -32,8 +32,12 @@ actual class EventDefaultStore : EventStore {
         return nextExpectedEventIdStore.get()?.get(groupId) ?: 0
     }
 
-    override suspend fun getEvents(groupId: String): List<EventSourcingEvent<*>> {
-        return eventStore.get()?.get(groupId) ?: emptyList()
+    override suspend fun getEventsSince(
+        groupId: String,
+        eventIdExclusive: Long
+    ): List<EventSourcingEvent<*>> {
+        val all = eventStore.get()?.get(groupId).orEmpty()
+        return all.filter { it.eventId > eventIdExclusive }
     }
 
     override suspend fun anonymizeUserIdsIndividually(groupId: String, originalUserId: String) {

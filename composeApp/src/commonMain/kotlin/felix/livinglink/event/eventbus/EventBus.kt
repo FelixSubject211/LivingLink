@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -23,9 +23,17 @@ interface EventBus {
 
     suspend fun emit(event: Event)
 
+    fun triggerUpdateNow()
+
     sealed class Event {
+        data class AttemptedButOffline(
+            val groupId: String?
+        ) : Event()
+
         data object ClearAll : Event()
+
         data object UpdateGroups : Event()
+
         data class GroupStateUpdated(
             val groupId: String,
             val latestEventId: Long?
@@ -103,9 +111,15 @@ class DefaultEventBus(
 
     override val events: Flow<EventBus.Event> = merge(
         _events,
-        changeNotifierClient.events.mapNotNull { changeEvent ->
+        changeNotifierClient.events.map { changeEvent ->
             when (changeEvent) {
-                Event.MembershipChanged -> {
+                is Event.AttemptedButOffline -> {
+                    EventBus.Event.AttemptedButOffline(
+                        groupId = changeEvent.groupId
+                    )
+                }
+
+                is Event.MembershipChanged -> {
                     EventBus.Event.UpdateGroups
                 }
 
@@ -129,5 +143,9 @@ class DefaultEventBus(
             pendingSuppressions += event
         }
         _events.emit(event)
+    }
+
+    override fun triggerUpdateNow() {
+        changeNotifierClient.triggerManualRefresh()
     }
 }

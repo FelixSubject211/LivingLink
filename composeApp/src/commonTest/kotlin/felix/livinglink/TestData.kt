@@ -2,7 +2,6 @@ package felix.livinglink
 
 import felix.livinglink.eventSourcing.EventSourcingEvent
 import felix.livinglink.group.Group
-import felix.livinglink.shoppingList.ShoppingListEvent
 import kotlinx.datetime.Clock
 
 object TestData {
@@ -18,10 +17,7 @@ object TestData {
         userId = "userId",
         groupId = group1.id,
         createdAt = Clock.System.now(),
-        payload = ShoppingListEvent.ItemAdded(
-            itemId = "item1Id",
-            itemName = "item1Name"
-        )
+        payload = TestEvent(id = "id1")
     )
 
     val event2FromGroup1 = EventSourcingEvent(
@@ -29,9 +25,7 @@ object TestData {
         userId = "userId",
         groupId = group1.id,
         createdAt = Clock.System.now(),
-        payload = ShoppingListEvent.ItemCompleted(
-            itemId = "item1Id"
-        )
+        payload = TestEvent(id = "id2")
     )
 
     val event3FromGroup1 = EventSourcingEvent(
@@ -39,9 +33,6 @@ object TestData {
         userId = "userId",
         groupId = group1.id,
         createdAt = Clock.System.now(),
-        payload = ShoppingListEvent.ItemAdded(
-            itemId = "item2Id",
-            itemName = "item2Name"
-        )
+        payload = TestEvent(id = "id3")
     )
 }

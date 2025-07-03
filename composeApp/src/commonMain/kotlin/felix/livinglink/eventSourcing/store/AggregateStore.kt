@@ -1,6 +1,7 @@
 package felix.livinglink.eventSourcing.store
 
 import felix.livinglink.common.store.createStore
+import felix.livinglink.eventSourcing.repository.AggregateSnapshot
 import felix.livinglink.eventSourcing.repository.CacheKey
 import felix.livinglink.json
 import io.github.xxfast.kstore.KStore
@@ -10,18 +11,19 @@ interface AggregateStore {
     suspend fun <AGGREGATE> get(
         cacheKey: CacheKey,
         serializer: KSerializer<AGGREGATE>
-    ): AGGREGATE?
+    ): AggregateSnapshot<AGGREGATE>?
 
     suspend fun <AGGREGATE> store(
         cacheKey: CacheKey,
         serializer: KSerializer<AGGREGATE>,
-        aggregate: Any
+        snapshot: Any
     )
 
     suspend fun clear(cacheKey: CacheKey)
 
     suspend fun clearAll()
 }
+
 
 class AggregateDefaultStore : AggregateStore {
     private val store: KStore<Map<CacheKey, String>> = createStore(
@@ -32,22 +34,31 @@ class AggregateDefaultStore : AggregateStore {
     override suspend fun <AGGREGATE> get(
         cacheKey: CacheKey,
         serializer: KSerializer<AGGREGATE>
-    ): AGGREGATE? {
+    ): AggregateSnapshot<AGGREGATE>? {
         val storedJsonString = store.get()?.get(cacheKey)
         return runCatching {
-            storedJsonString?.let { json.decodeFromString(serializer, it) }
+            storedJsonString?.let {
+                val snapshotSerializer = AggregateSnapshot.serializer(serializer)
+                json.decodeFromString(snapshotSerializer, it)
+            }
         }.getOrNull()
     }
 
-    @Suppress("UNCHECKED_CAST")
     override suspend fun <AGGREGATE> store(
         cacheKey: CacheKey,
         serializer: KSerializer<AGGREGATE>,
-        aggregate: Any
+        snapshot: Any
     ) {
-        val serializedAggregate = json.encodeToString(serializer, aggregate as AGGREGATE)
+        val snapshotSerializer = AggregateSnapshot.serializer(serializer)
+
+        @Suppress("UNCHECKED_CAST")
+        val serialized = json.encodeToString(
+            serializer = snapshotSerializer,
+            value = snapshot as AggregateSnapshot<AGGREGATE>
+        )
+
         store.update { current ->
-            (current ?: emptyMap()) + (cacheKey to serializedAggregate)
+            (current ?: emptyMap()) + (cacheKey to serialized)
         }
     }
 

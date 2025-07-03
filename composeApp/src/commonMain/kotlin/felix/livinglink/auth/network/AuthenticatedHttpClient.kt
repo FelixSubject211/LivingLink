@@ -23,6 +23,9 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.http.URLProtocol
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.decodeBase64Bytes
@@ -75,7 +78,7 @@ class AuthenticatedHttpDefaultClient(
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = AuthenticatedHttpClient.AuthSession.LoggedOut
+            initialValue = _bearerTokens.value.toAuthSession(config)
         )
 
     override val client: HttpClient by lazy {
@@ -88,6 +91,16 @@ class AuthenticatedHttpDefaultClient(
                     loadTokens { _bearerTokens.value }
                     refreshTokens { refresh() }
                 }
+            }
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        if (message.startsWith("RESPONSE:")) {
+                            println("[HTTP] $message")
+                        }
+                    }
+                }
+                level = LogLevel.INFO
             }
             defaultRequest {
                 url {

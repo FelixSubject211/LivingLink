@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import felix.livinglink.ui.common.toAlert
 
@@ -14,7 +15,12 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
     viewModel: LoadableStatefulViewModel<LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR>,
     modifier: Modifier,
     emptyContent: @Composable () -> Unit = {},
-    loadingContent: @Composable () -> Unit = {},
+    loadingContent: @Composable () -> Unit = {
+        LinearProgressIndicator(
+            modifier = Modifier
+                .fillMaxWidth()
+        )
+    },
     content: @Composable (loadableData: LOADABLE_DATA, data: DATA) -> Unit,
 ) {
     val loadableData = viewModel.loadableData.collectAsState().value
@@ -43,7 +49,7 @@ fun <LOADABLE_DATA, DATA, LOADABLE_ERROR, ERROR, REQUEST_ERROR> LoadableStateful
             LinearProgressIndicator(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .align(androidx.compose.ui.Alignment.TopCenter)
+                    .align(Alignment.TopCenter)
             )
         }
 

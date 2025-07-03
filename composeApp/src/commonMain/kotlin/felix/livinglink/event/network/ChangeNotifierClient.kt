@@ -22,6 +22,10 @@ interface ChangeNotifierClient {
     val events: Flow<Event>
 
     sealed class Event {
+        data class AttemptedButOffline(
+            val groupId: String?
+        ) : Event()
+
         data object MembershipChanged : Event()
 
         data class GroupStateUpdated(
@@ -31,6 +35,8 @@ interface ChangeNotifierClient {
     }
 
     fun start(currentGroupIdObserver: EventBus.CurrentGroupIdObserver)
+
+    fun triggerManualRefresh()
 }
 
 class ChangeNotifierDefaultClient(
@@ -44,6 +50,12 @@ class ChangeNotifierDefaultClient(
         path = "lastMembershipChangeId",
         defaultValue = ""
     )
+
+    private val manualRefreshChannel = Channel<Unit>(Channel.CONFLATED)
+
+    override fun triggerManualRefresh() {
+        manualRefreshChannel.trySend(Unit)
+    }
 
     override val events: Flow<ChangeNotifierClient.Event> = _events.asSharedFlow()
 
@@ -89,7 +101,14 @@ class ChangeNotifierDefaultClient(
                         data.nextPollInSeconds * 1000L
                     }
 
-                    else -> config.pollingRetryDelaySeconds * 1000L
+                    else -> {
+                        _events.emit(
+                            ChangeNotifierClient.Event.AttemptedButOffline(
+                                groupId = currentGroupId
+                            )
+                        )
+                        config.pollingRetryDelaySeconds * 1000L
+                    }
                 }
 
                 waitForNextPollOrGroupChange(delayMillis, groupIdUpdates)
@@ -105,6 +124,7 @@ class ChangeNotifierDefaultClient(
         select {
             onTimeout(delayMillis) {}
             groupIdUpdates.onReceive {}
+            manualRefreshChannel.onReceive {}
         }
     }
 }

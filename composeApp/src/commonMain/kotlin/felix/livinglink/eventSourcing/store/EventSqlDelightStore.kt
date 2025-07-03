@@ -32,8 +32,11 @@ class EventSqlDelightStore(
         return queries.getNextExpectedEventId(groupId).executeAsOne()
     }
 
-    override suspend fun getEvents(groupId: String): List<EventSourcingEvent<*>> {
-        return queries.getEventsByGroup(groupId).executeAsList().map {
+    override suspend fun getEventsSince(
+        groupId: String,
+        eventIdExclusive: Long
+    ): List<EventSourcingEvent<*>> {
+        return queries.getEventsByGroupSince(groupId, eventIdExclusive).executeAsList().map {
             EventSourcingEvent(
                 eventId = it.event_id,
                 userId = it.user_id,
