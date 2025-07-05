@@ -4,6 +4,7 @@ import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.eventSourcing.repository.EventSourcingRepository
 import felix.livinglink.shoppingList.ShoppingListAggregate
 import felix.livinglink.shoppingList.ShoppingListEvent
+import felix.livinglink.shoppingList.ShoppingListSuggestionAggregate
 import felix.livinglink.ui.common.navigation.Navigator
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -14,7 +15,7 @@ class ShoppingListViewModel(
     override val navigator: Navigator,
     private val eventSourcingRepository: EventSourcingRepository,
     private val viewModelState: ShoppingListViewModelState,
-    private val completedItemsDisplayChunk: Int = 10
+    private val completedItemsDisplayChunk: Int = 10,
 ) : ShoppingListStatefulViewModel {
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
@@ -22,6 +23,13 @@ class ShoppingListViewModel(
     override val loading = viewModelState.loading
     override fun closeError() = viewModelState.closeError()
     override fun cancel() = viewModelState.cancel()
+
+    val shoppingListSuggestionAggregate = eventSourcingRepository.aggregateState(
+        groupId = groupId,
+        aggregationKey = ShoppingListSuggestionAggregate::class.qualifiedName!!,
+        payloadType = ShoppingListEvent::class,
+        initial = ShoppingListSuggestionAggregate.empty
+    )
 
     fun showAddItem() = viewModelState.perform { data ->
         data.copy(showAddItem = true)

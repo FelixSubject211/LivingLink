@@ -159,7 +159,7 @@ fun defaultUiModule(
             )
         }
 
-        fun CoroutineScope.newChildScope(): CoroutineScope {
+        private fun CoroutineScope.newChildScope(): CoroutineScope {
             return CoroutineScope(this.coroutineContext + SupervisorJob())
         }
     }
