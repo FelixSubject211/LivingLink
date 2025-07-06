@@ -1,6 +1,6 @@
-package felix.livinglink.ui.shoppingList
+package felix.livinglink.ui.shoppingList.list
 
-import ShoppingListScreenLocalizables
+import ShoppingListListScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.ui.common.navigation.LivingLinkScreen
 
 @Composable
-fun ShoppingListScreenContent(
-    loadableData: ShoppingListViewModel.LoadableData,
-    data: ShoppingListViewModel.Data,
-    viewModel: ShoppingListViewModel
+fun ShoppingListListScreenContent(
+    loadableData: ShoppingListListViewModel.LoadableData,
+    data: ShoppingListListViewModel.Data,
+    viewModel: ShoppingListListViewModel
 ) {
     val aggregate = loadableData.aggregate
     val completedItems = aggregate.completedItemsReversed()
@@ -43,13 +43,13 @@ fun ShoppingListScreenContent(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(aggregate.openItemsReversed()) { item ->
-                ShoppingListItem(
+                ShoppingListListItemCard(
                     item = item,
                     onCompleteItem = { viewModel.completeItem(item.id) },
                     onUnCompleteItem = { viewModel.unCompleteItem(item.id) },
                     onItemClicked = {
                         viewModel.navigator.push(
-                            LivingLinkScreen.ShoppingListItem(
+                            LivingLinkScreen.ShoppingListDetail(
                                 groupId = viewModel.groupId,
                                 itemId = item.id
                             )
@@ -67,9 +67,9 @@ fun ShoppingListScreenContent(
                     ) {
                         Text(
                             text = if (data.showCompletedItems) {
-                                ShoppingListScreenLocalizables.hideCompletedItemsButton()
+                                ShoppingListListScreenLocalizables.hideCompletedItemsButton()
                             } else {
-                                ShoppingListScreenLocalizables.showCompletedItemsButton()
+                                ShoppingListListScreenLocalizables.showCompletedItemsButton()
                             }
                         )
                     }
@@ -79,13 +79,13 @@ fun ShoppingListScreenContent(
             if (data.showCompletedItems && visibleCompletedItems.isNotEmpty()) {
 
                 items(visibleCompletedItems) { item ->
-                    ShoppingListItem(
+                    ShoppingListListItemCard(
                         item = item,
                         onCompleteItem = { viewModel.completeItem(item.id) },
                         onUnCompleteItem = { viewModel.unCompleteItem(item.id) },
                         onItemClicked = {
                             viewModel.navigator.push(
-                                LivingLinkScreen.ShoppingListItem(
+                                LivingLinkScreen.ShoppingListDetail(
                                     groupId = viewModel.groupId,
                                     itemId = item.id
                                 )
@@ -100,7 +100,7 @@ fun ShoppingListScreenContent(
                             onClick = viewModel::showMoreCompletedItems,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text(ShoppingListScreenLocalizables.showMoreCompletedItemsButton())
+                            Text(ShoppingListListScreenLocalizables.showMoreCompletedItemsButton())
                         }
                     }
                 }
@@ -117,7 +117,7 @@ fun ShoppingListScreenContent(
             onClick = viewModel::showAddItem,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Text(ShoppingListScreenLocalizables.addItemButton())
+            Text(ShoppingListListScreenLocalizables.addItemButton())
         }
     }
 }

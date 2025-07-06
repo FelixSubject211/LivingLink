@@ -1,4 +1,4 @@
-package felix.livinglink.ui.shoppingList
+package felix.livinglink.ui.shoppingList.list
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.shoppingList.ShoppingListAggregate
 
 @Composable
-fun ShoppingListItem(
+fun ShoppingListListItemCard(
     item: ShoppingListAggregate.Item,
     onItemClicked: () -> Unit,
     onCompleteItem: () -> Unit,

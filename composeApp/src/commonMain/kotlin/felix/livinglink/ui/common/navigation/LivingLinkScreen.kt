@@ -21,7 +21,7 @@ sealed class LivingLinkScreen() {
     data object Register : LivingLinkScreen()
 
     @Serializable
-    data class ShoppingListItem(val groupId: String, val itemId: String) : LivingLinkScreen()
+    data class ShoppingListDetail(val groupId: String, val itemId: String) : LivingLinkScreen()
 
     val route: String
         get() = when (this) {
@@ -30,6 +30,6 @@ sealed class LivingLinkScreen() {
             is Settings -> "settings"
             is Login -> "login"
             is Register -> "register"
-            is ShoppingListItem -> "shoppingList/group/$groupId/item/$itemId"
+            is ShoppingListDetail -> "shoppingList/group/$groupId/item/$itemId"
         }
 }

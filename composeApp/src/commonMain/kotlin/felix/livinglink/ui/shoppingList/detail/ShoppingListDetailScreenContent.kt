@@ -1,4 +1,4 @@
-package felix.livinglink.ui.shoppingListItem
+package felix.livinglink.ui.shoppingList.detail
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,9 +12,9 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
-fun ShoppingListItemScreenContent(
-    loadableData: ShoppingListItemViewModel.LoadableData,
-    viewModel: ShoppingListItemViewModel
+fun ShoppingListDetailScreenContent(
+    loadableData: ShoppingListDetailViewModel.LoadableData,
+    viewModel: ShoppingListDetailViewModel
 ) {
     Column(
         modifier = Modifier
@@ -27,7 +27,7 @@ fun ShoppingListItemScreenContent(
         ) {
             items(loadableData.aggregate.history()) { event ->
                 val userName = event.userId?.let { viewModel.resolveUserName(it) }
-                ShoppingListItemEventHistoryItem(
+                ShoppingListDetailEventHistoryItem(
                     userNameFlow = userName ?: emptyFlow(),
                     event = event
                 )

@@ -10,9 +10,9 @@ import ComposeApp
 import SwiftUI
 
 struct ShoppingListItemContentScreen: View {
-    let loadableData: ShoppingListItemViewModel.LoadableData
+    let loadableData: ShoppingListDetailViewModel.LoadableData
     let data: KotlinUnit
-    let viewModel: ShoppingListItemViewModel
+    let viewModel: ShoppingListDetailViewModel
 
     var body: some View {
         VStack {

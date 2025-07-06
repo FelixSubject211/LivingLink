@@ -10,9 +10,9 @@ import ComposeApp
 import SwiftUI
 
 struct ShoppingListEmptyScreen: View {
-    let data: ShoppingListViewModel.Data
-    let viewModel: ShoppingListViewModel
-    let localizables = ShoppingListScreenLocalizables()
+    let data: ShoppingListListViewModel.Data
+    let viewModel: ShoppingListListViewModel
+    let localizables = ShoppingListListScreenLocalizables()
 
     var body: some View {
         VStack(spacing: DesignSystem.Spacing.betweenSections) {

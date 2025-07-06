@@ -10,10 +10,10 @@ import ComposeApp
 import SwiftUI
 
 struct ShoppingListContentScreen: View {
-    let loadableData: ShoppingListViewModel.LoadableData
-    let data: ShoppingListViewModel.Data
-    let viewModel: ShoppingListViewModel
-    let localizables = ShoppingListScreenLocalizables()
+    let loadableData: ShoppingListListViewModel.LoadableData
+    let data: ShoppingListListViewModel.Data
+    let viewModel: ShoppingListListViewModel
+    let localizables = ShoppingListListScreenLocalizables()
 
     @Namespace var itemNamespace
 
@@ -38,7 +38,7 @@ struct ShoppingListContentScreen: View {
                             onCompleteItem: { viewModel.completeItem(itemId: item.id) },
                             onUnCompleteItem: { viewModel.unCompleteItem(itemId: item.id) },
                             onClick: {
-                                viewModel.navigator.push(screen: LivingLinkScreen.ShoppingListItem(
+                                viewModel.navigator.push(screen: LivingLinkScreen.ShoppingListDetail(
                                     groupId: viewModel.groupId,
                                     itemId: item.id
                                 ))
@@ -68,7 +68,7 @@ struct ShoppingListContentScreen: View {
                                 onCompleteItem: { viewModel.completeItem(itemId: item.id) },
                                 onUnCompleteItem: { viewModel.unCompleteItem(itemId: item.id) },
                                 onClick: {
-                                    viewModel.navigator.push(screen: LivingLinkScreen.ShoppingListItem(
+                                    viewModel.navigator.push(screen: LivingLinkScreen.ShoppingListDetail(
                                         groupId: viewModel.groupId,
                                         itemId: item.id
                                     ))

@@ -1,20 +1,20 @@
-package felix.livinglink.ui.shoppingListItem
+package felix.livinglink.ui.shoppingList.detail
 
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.network.NetworkError
 import felix.livinglink.ui.common.state.LoadableStatefulViewModel
 import felix.livinglink.ui.common.state.LoadableViewModelState
 
-typealias ShoppingListItemViewModelState = LoadableViewModelState<
-        ShoppingListItemViewModel.LoadableData,
+typealias ShoppingListDetailViewModelState = LoadableViewModelState<
+        ShoppingListDetailViewModel.LoadableData,
         Unit,
         LivingLinkError,
         Nothing,
         NetworkError
         >
 
-typealias ShoppingListItemStatefulViewModel = LoadableStatefulViewModel<
-        ShoppingListItemViewModel.LoadableData,
+typealias ShoppingListDetailStatefulViewModel = LoadableStatefulViewModel<
+        ShoppingListDetailViewModel.LoadableData,
         Unit,
         LivingLinkError,
         Nothing,

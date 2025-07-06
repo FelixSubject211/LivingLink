@@ -1,6 +1,6 @@
-package felix.livinglink.ui.shoppingList
+package felix.livinglink.ui.shoppingList.list
 
-import ShoppingListScreenLocalizables
+import ShoppingListListScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -40,10 +40,10 @@ fun ShoppingListListAddItemDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(ShoppingListScreenLocalizables.addItemDialogTitle()) },
+        title = { Text(ShoppingListListScreenLocalizables.addItemDialogTitle()) },
         text = {
             Column {
-                Text(ShoppingListScreenLocalizables.addItemDialogText())
+                Text(ShoppingListListScreenLocalizables.addItemDialogText())
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = itemName,
@@ -78,12 +78,12 @@ fun ShoppingListListAddItemDialog(
                     }
                 }
             ) {
-                Text(ShoppingListScreenLocalizables.addItemDialogCreate())
+                Text(ShoppingListListScreenLocalizables.addItemDialogCreate())
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(ShoppingListScreenLocalizables.addItemDialogCancel())
+                Text(ShoppingListListScreenLocalizables.addItemDialogCancel())
             }
         }
     )

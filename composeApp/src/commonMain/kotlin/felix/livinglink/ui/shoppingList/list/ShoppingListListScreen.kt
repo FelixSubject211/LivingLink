@@ -1,4 +1,4 @@
-package felix.livinglink.ui.shoppingList
+package felix.livinglink.ui.shoppingList.list
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -7,7 +7,7 @@ import felix.livinglink.common.model.dataOrNull
 import felix.livinglink.ui.common.state.LoadableStatefulView
 
 @Composable
-fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
+fun ShoppingListListScreen(viewModel: ShoppingListListViewModel) {
     val data = viewModel.data.collectAsState().value
     val itemNameGraphAggregate = viewModel.shoppingListSuggestionAggregate.collectAsState(null)
 
@@ -23,12 +23,12 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
         viewModel = viewModel,
         modifier = Modifier,
         emptyContent = {
-            ShoppingListEmptyContent(
+            ShoppingListListEmptyContent(
                 viewModel = viewModel
             )
         },
         content = { loadableDate, _ ->
-            ShoppingListScreenContent(
+            ShoppingListListScreenContent(
                 loadableData = loadableDate,
                 data = data,
                 viewModel = viewModel

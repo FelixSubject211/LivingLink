@@ -1,4 +1,4 @@
-package felix.livinglink.ui.shoppingList
+package felix.livinglink.ui.shoppingList.list
 
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.eventSourcing.repository.EventSourcingRepository
@@ -10,13 +10,13 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
-class ShoppingListViewModel(
+class ShoppingListListViewModel(
     val groupId: String,
     override val navigator: Navigator,
     private val eventSourcingRepository: EventSourcingRepository,
-    private val viewModelState: ShoppingListViewModelState,
+    private val viewModelState: ShoppingListListViewModelState,
     private val completedItemsDisplayChunk: Int = 10,
-) : ShoppingListStatefulViewModel {
+) : ShoppingListListStatefulViewModel {
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
     override val error = viewModelState.error

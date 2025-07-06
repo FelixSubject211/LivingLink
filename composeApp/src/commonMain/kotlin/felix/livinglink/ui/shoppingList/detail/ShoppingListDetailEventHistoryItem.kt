@@ -1,6 +1,6 @@
-package felix.livinglink.ui.shoppingListItem
+package felix.livinglink.ui.shoppingList.detail
 
-import ShoppingListItemScreenLocalizables
+import ShoppingListDetailScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,28 +27,28 @@ import felix.livinglink.ui.common.formatWith
 import kotlinx.coroutines.flow.Flow
 
 @Composable
-fun ShoppingListItemEventHistoryItem(
+fun ShoppingListDetailEventHistoryItem(
     userNameFlow: Flow<String?>,
     event: EventSourcingEvent<ShoppingListEvent>
 ) {
     val userName by userNameFlow.collectAsState(initial = null)
-    val displayName = userName ?: ShoppingListItemScreenLocalizables.eventPerformedByUnknown()
+    val displayName = userName ?: ShoppingListDetailScreenLocalizables.eventPerformedByUnknown()
 
     val (descriptionText, icon) = when (event.payload) {
         is ShoppingListEvent.ItemAdded -> {
-            ShoppingListItemScreenLocalizables.eventAdded(displayName) to Icons.Default.Add
+            ShoppingListDetailScreenLocalizables.eventAdded(displayName) to Icons.Default.Add
         }
 
         is ShoppingListEvent.ItemCompleted -> {
-            ShoppingListItemScreenLocalizables.eventCompleted(displayName) to Icons.Default.Check
+            ShoppingListDetailScreenLocalizables.eventCompleted(displayName) to Icons.Default.Check
         }
 
         is ShoppingListEvent.ItemUncompleted -> {
-            ShoppingListItemScreenLocalizables.eventUncompleted(displayName) to Icons.Default.Close
+            ShoppingListDetailScreenLocalizables.eventUncompleted(displayName) to Icons.Default.Close
         }
 
         else -> {
-            ShoppingListItemScreenLocalizables.eventUnknown(displayName) to Icons.Default.Close
+            ShoppingListDetailScreenLocalizables.eventUnknown(displayName) to Icons.Default.Close
         }
     }
 

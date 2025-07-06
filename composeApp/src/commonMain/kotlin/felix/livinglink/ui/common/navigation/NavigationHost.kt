@@ -18,7 +18,7 @@ import felix.livinglink.ui.groups.list.GroupListScreen
 import felix.livinglink.ui.login.LoginScreen
 import felix.livinglink.ui.register.RegisterScreen
 import felix.livinglink.ui.settings.SettingsScreen
-import felix.livinglink.ui.shoppingListItem.ShoppingListItemScreen
+import felix.livinglink.ui.shoppingList.detail.ShoppingListDetailScreen
 
 @Composable
 fun NavigationHost(
@@ -80,7 +80,7 @@ fun NavigationHost(
                 navArgument("itemId") { type = NavType.StringType }
             )
         ) { backStackEntry: NavBackStackEntry ->
-            val screen = backStackEntry.toRoute<LivingLinkScreen.ShoppingListItem>()
+            val screen = backStackEntry.toRoute<LivingLinkScreen.ShoppingListDetail>()
             val (groupId, itemId) = screen.run { groupId to itemId }
 
             val shoppingListItemViewModel = remember("$groupId|$itemId") {
@@ -88,7 +88,7 @@ fun NavigationHost(
                     uiModule.shoppingListItemViewModel(groupId, itemId)
                 }
             }
-            ShoppingListItemScreen(shoppingListItemViewModel)
+            ShoppingListDetailScreen(shoppingListItemViewModel)
         }
     }
 }

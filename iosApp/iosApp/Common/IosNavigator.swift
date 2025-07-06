@@ -47,8 +47,8 @@ class IosNavigator: Navigator, ObservableObject {
                 self.navigationPath.append(Screen.Login())
             case is LivingLinkScreen.Register:
                 self.navigationPath.append(Screen.Register())
-            case is LivingLinkScreen.ShoppingListItem:
-                let screen = screen as! LivingLinkScreen.ShoppingListItem
+            case is LivingLinkScreen.ShoppingListDetail:
+                let screen = screen as! LivingLinkScreen.ShoppingListDetail
                 self.navigationPath.append(Screen.ShoppingListItem(
                     groupId: screen.groupId,
                     itemId: screen.itemId

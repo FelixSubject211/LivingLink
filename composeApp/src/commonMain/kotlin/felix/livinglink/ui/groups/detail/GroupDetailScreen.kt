@@ -18,13 +18,13 @@ import felix.livinglink.ui.common.state.LoadableStatefulView
 import felix.livinglink.ui.common.state.LoadableViewModelState
 import felix.livinglink.ui.groups.common.GroupConfirmDeleteDialog
 import felix.livinglink.ui.groups.common.GroupInviteDialog
-import felix.livinglink.ui.shoppingList.ShoppingListScreen
-import felix.livinglink.ui.shoppingList.ShoppingListViewModel
+import felix.livinglink.ui.shoppingList.list.ShoppingListListScreen
+import felix.livinglink.ui.shoppingList.list.ShoppingListListViewModel
 
 @Composable
 fun GroupScreen(
     groupDetailViewModel: GroupDetailViewModel,
-    shoppingListViewModel: ShoppingListViewModel
+    shoppingListListViewModel: ShoppingListListViewModel
 ) {
     val data = groupDetailViewModel.data.collectAsState().value
 
@@ -84,7 +84,7 @@ fun GroupScreen(
             viewModel = groupDetailViewModel,
             modifier = innerPadding,
             content = { _, _ ->
-                ShoppingListScreen(shoppingListViewModel)
+                ShoppingListListScreen(shoppingListListViewModel)
             }
         )
     }

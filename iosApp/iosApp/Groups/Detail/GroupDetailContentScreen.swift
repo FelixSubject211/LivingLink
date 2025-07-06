@@ -13,7 +13,7 @@ struct GroupDetailContentScreen: View {
     let loadableData: GroupDetailViewModel.LoadableData
     let data: GroupDetailViewModel.Data
     let viewModel: GroupDetailViewModel
-    let shoppingListViewModel: ShoppingListViewModel
+    let shoppingListViewModel: ShoppingListListViewModel
     let localizables = GroupDetailScreenLocalizables()
 
     var body: some View {

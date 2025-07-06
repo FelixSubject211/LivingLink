@@ -18,8 +18,8 @@ import felix.livinglink.ui.groups.list.GroupListViewModel
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
-import felix.livinglink.ui.shoppingList.ShoppingListViewModel
-import felix.livinglink.ui.shoppingListItem.ShoppingListItemViewModel
+import felix.livinglink.ui.shoppingList.detail.ShoppingListDetailViewModel
+import felix.livinglink.ui.shoppingList.list.ShoppingListListViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
@@ -31,8 +31,8 @@ interface UiModule {
     fun registerViewModel(): RegisterViewModel
     val groupListViewModel: GroupListViewModel
     fun groupDetailViewModel(groupId: String): GroupDetailViewModel
-    fun shoppingListViewModel(groupId: String): ShoppingListViewModel
-    fun shoppingListItemViewModel(groupId: String, itemId: String): ShoppingListItemViewModel
+    fun shoppingListViewModel(groupId: String): ShoppingListListViewModel
+    fun shoppingListItemViewModel(groupId: String, itemId: String): ShoppingListDetailViewModel
 }
 
 fun defaultUiModule(
@@ -116,8 +116,8 @@ fun defaultUiModule(
             )
         )
 
-        override fun shoppingListViewModel(groupId: String): ShoppingListViewModel {
-            return ShoppingListViewModel(
+        override fun shoppingListViewModel(groupId: String): ShoppingListListViewModel {
+            return ShoppingListListViewModel(
                 groupId = groupId,
                 navigator = navigator,
                 eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
@@ -127,8 +127,8 @@ fun defaultUiModule(
                         aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
                         payloadType = ShoppingListEvent::class,
                         initial = ShoppingListAggregate.empty
-                    ).mapState { ShoppingListViewModel.LoadableData(it) },
-                    initialState = ShoppingListViewModel.initialState,
+                    ).mapState { ShoppingListListViewModel.LoadableData(it) },
+                    initialState = ShoppingListListViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
                     scope = commonModule.defaultScope.newChildScope(),
                 )
@@ -138,10 +138,10 @@ fun defaultUiModule(
         override fun shoppingListItemViewModel(
             groupId: String,
             itemId: String
-        ): ShoppingListItemViewModel {
+        ): ShoppingListDetailViewModel {
             val aggregateName = ShoppingListItemHistoryAggregate::class.qualifiedName!!
 
-            return ShoppingListItemViewModel(
+            return ShoppingListDetailViewModel(
                 groupId = groupId,
                 navigator = navigator,
                 groupsRepository = groupsModule.groupsRepository,
@@ -151,7 +151,7 @@ fun defaultUiModule(
                         aggregationKey = "$aggregateName:$itemId",
                         payloadType = ShoppingListEvent::class,
                         initial = ShoppingListItemHistoryAggregate.empty(itemId)
-                    ).mapState { ShoppingListItemViewModel.LoadableData(it) },
+                    ).mapState { ShoppingListDetailViewModel.LoadableData(it) },
                     initialState = Unit,
                     hapticsController = hapticsModule.hapticsController,
                     scope = commonModule.defaultScope.newChildScope()

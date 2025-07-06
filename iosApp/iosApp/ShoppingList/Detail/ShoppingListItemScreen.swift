@@ -1,31 +1,28 @@
 //
-//  ShoppingListScreen.swift
+//  ShoppingListItemScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 16.05.25.
+//  Created by Felix Fischer on 28.06.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListScreen: View {
-    let viewModel: ShoppingListViewModel
+struct ShoppingListItemScreen: View {
+    let viewModel: ShoppingListDetailViewModel
 
     var body: some View {
         LoadableStatefulView(
             viewModel: viewModel,
-            buildAlert: { (error: ShoppingListScreenError) in
+            buildAlert: { (error: ShoppingListItemScreenError) in
                 error.asAlert(
                     navigator: viewModel.navigator,
                     dismiss: viewModel.closeError
                 )
             },
-            emptyContent: { data in
-                ShoppingListEmptyScreen(data: data, viewModel: viewModel)
-            },
             content: { loadbaleData, data in
-                ShoppingListContentScreen(
+                ShoppingListItemContentScreen(
                     loadableData: loadbaleData,
                     data: data,
                     viewModel: viewModel
@@ -36,4 +33,4 @@ struct ShoppingListScreen: View {
     }
 }
 
-private typealias ShoppingListScreenError = LoadableViewModelStateCombinedError<LivingLinkError, KotlinNothing, NetworkError>
+private typealias ShoppingListItemScreenError = LoadableViewModelStateCombinedError<LivingLinkError, KotlinNothing, NetworkError>

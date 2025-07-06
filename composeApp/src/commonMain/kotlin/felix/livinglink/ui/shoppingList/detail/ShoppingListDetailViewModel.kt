@@ -1,16 +1,16 @@
-package felix.livinglink.ui.shoppingListItem
+package felix.livinglink.ui.shoppingList.detail
 
 import felix.livinglink.groups.repository.GroupsRepository
 import felix.livinglink.shoppingList.ShoppingListItemHistoryAggregate
 import felix.livinglink.ui.common.navigation.Navigator
 import kotlinx.coroutines.flow.Flow
 
-class ShoppingListItemViewModel(
+class ShoppingListDetailViewModel(
     val groupId: String,
     override val navigator: Navigator,
     private val groupsRepository: GroupsRepository,
-    private val viewModelState: ShoppingListItemViewModelState
-) : ShoppingListItemStatefulViewModel {
+    private val viewModelState: ShoppingListDetailViewModelState
+) : ShoppingListDetailStatefulViewModel {
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
     override val error = viewModelState.error

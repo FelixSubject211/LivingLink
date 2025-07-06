@@ -1,6 +1,6 @@
-package felix.livinglink.ui.shoppingList
+package felix.livinglink.ui.shoppingList.list
 
-import ShoppingListScreenLocalizables
+import ShoppingListListScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -15,21 +15,21 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ShoppingListEmptyContent(viewModel: ShoppingListViewModel) {
+fun ShoppingListListEmptyContent(viewModel: ShoppingListListViewModel) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = ShoppingListScreenLocalizables.emptyScreenText(),
+            text = ShoppingListListScreenLocalizables.emptyScreenText(),
             textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(onClick = viewModel::showAddItem) {
-            Text(ShoppingListScreenLocalizables.emptyScreenButton())
+            Text(ShoppingListListScreenLocalizables.emptyScreenButton())
         }
     }
 }

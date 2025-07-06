@@ -1,6 +1,6 @@
-package felix.livinglink.ui.shoppingListItem
+package felix.livinglink.ui.shoppingList.detail
 
-import ShoppingListItemScreenLocalizables
+import ShoppingListDetailScreenLocalizables
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import felix.livinglink.ui.common.BackAwareScaffold
@@ -8,18 +8,18 @@ import felix.livinglink.ui.common.state.LoadableStatefulView
 import felix.livinglink.ui.common.state.LoadableViewModelState
 
 @Composable
-fun ShoppingListItemScreen(
-    viewModel: ShoppingListItemViewModel
+fun ShoppingListDetailScreen(
+    viewModel: ShoppingListDetailViewModel
 ) {
     val itemName = when (val loadableData = viewModel.loadableData.collectAsState().value) {
-        is LoadableViewModelState.State.Data<ShoppingListItemViewModel.LoadableData, *> -> {
+        is LoadableViewModelState.State.Data<ShoppingListDetailViewModel.LoadableData, *> -> {
             loadableData.data.aggregate.itemName ?: ""
         }
 
         else -> ""
     }
 
-    val title = ShoppingListItemScreenLocalizables.navigationTitle(itemName)
+    val title = ShoppingListDetailScreenLocalizables.navigationTitle(itemName)
 
     BackAwareScaffold(
         navigator = viewModel.navigator,
@@ -29,7 +29,7 @@ fun ShoppingListItemScreen(
             viewModel = viewModel,
             modifier = innerPadding,
             content = { loadableDate, _ ->
-                ShoppingListItemScreenContent(
+                ShoppingListDetailScreenContent(
                     loadableData = loadableDate,
                     viewModel = viewModel
                 )

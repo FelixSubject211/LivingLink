@@ -11,7 +11,7 @@ import SwiftUI
 
 struct GroupDetailScreen: View {
     let groupDetailViewModel: GroupDetailViewModel
-    let shoppingListViewModel: ShoppingListViewModel
+    let shoppingListViewModel: ShoppingListListViewModel
 
     var body: some View {
         LoadableStatefulView(

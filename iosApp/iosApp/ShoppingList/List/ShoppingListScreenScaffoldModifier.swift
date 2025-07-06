@@ -10,9 +10,9 @@ import ComposeApp
 import SwiftUI
 
 struct ShoppingListScreenScaffoldModifier: ViewModifier {
-    let data: ShoppingListViewModel.Data
-    let viewModel: ShoppingListViewModel
-    let localizables = ShoppingListScreenLocalizables()
+    let data: ShoppingListListViewModel.Data
+    let viewModel: ShoppingListListViewModel
+    let localizables = ShoppingListListScreenLocalizables()
 
     func body(content: Content) -> some View {
         content

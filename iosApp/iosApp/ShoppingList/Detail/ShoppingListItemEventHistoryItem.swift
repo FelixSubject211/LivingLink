@@ -11,12 +11,12 @@ import SwiftUI
 
 struct ShoppingListItemEventHistoryItem: View {
     let event: SharedEventSourcingEvent<SharedShoppingListEvent>
-    let viewModel: ShoppingListItemViewModel
-    let localizables = ShoppingListItemScreenLocalizables()
+    let viewModel: ShoppingListDetailViewModel
+    let localizables = ShoppingListDetailScreenLocalizables()
 
     @ObservedObject var userName: FlowObservable<String>
 
-    init(event: SharedEventSourcingEvent<SharedShoppingListEvent>, viewModel: ShoppingListItemViewModel) {
+    init(event: SharedEventSourcingEvent<SharedShoppingListEvent>, viewModel: ShoppingListDetailViewModel) {
         self.event = event
         self.viewModel = viewModel
         userName = viewModel.resolveUserName(userId: event.userId ?? "").asObservableObject()
