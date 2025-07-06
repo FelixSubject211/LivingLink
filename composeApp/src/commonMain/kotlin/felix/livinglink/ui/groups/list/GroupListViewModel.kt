@@ -1,5 +1,6 @@
 package felix.livinglink.ui.groups.list
 
+import GroupListScreenLocalizables
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.group.CreateGroupRequest
@@ -68,16 +69,35 @@ class GroupListViewModel(
         }
     )
 
+    fun showDeleteGroupDialog(groupId: String) = viewModelState.perform { data ->
+        data.copy(groupIdToDelete = groupId)
+    }
+
+    fun closeDeleteDialog() = viewModelState.perform { data ->
+        data.copy(groupIdToDelete = null)
+    }
+
+    fun deleteGroup() = viewModelState.perform(
+        request = { groupsRepository.deleteGroup(groupId = it.groupIdToDelete!!) },
+        onSuccess = { currentData, _ ->
+            LivingLinkResult.Success(
+                currentData.copy(groupIdToDelete = null)
+            )
+        }
+    )
+
     companion object {
         val initialState = Data(
             showAddGroupDialog = false,
-            showJoinGroupDialog = false
+            showJoinGroupDialog = false,
+            groupIdToDelete = null
         )
     }
 
     data class Data(
         val showAddGroupDialog: Boolean,
-        val showJoinGroupDialog: Boolean
+        val showJoinGroupDialog: Boolean,
+        val groupIdToDelete: String?
     )
 
     data class LoadableData(

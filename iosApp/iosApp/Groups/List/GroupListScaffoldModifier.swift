@@ -21,6 +21,13 @@ struct GroupListScaffoldModifier: ViewModifier {
                 DesignSystem.background
                     .ignoresSafeArea()
             }
+            .modifier(
+                GroupDeleteConfirmationAlert(
+                    isPresented: data.groupIdToDelete != nil,
+                    onConfirm: viewModel.deleteGroup,
+                    onCancel: viewModel.closeDeleteDialog
+                )
+            )
             .alertWithTextField(
                 title: localizables.createGroupDialogTitle.localized,
                 message: localizables.createGroupDialogLabel.localized,

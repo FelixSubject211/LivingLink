@@ -24,6 +24,12 @@ struct GroupListContentScreen: View {
                         viewModel: viewModel
                     )
                 }
+                .onDelete { indexSet in
+                    for index in indexSet {
+                        let group = loadableData.groups[index]
+                        viewModel.showDeleteGroupDialog(groupId: group.id)
+                    }
+                }
             }
             .listStyle(.sidebar)
             .scrollContentBackground(.hidden)
