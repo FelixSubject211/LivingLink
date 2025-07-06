@@ -25,7 +25,7 @@ struct GroupListContentScreen: View {
                     )
                 }
                 .onDelete { indexSet in
-                    for index in indexSet {
+                    if let index = indexSet.first {
                         let group = loadableData.groups[index]
                         viewModel.showDeleteGroupDialog(groupId: group.id)
                     }

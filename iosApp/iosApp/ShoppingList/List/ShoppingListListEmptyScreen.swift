@@ -1,5 +1,5 @@
 //
-//  ShoppingListEmptyScreen.swift
+//  ShoppingListListEmptyScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,7 +9,7 @@
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListEmptyScreen: View {
+struct ShoppingListListEmptyScreen: View {
     let data: ShoppingListListViewModel.Data
     let viewModel: ShoppingListListViewModel
     let localizables = ShoppingListListScreenLocalizables()
@@ -25,7 +25,7 @@ struct ShoppingListEmptyScreen: View {
         }
         .ignoresSafeArea(.keyboard)
         .padding(DesignSystem.Padding.large)
-        .modifier(ShoppingListScreenScaffoldModifier(
+        .modifier(ShoppingListListScreenScaffoldModifier(
             data: data,
             viewModel: viewModel
         ))

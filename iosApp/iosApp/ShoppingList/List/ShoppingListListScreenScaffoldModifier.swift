@@ -1,5 +1,5 @@
 //
-//  ShoppingListScreenScaffoldModifier.swift
+//  ShoppingListListScreenScaffoldModifier.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,7 +9,7 @@
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListScreenScaffoldModifier: ViewModifier {
+struct ShoppingListListScreenScaffoldModifier: ViewModifier {
     let data: ShoppingListListViewModel.Data
     let viewModel: ShoppingListListViewModel
     let localizables = ShoppingListListScreenLocalizables()

@@ -45,6 +45,11 @@ data class ShoppingListAggregate(
                     newOpenItems[payload.itemId] = it.copy(isCompleted = false)
                 }
             }
+
+            is ShoppingListEvent.ItemDeleted -> {
+                newOpenItems.remove(payload.itemId)
+                newCompletedItems.remove(payload.itemId)
+            }
         }
 
         return copy(openItems = newOpenItems, completedItems = newCompletedItems)

@@ -7,7 +7,7 @@ import felix.livinglink.ui.common.state.LoadableViewModelState
 
 typealias ShoppingListDetailViewModelState = LoadableViewModelState<
         ShoppingListDetailViewModel.LoadableData,
-        Unit,
+        ShoppingListDetailViewModel.Data,
         LivingLinkError,
         Nothing,
         NetworkError
@@ -15,7 +15,7 @@ typealias ShoppingListDetailViewModelState = LoadableViewModelState<
 
 typealias ShoppingListDetailStatefulViewModel = LoadableStatefulViewModel<
         ShoppingListDetailViewModel.LoadableData,
-        Unit,
+        ShoppingListDetailViewModel.Data,
         LivingLinkError,
         Nothing,
         NetworkError

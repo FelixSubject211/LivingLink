@@ -143,7 +143,9 @@ fun defaultUiModule(
 
             return ShoppingListDetailViewModel(
                 groupId = groupId,
+                itemId = itemId,
                 navigator = navigator,
+                eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
                 groupsRepository = groupsModule.groupsRepository,
                 viewModelState = LoadableViewModelDefaultState(
                     input = eventSourcingModule.eventSourcingRepository.aggregateState(
@@ -152,7 +154,7 @@ fun defaultUiModule(
                         payloadType = ShoppingListEvent::class,
                         initial = ShoppingListItemHistoryAggregate.empty(itemId)
                     ).mapState { ShoppingListDetailViewModel.LoadableData(it) },
-                    initialState = Unit,
+                    initialState = ShoppingListDetailViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
                     scope = commonModule.defaultScope.newChildScope()
                 )

@@ -1,5 +1,5 @@
 //
-//  ShoppingListItemEventHistoryItem.swift
+//  ShoppingListDetailEventHistoryItem.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 28.06.25.
@@ -9,7 +9,7 @@
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListItemEventHistoryItem: View {
+struct ShoppingListDetailEventHistoryItem: View {
     let event: SharedEventSourcingEvent<SharedShoppingListEvent>
     let viewModel: ShoppingListDetailViewModel
     let localizables = ShoppingListDetailScreenLocalizables()

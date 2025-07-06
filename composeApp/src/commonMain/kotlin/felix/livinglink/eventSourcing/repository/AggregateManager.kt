@@ -117,7 +117,11 @@ class AggregateManager<
 
         val snapshot = AggregateSnapshot(updated, latestId)
         aggregateStore.store(cacheKey(), initial.serializer(), snapshot)
-        state.value = RepositoryState.Data(updated)
+        state.value = if (updated.isEmpty()) {
+            RepositoryState.Empty
+        } else {
+            RepositoryState.Data(updated)
+        }
         isLoading.value = false
 
         events.filterByPayloadType(UserAnonymized::class).forEach { event ->

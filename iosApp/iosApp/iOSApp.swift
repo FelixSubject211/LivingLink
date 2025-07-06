@@ -71,7 +71,7 @@ private struct NavigationView: View {
                     let viewModel = ViewModelCache.getOrCreate(key: "shoppingListItemViewModel_\(groupId)_\(itemId)") {
                         uiModule.shoppingListItemViewModel(groupId: groupId, itemId: itemId)
                     }
-                    ShoppingListItemScreen(viewModel: viewModel)
+                    ShoppingDetailItemScreen(viewModel: viewModel)
                 }
         }
         .onChange(of: navigartor.navigationPath, initial: false) { oldPath, newPath in

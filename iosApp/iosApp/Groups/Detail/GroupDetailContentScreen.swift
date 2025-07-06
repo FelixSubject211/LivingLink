@@ -17,7 +17,7 @@ struct GroupDetailContentScreen: View {
     let localizables = GroupDetailScreenLocalizables()
 
     var body: some View {
-        ShoppingListScreen(viewModel: shoppingListViewModel)
+        ShoppingListListScreen(viewModel: shoppingListViewModel)
             .navigationTitle(loadableData.group.name)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {

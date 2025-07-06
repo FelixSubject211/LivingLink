@@ -19,6 +19,10 @@ private val eventSerializersModule = SerializersModule {
             ShoppingListEvent.ItemUncompleted::class,
             ShoppingListEvent.ItemUncompleted.serializer()
         )
+        subclass(
+            ShoppingListEvent.ItemDeleted::class,
+            ShoppingListEvent.ItemDeleted.serializer()
+        )
     }
 }
 

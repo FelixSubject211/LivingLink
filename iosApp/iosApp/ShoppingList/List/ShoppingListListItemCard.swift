@@ -1,5 +1,5 @@
 //
-//  ShoppingListItemCard.swift
+//  ShoppingListListItemCard.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,7 +9,7 @@
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListItemCard: View {
+struct ShoppingListListItemCard: View {
     let item: ShoppingListAggregate.Item
     let onCompleteItem: () -> Void
     let onUnCompleteItem: () -> Void

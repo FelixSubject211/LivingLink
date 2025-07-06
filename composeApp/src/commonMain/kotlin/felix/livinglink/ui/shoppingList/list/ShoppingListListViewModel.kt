@@ -93,6 +93,18 @@ class ShoppingListListViewModel(
         data.copy(completedItemsLimit = current + completedItemsDisplayChunk)
     }
 
+    fun deleteItem(itemId: String) = viewModelState.perform(
+        request = {
+            eventSourcingRepository.addEvent(
+                groupId = groupId,
+                payload = ShoppingListEvent.ItemDeleted(itemId)
+            )
+        },
+        onSuccess = { currentData, _ ->
+            LivingLinkResult.Success(currentData)
+        }
+    )
+
     companion object {
         val initialState = Data(
             showAddItem = false,

@@ -1,5 +1,5 @@
 //
-//  ShoppingListContentScreen.swift
+//  ShoppingListListContentScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,7 +9,7 @@
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListContentScreen: View {
+struct ShoppingListListContentScreen: View {
     let loadableData: ShoppingListListViewModel.LoadableData
     let data: ShoppingListListViewModel.Data
     let viewModel: ShoppingListListViewModel
@@ -33,7 +33,7 @@ struct ShoppingListContentScreen: View {
             List {
                 Section {
                     ForEach(openItems, id: \.id) { item in
-                        ShoppingListItemCard(
+                        ShoppingListListItemCard(
                             item: item,
                             onCompleteItem: { viewModel.completeItem(itemId: item.id) },
                             onUnCompleteItem: { viewModel.unCompleteItem(itemId: item.id) },
@@ -44,6 +44,12 @@ struct ShoppingListContentScreen: View {
                                 ))
                             }
                         ).matchedGeometryEffect(id: item.id, in: itemNamespace)
+                    }
+                    .onDelete { indexSet in
+                        if let index = indexSet.first {
+                            let item = openItems[index]
+                            viewModel.deleteItem(itemId: item.id)
+                        }
                     }
                 }
 
@@ -63,7 +69,7 @@ struct ShoppingListContentScreen: View {
                 if data.showCompletedItems && !visibleCompletedItems.isEmpty {
                     Section {
                         ForEach(visibleCompletedItems, id: \.id) { item in
-                            ShoppingListItemCard(
+                            ShoppingListListItemCard(
                                 item: item,
                                 onCompleteItem: { viewModel.completeItem(itemId: item.id) },
                                 onUnCompleteItem: { viewModel.unCompleteItem(itemId: item.id) },
@@ -74,6 +80,12 @@ struct ShoppingListContentScreen: View {
                                     ))
                                 }
                             ).matchedGeometryEffect(id: item.id, in: itemNamespace)
+                        }
+                        .onDelete { indexSet in
+                            if let index = indexSet.first {
+                                let item = completedItems[index]
+                                viewModel.deleteItem(itemId: item.id)
+                            }
                         }
 
                         if visibleCompletedItems.count < completedItems.count {
@@ -95,7 +107,7 @@ struct ShoppingListContentScreen: View {
             .padding()
         }
         .ignoresSafeArea(.keyboard)
-        .modifier(ShoppingListScreenScaffoldModifier(
+        .modifier(ShoppingListListScreenScaffoldModifier(
             data: data,
             viewModel: viewModel
         ))

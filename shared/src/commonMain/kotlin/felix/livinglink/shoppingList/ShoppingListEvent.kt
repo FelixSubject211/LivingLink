@@ -22,4 +22,9 @@ sealed class ShoppingListEvent : EventSourcingEvent.Payload {
     data class ItemUncompleted(
         override val itemId: String
     ) : ShoppingListEvent()
+
+    @Serializable
+    data class ItemDeleted(
+        override val itemId: String
+    ) : ShoppingListEvent()
 }

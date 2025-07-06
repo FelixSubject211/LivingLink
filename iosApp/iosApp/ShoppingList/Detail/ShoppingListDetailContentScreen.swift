@@ -1,5 +1,5 @@
 //
-//  ShoppingListItemContentScreen.swift
+//  ShoppingListDetailContentScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 28.06.25.
@@ -9,15 +9,17 @@
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListItemContentScreen: View {
+struct ShoppingListDetailContentScreen: View {
     let loadableData: ShoppingListDetailViewModel.LoadableData
-    let data: KotlinUnit
+    let data: ShoppingListDetailViewModel.Data
     let viewModel: ShoppingListDetailViewModel
+
+    let localizables = ShoppingListDetailScreenLocalizables()
 
     var body: some View {
         VStack {
             List(loadableData.aggregate.history()) { event in
-                ShoppingListItemEventHistoryItem(
+                ShoppingListDetailEventHistoryItem(
                     event: event,
                     viewModel: viewModel
                 )
@@ -26,6 +28,18 @@ struct ShoppingListItemContentScreen: View {
             .listStyle(.plain)
 
             Spacer()
+        }
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Menu {
+                    Button(localizables.menuDeleteItem.localized) {
+                        viewModel.deleteItem()
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                        .accessibilityLabel(localizables.moreOptionsContentDescription.localized)
+                }
+            }
         }
         .ignoresSafeArea(.keyboard)
         .navigationTitle(loadableData.aggregate.itemName ?? "")
