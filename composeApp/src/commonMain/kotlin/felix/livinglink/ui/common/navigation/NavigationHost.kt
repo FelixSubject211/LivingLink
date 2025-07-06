@@ -13,8 +13,8 @@ import androidx.navigation.toRoute
 import felix.livinglink.ui.UiModule
 import felix.livinglink.ui.common.state.LoadableStatefulViewModel
 import felix.livinglink.ui.common.state.StatefulViewModel
-import felix.livinglink.ui.group.GroupScreen
-import felix.livinglink.ui.listGroups.ListGroupsScreen
+import felix.livinglink.ui.groups.detail.GroupScreen
+import felix.livinglink.ui.groups.list.GroupListScreen
 import felix.livinglink.ui.login.LoginScreen
 import felix.livinglink.ui.register.RegisterScreen
 import felix.livinglink.ui.settings.SettingsScreen
@@ -27,23 +27,23 @@ fun NavigationHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = LivingLinkScreen.ListGroups.route,
+        startDestination = LivingLinkScreen.GroupList.route,
         modifier = Modifier
     ) {
-        composable(route = LivingLinkScreen.ListGroups.route) {
+        composable(route = LivingLinkScreen.GroupList.route) {
             ViewModelCache.clearAll()
-            ListGroupsScreen(uiModule.listGroupsViewModel)
+            GroupListScreen(uiModule.groupListViewModel)
         }
         composable(
-            route = "group/{groupId}",
+            route = "groupDetail/{groupId}",
             arguments = listOf(navArgument("groupId") { type = NavType.StringType })
         ) { backStackEntry: NavBackStackEntry ->
-            val screen = backStackEntry.toRoute<LivingLinkScreen.Group>()
+            val screen = backStackEntry.toRoute<LivingLinkScreen.GroupDetail>()
             val groupId = screen.groupId
 
             val groupViewModel = remember(groupId) {
                 ViewModelCache.getOrCreate("groupViewModel_$groupId") {
-                    uiModule.groupViewModel(groupId)
+                    uiModule.groupDetailViewModel(groupId)
                 }
             }
             val shoppingListViewModel = remember(groupId) {

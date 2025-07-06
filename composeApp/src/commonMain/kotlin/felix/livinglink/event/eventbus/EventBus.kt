@@ -65,7 +65,7 @@ interface EventBus {
         private fun updateGroupId() {
             val top = screenStack.lastOrNull()
             _currentGroupIdFlow.value = when (top) {
-                is LivingLinkScreen.Group -> top.groupId
+                is LivingLinkScreen.GroupDetail -> top.groupId
                 is LivingLinkScreen.ShoppingListItem -> top.groupId
                 else -> null
             }

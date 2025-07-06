@@ -13,8 +13,8 @@ import felix.livinglink.shoppingList.ShoppingListItemHistoryAggregate
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
 import felix.livinglink.ui.common.state.ViewModelDefaultState
-import felix.livinglink.ui.group.GroupViewModel
-import felix.livinglink.ui.listGroups.ListGroupsViewModel
+import felix.livinglink.ui.groups.detail.GroupDetailViewModel
+import felix.livinglink.ui.groups.list.GroupListViewModel
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
@@ -29,8 +29,8 @@ interface UiModule {
     val settingsViewModel: SettingsViewModel
     fun loginViewModel(): LoginViewModel
     fun registerViewModel(): RegisterViewModel
-    val listGroupsViewModel: ListGroupsViewModel
-    fun groupViewModel(groupId: String): GroupViewModel
+    val groupListViewModel: GroupListViewModel
+    fun groupDetailViewModel(groupId: String): GroupDetailViewModel
     fun shoppingListViewModel(groupId: String): ShoppingListViewModel
     fun shoppingListItemViewModel(groupId: String, itemId: String): ShoppingListItemViewModel
 }
@@ -89,28 +89,28 @@ fun defaultUiModule(
             )
         )
 
-        override val listGroupsViewModel = ListGroupsViewModel(
+        override val groupListViewModel = GroupListViewModel(
             navigator = navigator,
             groupsRepository = groupsModule.groupsRepository,
             viewModelState = LoadableViewModelDefaultState(
                 input = groupsModule.groupsRepository.groups.map { flow ->
-                    flow.mapState { ListGroupsViewModel.LoadableData(it) }
+                    flow.mapState { GroupListViewModel.LoadableData(it) }
                 },
-                initialState = ListGroupsViewModel.initialState,
+                initialState = GroupListViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope.newChildScope()
             )
         )
 
-        override fun groupViewModel(groupId: String) = GroupViewModel(
+        override fun groupDetailViewModel(groupId: String) = GroupDetailViewModel(
             navigator = navigator,
             groupId = groupId,
             groupsRepository = groupsModule.groupsRepository,
             viewModelState = LoadableViewModelDefaultState(
                 input = groupsModule.groupsRepository.group(groupId).mapState {
-                    GroupViewModel.LoadableData(it)
+                    GroupDetailViewModel.LoadableData(it)
                 },
-                initialState = GroupViewModel.initialState,
+                initialState = GroupDetailViewModel.initialState,
                 hapticsController = hapticsModule.hapticsController,
                 scope = commonModule.defaultScope.newChildScope()
             )

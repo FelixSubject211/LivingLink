@@ -1,5 +1,5 @@
 //
-//  ListGroupsEmptyScreen.swift
+//  GroupListEmptyScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,10 +9,10 @@
 import ComposeApp
 import SwiftUI
 
-struct ListGroupsEmptyScreen: View {
-    let data: ListGroupsViewModel.Data
-    let viewModel: ListGroupsViewModel
-    let localizables = ListGroupsScreenLocalizables()
+struct GroupListEmptyScreen: View {
+    let data: GroupListViewModel.Data
+    let viewModel: GroupListViewModel
+    let localizables = GroupListScreenLocalizables()
 
     var body: some View {
         VStack(spacing: DesignSystem.Spacing.betweenSections) {
@@ -28,7 +28,7 @@ struct ListGroupsEmptyScreen: View {
         }
         .ignoresSafeArea(.keyboard)
         .padding(DesignSystem.Padding.large)
-        .modifier(ListGroupsScaffoldModifier(
+        .modifier(GroupListScaffoldModifier(
             data: data,
             viewModel: viewModel
         ))

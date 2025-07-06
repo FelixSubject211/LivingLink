@@ -1,6 +1,6 @@
-package felix.livinglink.ui.group
+package felix.livinglink.ui.groups.detail
 
-import GroupScreenLocalizables
+import GroupDetailScreenLocalizables
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -16,70 +16,72 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.ui.common.BackAwareScaffold
 import felix.livinglink.ui.common.state.LoadableStatefulView
 import felix.livinglink.ui.common.state.LoadableViewModelState
+import felix.livinglink.ui.groups.common.GroupConfirmDeleteDialog
+import felix.livinglink.ui.groups.common.GroupInviteDialog
 import felix.livinglink.ui.shoppingList.ShoppingListScreen
 import felix.livinglink.ui.shoppingList.ShoppingListViewModel
 
 @Composable
 fun GroupScreen(
-    groupViewModel: GroupViewModel,
+    groupDetailViewModel: GroupDetailViewModel,
     shoppingListViewModel: ShoppingListViewModel
 ) {
-    val data = groupViewModel.data.collectAsState().value
+    val data = groupDetailViewModel.data.collectAsState().value
 
-    val groupName = when (val loadableData = groupViewModel.loadableData.collectAsState().value) {
-        is LoadableViewModelState.State.Data<GroupViewModel.LoadableData, *> -> {
+    val groupName = when (val loadableData = groupDetailViewModel.loadableData.collectAsState().value) {
+        is LoadableViewModelState.State.Data<GroupDetailViewModel.LoadableData, *> -> {
             loadableData.data.group.name
         }
 
         else -> ""
     }
 
-    val title = GroupScreenLocalizables.navigationTitle(groupName)
+    val title = GroupDetailScreenLocalizables.navigationTitle(groupName)
 
     if (data.showDeleteGroupDialog) {
         GroupConfirmDeleteDialog(
-            onConfirm = groupViewModel::deleteGroup,
-            onDismiss = groupViewModel::closeDeleteGroupDialog
+            onConfirm = groupDetailViewModel::deleteGroup,
+            onDismiss = groupDetailViewModel::closeDeleteGroupDialog
         )
     }
 
     if (data.inviteCode != null) {
         GroupInviteDialog(
             inviteCode = data.inviteCode,
-            onDismissRequest = groupViewModel::closeInviteCode
+            onDismissRequest = groupDetailViewModel::closeInviteCode
         )
     }
 
     BackAwareScaffold(
-        navigator = groupViewModel.navigator,
+        navigator = groupDetailViewModel.navigator,
         title = title,
         actions = {
             Icon(
                 imageVector = Icons.Default.MoreVert,
-                contentDescription = GroupScreenLocalizables.moreOptionsContentDescription(),
+                contentDescription = GroupDetailScreenLocalizables.moreOptionsContentDescription(),
                 modifier = Modifier
                     .padding(16.dp)
-                    .clickable { groupViewModel.expandMenu() }
+                    .clickable { groupDetailViewModel.expandMenu() }
             )
 
             DropdownMenu(
                 expanded = data.menuExpanded,
-                onDismissRequest = groupViewModel::closeMenu
+                onDismissRequest = groupDetailViewModel::closeMenu
             ) {
                 DropdownMenuItem(
-                    text = { Text(GroupScreenLocalizables.menuDeleteGroup()) },
-                    onClick = groupViewModel::showDeleteGroupDialog
+                    text = { Text(GroupDetailScreenLocalizables.menuDeleteGroup()) },
+                    onClick = groupDetailViewModel::showDeleteGroupDialog
                 )
 
                 DropdownMenuItem(
-                    text = { Text(GroupScreenLocalizables.menuCreateInvite()) },
-                    onClick = groupViewModel::createInviteCode
+                    text = { Text(GroupDetailScreenLocalizables.menuCreateInvite()) },
+                    onClick = groupDetailViewModel::createInviteCode
                 )
             }
         }
     ) { innerPadding ->
         LoadableStatefulView(
-            viewModel = groupViewModel,
+            viewModel = groupDetailViewModel,
             modifier = innerPadding,
             content = { _, _ ->
                 ShoppingListScreen(shoppingListViewModel)

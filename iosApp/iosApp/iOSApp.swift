@@ -36,17 +36,17 @@ private struct NavigationView: View {
 
     var body: some View {
         NavigationStack(path: $navigartor.navigationPath) {
-            ListGroupsScreen(viewModel: uiModule.listGroupsViewModel)
-                .navigationDestination(for: IosNavigator.Screen.Group.self) { group in
+            GroupListScreen(viewModel: uiModule.groupListViewModel)
+                .navigationDestination(for: IosNavigator.Screen.GroupDetail.self) { group in
                     let groupId = group.groupId
-                    let groupViewModel = ViewModelCache.getOrCreate(key: "groupViewModel_\(groupId)") {
-                        uiModule.groupViewModel(groupId: groupId)
+                    let groupDetailViewModel = ViewModelCache.getOrCreate(key: "groupViewModel_\(groupId)") {
+                        uiModule.groupDetailViewModel(groupId: groupId)
                     }
                     let shoppingListViewModel = ViewModelCache.getOrCreate(key: "shoppingListViewModel_\(groupId)") {
                         uiModule.shoppingListViewModel(groupId: groupId)
                     }
-                    GroupScreen(
-                        groupViewModel: groupViewModel,
+                    GroupDetailScreen(
+                        groupDetailViewModel: groupDetailViewModel,
                         shoppingListViewModel: shoppingListViewModel
                     )
                 }

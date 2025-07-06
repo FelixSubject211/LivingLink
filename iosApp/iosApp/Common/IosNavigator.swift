@@ -36,11 +36,11 @@ class IosNavigator: Navigator, ObservableObject {
         DispatchQueue.main.async {
             self.currentGroupIdObserver?.push(screen: screen)
             switch screen {
-            case is LivingLinkScreen.ListGroups:
-                self.navigationPath.append(Screen.ListGroups())
-            case is LivingLinkScreen.Group:
-                let groupId = (screen as! LivingLinkScreen.Group).groupId
-                self.navigationPath.append(Screen.Group(groupId: groupId))
+            case is LivingLinkScreen.GroupList:
+                self.navigationPath.append(Screen.GroupList())
+            case is LivingLinkScreen.GroupDetail:
+                let groupId = (screen as! LivingLinkScreen.GroupDetail).groupId
+                self.navigationPath.append(Screen.GroupDetail(groupId: groupId))
             case is LivingLinkScreen.Settings:
                 self.navigationPath.append(Screen.Settings())
             case is LivingLinkScreen.Login:
@@ -63,8 +63,8 @@ class IosNavigator: Navigator, ObservableObject {
     }
 
     enum Screen {
-        struct ListGroups: Hashable {}
-        struct Group: Hashable {
+        struct GroupList: Hashable {}
+        struct GroupDetail: Hashable {
             let groupId: String
         }
 

@@ -1,6 +1,5 @@
-package felix.livinglink.ui.listGroups
+package felix.livinglink.ui.groups.list
 
-import ListGroupsScreenLocalizables
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -15,19 +14,19 @@ import felix.livinglink.ui.common.navigation.LivingLinkScreen
 import felix.livinglink.ui.common.state.LoadableStatefulView
 
 @Composable
-fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
+fun GroupListScreen(viewModel: GroupListViewModel) {
 
     val data = viewModel.data.collectAsState().value
 
     if (data.showAddGroupDialog) {
-        ListGroupsAddGroupDialog(
+        GroupListAddGroupDialog(
             onDismiss = viewModel::closeAddGroupDialog,
             onConfirm = viewModel::createGroup
         )
     }
 
     if (data.showJoinGroupDialog) {
-        ListGroupsJoinGroupDialog(
+        GroupListJoinGroupDialog(
             onDismiss = viewModel::closeJoinGroupDialog,
             onConfirm = viewModel::useInvite
         )
@@ -35,11 +34,11 @@ fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
 
     BackAwareScaffold(
         navigator = viewModel.navigator,
-        title = ListGroupsScreenLocalizables.navigationTitle(),
+        title = GroupListScreenLocalizables.navigationTitle(),
         actions = {
             Icon(
                 imageVector = Icons.Default.Settings,
-                contentDescription = ListGroupsScreenLocalizables
+                contentDescription = GroupListScreenLocalizables
                     .showSettingsIconContentDescription(),
                 modifier = Modifier
                     .padding(16.dp)
@@ -53,10 +52,10 @@ fun ListGroupsScreen(viewModel: ListGroupsViewModel) {
             viewModel = viewModel,
             modifier = innerPadding,
             emptyContent = {
-                ListGroupsEmptyContent(viewModel)
+                GroupListEmptyContent(viewModel)
             },
             content = { loadableData, _ ->
-                ListGroupsScreenContent(
+                GroupListScreenContent(
                     loadableData = loadableData,
                     viewModel = viewModel
                 )

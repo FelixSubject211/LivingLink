@@ -1,6 +1,5 @@
-package felix.livinglink.ui.listGroups
+package felix.livinglink.ui.groups.list
 
-import ListGroupsScreenLocalizables
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.group.CreateGroupRequest
@@ -11,11 +10,11 @@ import felix.livinglink.group.UseInviteResponse
 import felix.livinglink.groups.repository.GroupsRepository
 import felix.livinglink.ui.common.navigation.Navigator
 
-class ListGroupsViewModel(
+class GroupListViewModel(
     override val navigator: Navigator,
     private val groupsRepository: GroupsRepository,
-    private val viewModelState: ListGroupsViewModelState,
-) : ListGroupsStatefulViewModel {
+    private val viewModelState: GroupListViewModelState,
+) : GroupListStatefulViewModel {
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
     override val error = viewModelState.error
@@ -88,11 +87,12 @@ class ListGroupsViewModel(
     sealed class Error : LivingLinkError {
         data object InviteInvalidOrAlreadyUsed : Error() {
             override fun title() =
-                ListGroupsScreenLocalizables.errorInviteInvalidOrAlreadyUsedTitle()
+                GroupListScreenLocalizables.errorInviteInvalidOrAlreadyUsedTitle()
         }
 
         data object CreateGroupResponseError : Error() {
-            override fun title() = ListGroupsScreenLocalizables.errorCreateGroupResponseTitle()
+            override fun title() =
+                GroupListScreenLocalizables.errorCreateGroupResponseTitle()
         }
     }
 }

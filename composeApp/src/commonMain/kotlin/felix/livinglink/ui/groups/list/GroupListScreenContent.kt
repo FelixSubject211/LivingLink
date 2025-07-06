@@ -1,6 +1,5 @@
-package felix.livinglink.ui.listGroups
+package felix.livinglink.ui.groups.list
 
-import ListGroupsScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -19,9 +18,9 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.ui.common.navigation.LivingLinkScreen
 
 @Composable
-fun ListGroupsScreenContent(
-    loadableData: ListGroupsViewModel.LoadableData,
-    viewModel: ListGroupsViewModel
+fun GroupListScreenContent(
+    loadableData: GroupListViewModel.LoadableData,
+    viewModel: GroupListViewModel
 ) {
     Column(
         modifier = Modifier
@@ -33,9 +32,9 @@ fun ListGroupsScreenContent(
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             items(loadableData.groups) { group ->
-                ListGroupsGroupItem(
+                GroupListGroupItem(
                     group = group,
-                    onClick = { viewModel.navigator.push(LivingLinkScreen.Group(group.id)) }
+                    onClick = { viewModel.navigator.push(LivingLinkScreen.GroupDetail(group.id)) }
                 )
             }
 
@@ -51,7 +50,7 @@ fun ListGroupsScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(ListGroupsScreenLocalizables.joinGroupButtonTitle())
+            Text(GroupListScreenLocalizables.joinGroupButtonTitle())
         }
 
         TextButton(
@@ -59,7 +58,7 @@ fun ListGroupsScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(ListGroupsScreenLocalizables.createGroupButtonTitle())
+            Text(GroupListScreenLocalizables.createGroupButtonTitle())
         }
     }
 }

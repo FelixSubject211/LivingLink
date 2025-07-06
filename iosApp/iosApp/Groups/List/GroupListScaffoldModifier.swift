@@ -1,5 +1,5 @@
 //
-//  ListGroupsScaffoldModifier.swift
+//  GroupListScaffoldModifier.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,10 +9,10 @@
 import ComposeApp
 import SwiftUI
 
-struct ListGroupsScaffoldModifier: ViewModifier {
-    let data: ListGroupsViewModel.Data
-    let viewModel: ListGroupsViewModel
-    let localizables = ListGroupsScreenLocalizables()
+struct GroupListScaffoldModifier: ViewModifier {
+    let data: GroupListViewModel.Data
+    let viewModel: GroupListViewModel
+    let localizables = GroupListScreenLocalizables()
 
     func body(content: Content) -> some View {
         content

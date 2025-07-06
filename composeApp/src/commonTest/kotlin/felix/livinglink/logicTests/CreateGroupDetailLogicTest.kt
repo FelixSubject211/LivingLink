@@ -18,7 +18,7 @@ import felix.livinglink.group.Group
 import felix.livinglink.groups.network.GroupsNetworkDataSource
 import felix.livinglink.ui.UiModule
 import felix.livinglink.ui.common.state.LoadableViewModelState
-import felix.livinglink.ui.listGroups.ListGroupsViewModel
+import felix.livinglink.ui.groups.list.GroupListViewModel
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import kotlin.test.BeforeTest
@@ -26,7 +26,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 
-class CreateGroupLogicTest {
+class CreateGroupDetailLogicTest {
     private lateinit var mockGroupsNetworkDataSource: GroupsNetworkDataSource
     private lateinit var appTestModule: UiModule
 
@@ -57,7 +57,7 @@ class CreateGroupLogicTest {
             mockGroupsNetworkDataSource.getGroupsForUser()
         } returns LivingLinkResult.Success(GetGroupsForUserResponse(groups = setOf(group)))
 
-        val viewModel = appTestModule.listGroupsViewModel
+        val viewModel = appTestModule.groupListViewModel
 
         turbineScope {
             val loadableData = viewModel.loadableData.testIn(backgroundScope)
@@ -73,7 +73,7 @@ class CreateGroupLogicTest {
                 LoadableViewModelState.State.Empty(),
                 LoadableViewModelState.State.Loading(),
                 LoadableViewModelState.State.Data(
-                    data = ListGroupsViewModel.LoadableData(
+                    data = GroupListViewModel.LoadableData(
                         groups = listOf(group)
                     )
                 )

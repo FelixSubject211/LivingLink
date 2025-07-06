@@ -1,5 +1,5 @@
 //
-//  ListGroupsContentScreen.swift
+//  GroupListContentScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,17 +9,17 @@
 import ComposeApp
 import SwiftUI
 
-struct ListGroupsContentScreen: View {
-    let loadableData: ListGroupsViewModel.LoadableData
-    let data: ListGroupsViewModel.Data
-    let viewModel: ListGroupsViewModel
-    let localizables = ListGroupsScreenLocalizables()
+struct GroupListContentScreen: View {
+    let loadableData: GroupListViewModel.LoadableData
+    let data: GroupListViewModel.Data
+    let viewModel: GroupListViewModel
+    let localizables = GroupListScreenLocalizables()
 
     var body: some View {
         VStack {
             List {
                 ForEach(loadableData.groups) { group in
-                    ListGroupsGroupCard(
+                    GroupListGroupCard(
                         group: group,
                         viewModel: viewModel
                     )
@@ -42,7 +42,7 @@ struct ListGroupsContentScreen: View {
             .padding(.horizontal, DesignSystem.Padding.large)
         }
         .ignoresSafeArea(.keyboard)
-        .modifier(ListGroupsScaffoldModifier(
+        .modifier(GroupListScaffoldModifier(
             data: data,
             viewModel: viewModel
         ))

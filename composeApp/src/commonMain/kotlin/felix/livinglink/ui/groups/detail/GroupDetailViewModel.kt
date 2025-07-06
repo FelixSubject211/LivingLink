@@ -1,4 +1,4 @@
-package felix.livinglink.ui.group
+package felix.livinglink.ui.groups.detail
 
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
@@ -7,12 +7,12 @@ import felix.livinglink.group.Group
 import felix.livinglink.groups.repository.GroupsRepository
 import felix.livinglink.ui.common.navigation.Navigator
 
-class GroupViewModel(
+class GroupDetailViewModel(
     override val navigator: Navigator,
     private val groupId: String,
     private val groupsRepository: GroupsRepository,
-    private val viewModelState: GroupViewModelState,
-) : GroupStatefulViewModel {
+    private val viewModelState: GroupDetailViewModelState,
+) : GroupDetailStatefulViewModel {
     override val loadableData = viewModelState.loadableData
     override val data = viewModelState.data
     override val error = viewModelState.error

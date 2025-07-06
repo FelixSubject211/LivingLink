@@ -1,5 +1,5 @@
 //
-//  GroupScreen.swift
+//  GroupDetailScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 08.05.25.
@@ -9,24 +9,24 @@
 import ComposeApp
 import SwiftUI
 
-struct GroupScreen: View {
-    let groupViewModel: GroupViewModel
+struct GroupDetailScreen: View {
+    let groupDetailViewModel: GroupDetailViewModel
     let shoppingListViewModel: ShoppingListViewModel
 
     var body: some View {
         LoadableStatefulView(
-            viewModel: groupViewModel,
-            buildAlert: { (error: GroupScreenError) in
+            viewModel: groupDetailViewModel,
+            buildAlert: { (error: GroupDetailScreenError) in
                 error.asAlert(
-                    navigator: groupViewModel.navigator,
-                    dismiss: groupViewModel.closeError
+                    navigator: groupDetailViewModel.navigator,
+                    dismiss: groupDetailViewModel.closeError
                 )
             },
             content: { loadableData, data in
-                GroupContentScreen(
+                GroupDetailContentScreen(
                     loadableData: loadableData,
                     data: data,
-                    groupViewModel: groupViewModel,
+                    viewModel: groupDetailViewModel,
                     shoppingListViewModel: shoppingListViewModel
                 )
             }
@@ -35,4 +35,4 @@ struct GroupScreen: View {
     }
 }
 
-private typealias GroupScreenError = LoadableViewModelStateCombinedError<NetworkError, GroupViewModel.Error, NetworkError>
+private typealias GroupDetailScreenError = LoadableViewModelStateCombinedError<NetworkError, GroupDetailViewModel.Error, NetworkError>

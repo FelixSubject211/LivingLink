@@ -1,6 +1,5 @@
-package felix.livinglink.ui.group
+package felix.livinglink.ui.groups.common
 
-import GroupScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
@@ -19,17 +18,17 @@ fun GroupInviteDialog(
         onDismissRequest = onDismissRequest,
         confirmButton = {
             TextButton(onClick = onDismissRequest) {
-                Text(GroupScreenLocalizables.groupInviteDialogClose())
+                Text(GroupCommonLocalizables.groupInviteDialogClose())
             }
         },
         title = {
-            Text(GroupScreenLocalizables.groupInviteDialogTitle())
+            Text(GroupCommonLocalizables.groupInviteDialogTitle())
         },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(GroupScreenLocalizables.groupInviteDialogText())
+                Text(GroupCommonLocalizables.groupInviteDialogText())
                 Text(
                     text = inviteCode,
                     style = MaterialTheme.typography.headlineMedium,

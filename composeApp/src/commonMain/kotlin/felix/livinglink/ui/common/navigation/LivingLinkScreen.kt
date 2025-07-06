@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 sealed class LivingLinkScreen() {
 
     @Serializable
-    data object ListGroups : LivingLinkScreen()
+    data object GroupList : LivingLinkScreen()
 
     @Serializable
-    data class Group(val groupId: String) : LivingLinkScreen()
+    data class GroupDetail(val groupId: String) : LivingLinkScreen()
 
     @Serializable
     data object Settings : LivingLinkScreen()
@@ -25,8 +25,8 @@ sealed class LivingLinkScreen() {
 
     val route: String
         get() = when (this) {
-            is Group -> "group/$groupId"
-            is ListGroups -> "list"
+            is GroupDetail -> "groupDetail/$groupId"
+            is GroupList -> "groupList"
             is Settings -> "settings"
             is Login -> "login"
             is Register -> "register"

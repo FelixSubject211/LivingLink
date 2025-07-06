@@ -1,6 +1,5 @@
-package felix.livinglink.ui.listGroups
+package felix.livinglink.ui.groups.list
 
-import ListGroupsScreenLocalizables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import felix.livinglink.group.Group
 
 @Composable
-fun ListGroupsGroupItem(
+fun GroupListGroupItem(
     group: Group,
     onClick: () -> Unit
 ) {
@@ -36,7 +35,7 @@ fun ListGroupsGroupItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = ListGroupsScreenLocalizables.groupMemberCount(
+                text = GroupListScreenLocalizables.groupMemberCount(
                     group.groupMemberIdsToName.size
                 ),
                 style = MaterialTheme.typography.bodySmall,

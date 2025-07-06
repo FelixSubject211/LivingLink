@@ -1,5 +1,5 @@
 //
-//  ListGroupsGroupCard.swift
+//  GroupListGroupCard.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 19.05.25.
@@ -9,14 +9,14 @@
 import ComposeApp
 import SwiftUI
 
-struct ListGroupsGroupCard: View {
+struct GroupListGroupCard: View {
     let group: SharedGroup
-    let viewModel: ListGroupsViewModel
-    let localizables = ListGroupsScreenLocalizables()
+    let viewModel: GroupListViewModel
+    let localizables = GroupListScreenLocalizables()
 
     var body: some View {
         Button(action: {
-            viewModel.navigator.push(screen: LivingLinkScreen.Group(groupId: group.id))
+            viewModel.navigator.push(screen: LivingLinkScreen.GroupDetail(groupId: group.id))
         }, label: {
             VStack(alignment: .leading, spacing: DesignSystem.Spacing.betweenText) {
                 Text(group.name)

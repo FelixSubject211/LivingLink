@@ -1,5 +1,5 @@
 //
-//  ListGroupsScreen.swift
+//  GroupListScreen.swift
 //  iosApp
 //
 //  Created by Felix Fischer on 21.04.25.
@@ -9,9 +9,9 @@
 import ComposeApp
 import SwiftUI
 
-struct ListGroupsScreen: View {
-    let viewModel: ListGroupsViewModel
-    let localizables = ListGroupsScreenLocalizables()
+struct GroupListScreen: View {
+    let viewModel: GroupListViewModel
+    let localizables = GroupListScreenLocalizables()
 
     var body: some View {
         LoadableStatefulView(
@@ -23,13 +23,13 @@ struct ListGroupsScreen: View {
                 )
             },
             emptyContent: { data in
-                ListGroupsEmptyScreen(
+                GroupListEmptyScreen(
                     data: data,
                     viewModel: viewModel
                 )
             },
             content: { loadbaleData, data in
-                ListGroupsContentScreen(
+                GroupListContentScreen(
                     loadableData: loadbaleData,
                     data: data,
                     viewModel: viewModel
@@ -52,4 +52,4 @@ struct ListGroupsScreen: View {
     }
 }
 
-private typealias ListGroupsScreenError = LoadableViewModelStateCombinedError<NetworkError, ListGroupsViewModel.Error, NetworkError>
+private typealias ListGroupsScreenError = LoadableViewModelStateCombinedError<NetworkError, GroupListViewModel.Error, NetworkError>
