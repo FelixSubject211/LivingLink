@@ -29,7 +29,7 @@ struct ShoppingListDetailEventHistoryItem: View {
                 .frame(width: 28, height: 28)
                 .foregroundColor(.accentColor)
 
-            VStack(alignment: .leading, spacing: 4) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.betweenText) {
                 Text(descriptionText())
                     .font(.body)
 

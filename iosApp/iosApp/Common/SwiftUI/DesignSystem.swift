@@ -15,6 +15,7 @@ extension DesignSystem {
         static let primary = Color("primary")
         static let onPrimary = Color("onPrimary")
         static let labelColor = Color("labelColor")
+        static let uiTabBarBackgroundColor = Color("uiTabBarBackgroundColor")
     }
 }
 

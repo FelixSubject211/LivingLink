@@ -32,6 +32,13 @@
 		3E5A65562DB5A94C007A66A8 /* GroupListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5A65552DB5A945007A66A8 /* GroupListScreen.swift */; };
 		3E5D4F502DD7CD1500A4C150 /* ShoppingListListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5D4F4F2DD7CD1400A4C150 /* ShoppingListListScreen.swift */; };
 		3E773E932D94388000434B2D /* ViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E773E922D94387A00434B2D /* ViewExtension.swift */; };
+		3E9A64F02E1BB2AB00B2D61B /* TaskBoardListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64EF2E1BB2A800B2D61B /* TaskBoardListScreen.swift */; };
+		3E9A64F42E1BB38300B2D61B /* TaskBoardListEmptyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F32E1BB38100B2D61B /* TaskBoardListEmptyScreen.swift */; };
+		3E9A64F62E1BB3AB00B2D61B /* TaskBoardListScreenScaffoldModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F52E1BB3A900B2D61B /* TaskBoardListScreenScaffoldModifier.swift */; };
+		3E9A64F82E1BB3CB00B2D61B /* TaskBoardListContentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F72E1BB3C900B2D61B /* TaskBoardListContentScreen.swift */; };
+		3E9A64FA2E1BB3E700B2D61B /* TaskBoardListItemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F92E1BB3E500B2D61B /* TaskBoardListItemCard.swift */; };
+		3E9A64FC2E1BBA5600B2D61B /* ModalBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64FB2E1BBA5500B2D61B /* ModalBottomSheet.swift */; };
+		3E9A64FE2E1BFD9200B2D61B /* CustomTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64FD2E1BFD9100B2D61B /* CustomTextEditor.swift */; };
 		3EABCD312E1103F50067A6E0 /* KotlinFlowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABCD302E1103E80067A6E0 /* KotlinFlowExtension.swift */; };
 		3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */; };
 		3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */; };
@@ -77,6 +84,13 @@
 		3E5A65552DB5A945007A66A8 /* GroupListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupListScreen.swift; sourceTree = "<group>"; };
 		3E5D4F4F2DD7CD1400A4C150 /* ShoppingListListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListListScreen.swift; sourceTree = "<group>"; };
 		3E773E922D94387A00434B2D /* ViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtension.swift; sourceTree = "<group>"; };
+		3E9A64EF2E1BB2A800B2D61B /* TaskBoardListScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListScreen.swift; sourceTree = "<group>"; };
+		3E9A64F32E1BB38100B2D61B /* TaskBoardListEmptyScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListEmptyScreen.swift; sourceTree = "<group>"; };
+		3E9A64F52E1BB3A900B2D61B /* TaskBoardListScreenScaffoldModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListScreenScaffoldModifier.swift; sourceTree = "<group>"; };
+		3E9A64F72E1BB3C900B2D61B /* TaskBoardListContentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListContentScreen.swift; sourceTree = "<group>"; };
+		3E9A64F92E1BB3E500B2D61B /* TaskBoardListItemCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListItemCard.swift; sourceTree = "<group>"; };
+		3E9A64FB2E1BBA5500B2D61B /* ModalBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBottomSheet.swift; sourceTree = "<group>"; };
+		3E9A64FD2E1BFD9100B2D61B /* CustomTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextEditor.swift; sourceTree = "<group>"; };
 		3EABCD302E1103E80067A6E0 /* KotlinFlowExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinFlowExtension.swift; sourceTree = "<group>"; };
 		3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I18n4kExtension.swift; sourceTree = "<group>"; };
 		3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
@@ -145,6 +159,26 @@
 				3E0CE1B62D953F3F00B97630 /* RegisterScreen.swift */,
 			);
 			path = RegisterScreen;
+			sourceTree = "<group>";
+		};
+		3E9A64ED2E1BB28500B2D61B /* TaskBoard */ = {
+			isa = PBXGroup;
+			children = (
+				3E9A64EE2E1BB29200B2D61B /* List */,
+			);
+			path = TaskBoard;
+			sourceTree = "<group>";
+		};
+		3E9A64EE2E1BB29200B2D61B /* List */ = {
+			isa = PBXGroup;
+			children = (
+				3E9A64F92E1BB3E500B2D61B /* TaskBoardListItemCard.swift */,
+				3E9A64F72E1BB3C900B2D61B /* TaskBoardListContentScreen.swift */,
+				3E9A64F52E1BB3A900B2D61B /* TaskBoardListScreenScaffoldModifier.swift */,
+				3E9A64F32E1BB38100B2D61B /* TaskBoardListEmptyScreen.swift */,
+				3E9A64EF2E1BB2A800B2D61B /* TaskBoardListScreen.swift */,
+			);
+			path = List;
 			sourceTree = "<group>";
 		};
 		3EE42FCA2E1A436D00CDC3BC /* Groups */ = {
@@ -221,6 +255,8 @@
 		3EEC02432DB37DFF0059D973 /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				3E9A64FD2E1BFD9100B2D61B /* CustomTextEditor.swift */,
+				3E9A64FB2E1BBA5500B2D61B /* ModalBottomSheet.swift */,
 				3ECB4A082E10061C00E5C540 /* InvisibleAlertHost.swift */,
 				3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */,
 				3EEEF8192D8F540700FE7D80 /* StatefulView.swift */,
@@ -292,6 +328,7 @@
 				3E36EA142DDBC48500369930 /* SettingsScreen */,
 				3EE42FCA2E1A436D00CDC3BC /* Groups */,
 				3EE42FD22E1A524500CDC3BC /* ShoppingList */,
+				3E9A64ED2E1BB28500B2D61B /* TaskBoard */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF8C242A565B00829871 /* Info.plist */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
@@ -433,6 +470,7 @@
 				3E36EA132DDBC21D00369930 /* GroupListScaffoldModifier.swift in Sources */,
 				3EC4CD082DCC56120044A642 /* GroupDetailScreen.swift in Sources */,
 				3E5A65562DB5A94C007A66A8 /* GroupListScreen.swift in Sources */,
+				3E9A64F62E1BB3AB00B2D61B /* TaskBoardListScreenScaffoldModifier.swift in Sources */,
 				3E36EA1C2DDBC73600369930 /* RegisterContentScreen.swift in Sources */,
 				3E36EA192DDBC5C500369930 /* LoginContentScreen.swift in Sources */,
 				3EEEF8182D8F53B100FE7D80 /* KotlinStateFlowExtension.swift in Sources */,
@@ -441,19 +479,25 @@
 				3E36EA162DDBC4A500369930 /* SettingsContentScreen.swift in Sources */,
 				3E36E9FF2DDBB13500369930 /* ShoppingListListEmptyScreen.swift in Sources */,
 				3E36EA0A2DDBBE4300369930 /* GroupDetailContentScreen.swift in Sources */,
+				3E9A64F82E1BB3CB00B2D61B /* TaskBoardListContentScreen.swift in Sources */,
 				3E36EA042DDBB41700369930 /* ShoppingListListContentScreen.swift in Sources */,
 				3E0CE1B72D953F4B00B97630 /* RegisterScreen.swift in Sources */,
 				3ECB4A0C2E107D8D00E5C540 /* ShoppingDetailItemScreen.swift in Sources */,
+				3E9A64F02E1BB2AB00B2D61B /* TaskBoardListScreen.swift in Sources */,
 				3E2599C12D9400DA009CDC00 /* IosNavigator.swift in Sources */,
 				3EE42FD12E1A459900CDC3BC /* GroupInviteCodeSheet.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				3EBEBF712D90706C003DF183 /* DesignSystem.swift in Sources */,
 				7555FF83242A565900829871 /* ContentComposeView.swift in Sources */,
+				3E9A64FC2E1BBA5600B2D61B /* ModalBottomSheet.swift in Sources */,
 				3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */,
 				3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */,
 				3E36EA112DDBC14F00369930 /* GroupListGroupCard.swift in Sources */,
 				3EE42FCF2E1A456700CDC3BC /* GroupDeleteConfirmationAlert.swift in Sources */,
+				3E9A64FE2E1BFD9200B2D61B /* CustomTextEditor.swift in Sources */,
+				3E9A64FA2E1BB3E700B2D61B /* TaskBoardListItemCard.swift in Sources */,
 				3ECB4A092E10061D00E5C540 /* InvisibleAlertHost.swift in Sources */,
+				3E9A64F42E1BB38300B2D61B /* TaskBoardListEmptyScreen.swift in Sources */,
 				3EEEF8202D8F6C5D00FE7D80 /* CustomSecureField.swift in Sources */,
 				3E773E932D94388000434B2D /* ViewExtension.swift in Sources */,
 				3ECB4A0E2E107E7200E5C540 /* ShoppingListDetailContentScreen.swift in Sources */,

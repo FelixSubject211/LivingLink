@@ -20,12 +20,12 @@ struct CustomTextField: View {
             .onAppear {
                 internalText = text
             }
-            .onChange(of: text) { newValue in
+            .onChange(of: text) { _, newValue in
                 if newValue != internalText {
                     internalText = newValue
                 }
             }
-            .onChange(of: internalText) { newValue in
+            .onChange(of: internalText) { _, newValue in
                 onChange(newValue)
             }
     }

@@ -17,6 +17,13 @@ struct iOSApp: App {
         UIView.appearance(
             whenContainedInInstancesOf: [UIAlertController.self]
         ).tintColor = UIColor(DesignSystem.Colors.primary)
+
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = UIColor(DesignSystem.Colors.uiTabBarBackgroundColor)
+
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
     }
 
     var body: some Scene {
@@ -45,9 +52,13 @@ private struct NavigationView: View {
                     let shoppingListViewModel = ViewModelCache.getOrCreate(key: "shoppingListViewModel_\(groupId)") {
                         uiModule.shoppingListViewModel(groupId: groupId)
                     }
+                    let taskBoardListViewModel = ViewModelCache.getOrCreate(key: "taskBoardListViewModel_\(groupId)") {
+                        uiModule.taskBoardListViewModel(groupId: groupId)
+                    }
                     GroupDetailScreen(
                         groupDetailViewModel: groupDetailViewModel,
-                        shoppingListViewModel: shoppingListViewModel
+                        shoppingListViewModel: shoppingListViewModel,
+                        taskBoardListViewModel: taskBoardListViewModel
                     )
                 }
                 .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in

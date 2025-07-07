@@ -10,6 +10,8 @@ import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.shoppingList.ShoppingListAggregate
 import felix.livinglink.shoppingList.ShoppingListEvent
 import felix.livinglink.shoppingList.ShoppingListItemHistoryAggregate
+import felix.livinglink.taskBoard.TaskBoardAggregate
+import felix.livinglink.taskBoard.TaskBoardEvent
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
 import felix.livinglink.ui.common.state.ViewModelDefaultState
@@ -20,6 +22,7 @@ import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
 import felix.livinglink.ui.shoppingList.detail.ShoppingListDetailViewModel
 import felix.livinglink.ui.shoppingList.list.ShoppingListListViewModel
+import felix.livinglink.ui.taskBoard.list.TaskBoardListViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.combine
@@ -33,6 +36,7 @@ interface UiModule {
     fun groupDetailViewModel(groupId: String): GroupDetailViewModel
     fun shoppingListViewModel(groupId: String): ShoppingListListViewModel
     fun shoppingListItemViewModel(groupId: String, itemId: String): ShoppingListDetailViewModel
+    fun taskBoardListViewModel(groupId: String): TaskBoardListViewModel
 }
 
 fun defaultUiModule(
@@ -155,6 +159,25 @@ fun defaultUiModule(
                         initial = ShoppingListItemHistoryAggregate.empty(itemId)
                     ).mapState { ShoppingListDetailViewModel.LoadableData(it) },
                     initialState = ShoppingListDetailViewModel.initialState,
+                    hapticsController = hapticsModule.hapticsController,
+                    scope = commonModule.defaultScope.newChildScope()
+                )
+            )
+        }
+
+        override fun taskBoardListViewModel(groupId: String): TaskBoardListViewModel {
+            return TaskBoardListViewModel(
+                groupId = groupId,
+                navigator = navigator,
+                eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
+                viewModelState = LoadableViewModelDefaultState(
+                    input = eventSourcingModule.eventSourcingRepository.aggregateState(
+                        groupId = groupId,
+                        aggregationKey = TaskBoardAggregate::class.qualifiedName!!,
+                        payloadType = TaskBoardEvent::class,
+                        initial = TaskBoardAggregate.empty
+                    ).mapState { TaskBoardListViewModel.LoadableData(it) },
+                    initialState = TaskBoardListViewModel.initialState,
                     hapticsController = hapticsModule.hapticsController,
                     scope = commonModule.defaultScope.newChildScope()
                 )

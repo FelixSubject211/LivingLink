@@ -12,6 +12,7 @@ import SwiftUI
 struct GroupDetailScreen: View {
     let groupDetailViewModel: GroupDetailViewModel
     let shoppingListViewModel: ShoppingListListViewModel
+    let taskBoardListViewModel: TaskBoardListViewModel
 
     var body: some View {
         LoadableStatefulView(
@@ -27,7 +28,8 @@ struct GroupDetailScreen: View {
                     loadableData: loadableData,
                     data: data,
                     viewModel: groupDetailViewModel,
-                    shoppingListViewModel: shoppingListViewModel
+                    shoppingListViewModel: shoppingListViewModel,
+                    taskBoardListViewModel: taskBoardListViewModel
                 )
             }
         )

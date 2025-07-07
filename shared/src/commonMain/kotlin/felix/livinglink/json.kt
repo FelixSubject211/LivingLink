@@ -3,6 +3,7 @@ package felix.livinglink
 import felix.livinglink.eventSourcing.EventSourcingEvent
 import felix.livinglink.eventSourcing.UserAnonymized
 import felix.livinglink.shoppingList.ShoppingListEvent
+import felix.livinglink.taskBoard.TaskBoardEvent
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
@@ -22,6 +23,10 @@ private val eventSerializersModule = SerializersModule {
         subclass(
             ShoppingListEvent.ItemDeleted::class,
             ShoppingListEvent.ItemDeleted.serializer()
+        )
+        subclass(
+            TaskBoardEvent.TaskCreated::class,
+            TaskBoardEvent.TaskCreated.serializer()
         )
     }
 }

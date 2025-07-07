@@ -41,17 +41,26 @@ fun NavigationHost(
             val screen = backStackEntry.toRoute<LivingLinkScreen.GroupDetail>()
             val groupId = screen.groupId
 
-            val groupViewModel = remember(groupId) {
-                ViewModelCache.getOrCreate("groupViewModel_$groupId") {
+            val groupDetailViewModel = remember(groupId) {
+                ViewModelCache.getOrCreate("groupDetailViewModel_$groupId") {
                     uiModule.groupDetailViewModel(groupId)
                 }
             }
-            val shoppingListViewModel = remember(groupId) {
-                ViewModelCache.getOrCreate("shoppingListViewModel_$groupId") {
+            val shoppingListListViewModel = remember(groupId) {
+                ViewModelCache.getOrCreate("shoppingListListViewModel_$groupId") {
                     uiModule.shoppingListViewModel(groupId)
                 }
             }
-            GroupScreen(groupViewModel, shoppingListViewModel)
+            val taskBoardListViewModel = remember(groupId) {
+                ViewModelCache.getOrCreate("taskBoardListViewModel_$groupId") {
+                    uiModule.taskBoardListViewModel(groupId)
+                }
+            }
+            GroupScreen(
+                groupDetailViewModel = groupDetailViewModel,
+                shoppingListListViewModel = shoppingListListViewModel,
+                taskBoardListViewModel = taskBoardListViewModel
+            )
         }
         composable(route = LivingLinkScreen.Settings.route) {
             ViewModelCache.clearAll()
