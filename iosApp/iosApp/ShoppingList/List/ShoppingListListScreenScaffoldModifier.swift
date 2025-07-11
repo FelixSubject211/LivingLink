@@ -23,12 +23,16 @@ struct ShoppingListListScreenScaffoldModifier: ViewModifier {
             }
             .alertWithTextField(
                 title: localizables.addItemDialogTitle.localized,
+                message: nil,
                 isPresented: data.showAddItem,
+                text: data.addItemName,
+                onTextChange: viewModel.updateAddItemName(addItemName:),
                 placeholder: localizables.addItemDialogText.localized,
-                confirmTitle: localizables.addItemDialogCreate.localized,
-                cancelTitle: localizables.addItemDialogCancel.localized,
+                confirmButtonTitle: localizables.addItemDialogCreate.localized,
+                cancelButtonTitle: localizables.addItemDialogCancel.localized,
+                isConfirmButtonEnabled: viewModel.addItemConfirmButtonEnabled(),
                 onCancel: viewModel.closeAddItem,
-                onConfirm: viewModel.addItem(name:)
+                onConfirm: viewModel.addItem
             )
     }
 }

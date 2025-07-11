@@ -15,10 +15,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import felix.livinglink.shoppingList.ShoppingListSuggestionAggregate
@@ -26,20 +22,18 @@ import felix.livinglink.shoppingList.suggestItems
 
 @Composable
 fun ShoppingListListAddItemDialog(
-    itemNameGraphAggregate: ShoppingListSuggestionAggregate?,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    shoppingListSuggestionAggregate: ShoppingListSuggestionAggregate?,
+    itemName: String,
+    confirmButtonEnabled: Boolean,
+    viewModel: ShoppingListListViewModel,
 ) {
-    var itemName by remember { mutableStateOf("") }
-    val suggestions = remember(itemName, itemNameGraphAggregate) {
-        itemNameGraphAggregate?.suggestItems(
-            currentInput = itemName,
-            max = 10
-        ).orEmpty()
-    }
+    val suggestions = shoppingListSuggestionAggregate?.suggestItems(
+        currentInput = itemName,
+        max = 10
+    ).orEmpty()
 
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = viewModel::closeAddItem,
         title = { Text(ShoppingListListScreenLocalizables.addItemDialogTitle()) },
         text = {
             Column {
@@ -47,7 +41,7 @@ fun ShoppingListListAddItemDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = itemName,
-                    onValueChange = { itemName = it },
+                    onValueChange = viewModel::updateAddItemName,
                     singleLine = true
                 )
 
@@ -62,7 +56,7 @@ fun ShoppingListListAddItemDialog(
                 ) {
                     suggestions.forEach { suggestion ->
                         AssistChip(
-                            onClick = { itemName = suggestion },
+                            onClick = { viewModel.updateAddItemName(suggestion) },
                             label = { Text(suggestion) }
                         )
                     }
@@ -71,18 +65,14 @@ fun ShoppingListListAddItemDialog(
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    if (itemName.isNotBlank()) {
-                        onConfirm(itemName)
-                        onDismiss()
-                    }
-                }
+                onClick = viewModel::addItem,
+                enabled = confirmButtonEnabled
             ) {
                 Text(ShoppingListListScreenLocalizables.addItemDialogCreate())
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = viewModel::closeAddItem) {
                 Text(ShoppingListListScreenLocalizables.addItemDialogCancel())
             }
         }

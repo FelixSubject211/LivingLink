@@ -9,12 +9,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.flow.emptyFlow
 
 @Composable
 fun ShoppingListDetailScreenContent(
-    loadableData: ShoppingListDetailViewModel.LoadableData,
-    viewModel: ShoppingListDetailViewModel
+    loadableData: ShoppingListDetailViewModel.LoadableData
 ) {
     Column(
         modifier = Modifier
@@ -25,10 +23,10 @@ fun ShoppingListDetailScreenContent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(loadableData.aggregate.history()) { event ->
-                val userName = event.userId?.let { viewModel.resolveUserName(it) }
+            items(loadableData.historyItemAggregate.history()) { event ->
+                val userName = event.userId?.let { loadableData.group.groupMemberIdsToName[it] }
                 ShoppingListDetailEventHistoryItem(
-                    userNameFlow = userName ?: emptyFlow(),
+                    userName = userName,
                     event = event
                 )
             }

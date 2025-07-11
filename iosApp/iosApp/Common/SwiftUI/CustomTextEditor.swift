@@ -48,8 +48,8 @@ struct CustomTextEditor: View {
                 .autocorrectionDisabled()
                 .textInputAutocapitalization(.none)
                 .onAppear { internalText = text }
-                .onChange(of: text) { new in if new != internalText { internalText = new } }
-                .onChange(of: internalText) { new in onChange(new) }
+                .onChange(of: text) { _, new in if new != internalText { internalText = new } }
+                .onChange(of: internalText) { _, new in onChange(new) }
         }
         .frame(minHeight: 100)
     }

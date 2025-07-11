@@ -1,5 +1,6 @@
 package felix.livinglink.ui.groups.list
 
+import GroupListScreenLocalizables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -8,22 +9,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun GroupListJoinGroupDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    inviteCode: String,
+    confirmButtonEnabled: Boolean,
+    viewModel: GroupListViewModel
 ) {
-    var inviteCode by remember { mutableStateOf("") }
-
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = viewModel::closeJoinGroupDialog,
         title = { Text(GroupListScreenLocalizables.joinGroupDialogTitle()) },
         text = {
             Column {
@@ -31,25 +27,21 @@ fun GroupListJoinGroupDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = inviteCode,
-                    onValueChange = { inviteCode = it },
+                    onValueChange = viewModel::updateInviteCode,
                     singleLine = true
                 )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    if (inviteCode.isNotBlank()) {
-                        onConfirm(inviteCode)
-                        onDismiss()
-                    }
-                }
+                onClick = viewModel::useInvite,
+                enabled = confirmButtonEnabled
             ) {
                 Text(GroupListScreenLocalizables.joinGroupDialogConfirm())
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = viewModel::closeJoinGroupDialog) {
                 Text(GroupListScreenLocalizables.joinGroupDialogCancel())
             }
         }

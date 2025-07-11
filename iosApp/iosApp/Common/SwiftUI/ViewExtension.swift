@@ -23,19 +23,25 @@ extension View {
         title: String,
         message: String? = nil,
         isPresented: Bool,
+        text: String,
+        onTextChange: @escaping (String) -> Void,
         placeholder: String,
-        confirmTitle: String,
-        cancelTitle: String,
+        confirmButtonTitle: String,
+        cancelButtonTitle: String,
+        isConfirmButtonEnabled: Bool,
         onCancel: @escaping () -> Void,
-        onConfirm: @escaping (String) -> Void
+        onConfirm: @escaping () -> Void
     ) -> some View {
         modifier(TextFieldAlertModifier(
             title: title,
             message: message,
             isPresented: isPresented,
+            text: text,
+            onTextChange: onTextChange,
             placeholder: placeholder,
-            confirmTitle: confirmTitle,
-            cancelTitle: cancelTitle,
+            confirmButtonTitle: confirmButtonTitle,
+            cancelButtonTitle: cancelButtonTitle,
+            isConfirmButtonEnabled: isConfirmButtonEnabled,
             onCancel: onCancel,
             onConfirm: onConfirm
         ))

@@ -12,15 +12,8 @@ import SwiftUI
 struct ShoppingListDetailEventHistoryItem: View {
     let event: SharedEventSourcingEvent<SharedShoppingListEvent>
     let viewModel: ShoppingListDetailViewModel
+    let group: SharedGroup
     let localizables = ShoppingListDetailScreenLocalizables()
-
-    @ObservedObject var userName: FlowObservable<String>
-
-    init(event: SharedEventSourcingEvent<SharedShoppingListEvent>, viewModel: ShoppingListDetailViewModel) {
-        self.event = event
-        self.viewModel = viewModel
-        userName = viewModel.resolveUserName(userId: event.userId ?? "").asObservableObject()
-    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 14) {
@@ -42,7 +35,9 @@ struct ShoppingListDetailEventHistoryItem: View {
     }
 
     private func descriptionText() -> String {
-        let displayName = userName.value ?? localizables.eventPerformedByUnknown.localized
+        let displayName = event.userId
+            .flatMap { group.groupMemberIdsToName[$0] }
+            ?? localizables.eventPerformedByUnknown.localized
         switch event.payload {
         case is SharedShoppingListEvent.ItemAdded:
             return localizables.eventAdded.localized(displayName)

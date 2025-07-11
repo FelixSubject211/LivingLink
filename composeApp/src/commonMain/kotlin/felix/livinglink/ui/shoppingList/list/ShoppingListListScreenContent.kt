@@ -23,7 +23,7 @@ fun ShoppingListListScreenContent(
     data: ShoppingListListViewModel.Data,
     viewModel: ShoppingListListViewModel
 ) {
-    val aggregate = loadableData.aggregate
+    val aggregate = loadableData.shoppingListAggregate
     val completedItems = aggregate.completedItemsReversed()
     val visibleCompletedItems = if (data.completedItemsLimit != null) {
         completedItems.take(data.completedItemsLimit)

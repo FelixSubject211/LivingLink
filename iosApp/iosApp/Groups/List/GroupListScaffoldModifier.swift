@@ -32,21 +32,27 @@ struct GroupListScaffoldModifier: ViewModifier {
                 title: localizables.createGroupDialogTitle.localized,
                 message: localizables.createGroupDialogLabel.localized,
                 isPresented: data.showAddGroupDialog,
+                text: data.addGroupName,
+                onTextChange: viewModel.updateAddGroupName(groupName:),
                 placeholder: localizables.createGroupDialogLabel.localized,
-                confirmTitle: localizables.createGroupDialogConfirm.localized,
-                cancelTitle: localizables.createGroupDialogCancel.localized,
+                confirmButtonTitle: localizables.createGroupDialogConfirm.localized,
+                cancelButtonTitle: localizables.createGroupDialogCancel.localized,
+                isConfirmButtonEnabled: viewModel.createGroupConfirmButtonEnabled(),
                 onCancel: viewModel.closeAddGroupDialog,
-                onConfirm: viewModel.createGroup(groupName:)
+                onConfirm: viewModel.createGroup
             )
             .alertWithTextField(
                 title: localizables.joinGroupDialogTitle.localized,
                 message: localizables.joinGroupDialogLabel.localized,
                 isPresented: data.showJoinGroupDialog,
+                text: data.inviteCode,
+                onTextChange: viewModel.updateInviteCode(inviteCode:),
                 placeholder: localizables.joinGroupDialogLabel.localized,
-                confirmTitle: localizables.joinGroupDialogConfirm.localized,
-                cancelTitle: localizables.joinGroupDialogCancel.localized,
+                confirmButtonTitle: localizables.joinGroupDialogConfirm.localized,
+                cancelButtonTitle: localizables.joinGroupDialogCancel.localized,
+                isConfirmButtonEnabled: viewModel.useInviteConfirmButtonEnabled(),
                 onCancel: viewModel.closeJoinGroupDialog,
-                onConfirm: viewModel.useInvite(code:)
+                onConfirm: viewModel.useInvite
             )
     }
 }

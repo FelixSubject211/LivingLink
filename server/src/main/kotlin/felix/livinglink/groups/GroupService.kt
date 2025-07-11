@@ -52,16 +52,12 @@ class GroupService(
     }
 
     fun useInviteCode(request: UseInviteRequest, userId: String): UseInviteResponse {
-        val success = groupStore.useInviteCode(request.code, userId)
-        if (success) {
-            val groupId = groupStore.getGroupsForUser(userId)
-                .firstOrNull { it.groupMemberIdsToName.containsKey(userId) }?.id
-
-            if (groupId != null) {
-                val userIds = groupStore.getUserIdsInGroup(groupId)
-                userIds.forEach { changeNotifier.markGroupChangeForUser(it) }
-            }
+        val groupId = groupStore.useInviteCode(request.code, userId)
+        if (groupId != null) {
+            val userIds = groupStore.getUserIdsInGroup(groupId)
+            userIds.forEach { changeNotifier.markGroupChangeForUser(it) }
+            return UseInviteResponse.Success
         }
-        return if (success) UseInviteResponse.Success else UseInviteResponse.InvalidOrAlreadyUsed
+        return UseInviteResponse.InvalidOrAlreadyUsed
     }
 }

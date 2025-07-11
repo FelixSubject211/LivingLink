@@ -32,6 +32,9 @@ interface LoadableViewModelState<
     fun perform(action: (DATA) -> DATA)
 
     fun <RESULT> perform(
+        assert: (currentData: DATA) -> LivingLinkResult<Unit, ERROR> = {
+            LivingLinkResult.Success(Unit)
+        },
         request: suspend (currentData: DATA) -> LivingLinkResult<RESULT, REQUEST_ERROR>,
         onSuccess: (
             currentData: DATA,
@@ -62,9 +65,19 @@ interface LoadableViewModelState<
                 }
 
                 is Data<*, *> -> {
+                    @Suppress("UNCHECKED_CAST")
                     val transformedData = transform(this.data as LOADABLE_DATA1)
                     Data(transformedData)
                 }
+            }
+        }
+
+        fun dataOrNull(): LOADABLE_DATA? {
+            @Suppress("UNCHECKED_CAST")
+            return when (this) {
+                is Empty<*, *> -> null
+                is Loading<*, *> -> null
+                is Data<*, *> -> this.data as LOADABLE_DATA
             }
         }
     }
@@ -192,9 +205,10 @@ class LoadableViewModelDefaultState<
     }
 
     override fun <RESULT> perform(
+        assert: (currentData: DATA) -> LivingLinkResult<Unit, ERROR>,
         request: suspend (currentData: DATA) -> LivingLinkResult<RESULT, REQUEST_ERROR>,
         onSuccess: (currentData: DATA, result: RESULT) -> LivingLinkResult<DATA, ERROR>
-    ) = viewModelState.perform(request = request, onSuccess = onSuccess)
+    ) = viewModelState.perform(assert = assert, request = request, onSuccess = onSuccess)
 
     override fun perform(action: (DATA) -> DATA) = viewModelState.perform(action = action)
 

@@ -23,8 +23,6 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
     private val eventType = "event"
     private val payload = """{"some":"data"}"""
 
-    private val uuidFactory = UuidDefaultFactory()
-
     @Test
     fun `should append $writeEventCount events in parallel into one group`() = testApplication {
         DatabaseInitializer.initialize(database)

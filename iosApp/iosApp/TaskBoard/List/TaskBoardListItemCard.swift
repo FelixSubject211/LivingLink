@@ -21,7 +21,9 @@ struct TaskBoardListItemCard: View {
                 .foregroundColor(.primary)
                 .multilineTextAlignment(.leading)
 
-            Text(task.description_?.isEmpty == false ? task.description_! : localizables.noDescriptionPlaceholder.localized)
+            Text(task.description_.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? localizables.noDescriptionPlaceholder.localized
+                : task.description_)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(1)
@@ -29,7 +31,7 @@ struct TaskBoardListItemCard: View {
                 .multilineTextAlignment(.leading)
         }
         .padding()
-        .frame(maxWidth: .infinity, alignment: .leading) // <-- Linksbündig
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(Color(.systemBackground))

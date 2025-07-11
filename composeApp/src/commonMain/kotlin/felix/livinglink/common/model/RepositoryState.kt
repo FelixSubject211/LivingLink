@@ -1,6 +1,7 @@
 package felix.livinglink.common.model
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 sealed class RepositoryState<out DATA, out ERROR> {
@@ -48,6 +49,38 @@ fun <DATA1, DATA2, ERROR> RepositoryState<DATA1, ERROR>.mapState(
             } else {
                 RepositoryState.Data(transformedData)
             }
+        }
+    }
+}
+
+fun <T1, T2, E, R> combineStates(
+    flow1: Flow<RepositoryState<T1, E>>,
+    flow2: Flow<RepositoryState<T2, E>>,
+    transform: suspend (a: T1, b: T2) -> R
+): Flow<RepositoryState<R, E>> {
+    return combine(flow1, flow2) { value1, value2 ->
+        when {
+            value1 is RepositoryState.Error -> RepositoryState.Error(value1.error)
+            value2 is RepositoryState.Error -> RepositoryState.Error(value2.error)
+
+            value1 is RepositoryState.Loading || value2 is RepositoryState.Loading -> {
+                val data1 = value1.dataOrNull()
+                val data2 = value2.dataOrNull()
+                if (data1 != null && data2 != null) {
+                    RepositoryState.Loading(transform(data1, data2))
+                } else {
+                    RepositoryState.Loading(data = null)
+                }
+            }
+
+            value1 is RepositoryState.Data && value2 is RepositoryState.Data -> {
+                val result = transform(value1.data, value2.data)
+                RepositoryState.Data(result)
+            }
+
+            value1 is RepositoryState.Empty || value2 is RepositoryState.Empty -> RepositoryState.Empty
+
+            else -> RepositoryState.Empty
         }
     }
 }

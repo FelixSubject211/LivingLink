@@ -8,37 +8,45 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct TextFieldAlertModifier: ViewModifier {
     let title: String
     let message: String?
-    let isPresented: Bool
-    let placeholder: String
-    let confirmTitle: String
-    let cancelTitle: String
-    let onCancel: () -> Void
-    let onConfirm: (String) -> Void
 
-    @State private var inputText: String = ""
+    let isPresented: Bool
+
+    let text: String
+    let onTextChange: (String) -> Void
+    let placeholder: String
+
+    let confirmButtonTitle: String
+    let cancelButtonTitle: String
+    let isConfirmButtonEnabled: Bool
+
+    let onCancel: () -> Void
+    let onConfirm: () -> Void
+
+    @State private var confirmTapped = false
 
     func body(content: Content) -> some View {
         content
-            .alert(title, isPresented: .constant(isPresented, onSetFalse: onCancel)) {
-                TextField(placeholder, text: $inputText)
+            .alert(title, isPresented: .constant(isPresented, onSetFalse: {
+                if !confirmTapped {
+                    onCancel()
+                }
+                confirmTapped = false
+            })) {
+                TextField(placeholder, text: .init(get: { text }, set: onTextChange))
 
-                Button(cancelTitle, role: .cancel) {
-                    inputText = ""
+                Button(cancelButtonTitle, role: .cancel) {
                     onCancel()
                 }
 
-                Button(confirmTitle) {
-                    let trimmed = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-                    if !trimmed.isEmpty {
-                        onConfirm(trimmed)
-                        inputText = ""
-                    }
+                Button(confirmButtonTitle) {
+                    confirmTapped = true
+                    onConfirm()
                 }
+                .disabled(!isConfirmButtonEnabled)
+
             } message: {
                 if let message = message {
                     Text(message)

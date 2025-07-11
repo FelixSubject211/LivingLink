@@ -1,5 +1,6 @@
 package felix.livinglink.ui.groups.list
 
+import GroupListScreenLocalizables
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,15 +21,17 @@ fun GroupListScreen(viewModel: GroupListViewModel) {
 
     if (data.showAddGroupDialog) {
         GroupListAddGroupDialog(
-            onDismiss = viewModel::closeAddGroupDialog,
-            onConfirm = viewModel::createGroup
+            groupName = data.addGroupName,
+            confirmButtonEnabled = viewModel.createGroupConfirmButtonEnabled(),
+            viewModel = viewModel
         )
     }
 
     if (data.showJoinGroupDialog) {
         GroupListJoinGroupDialog(
-            onDismiss = viewModel::closeJoinGroupDialog,
-            onConfirm = viewModel::useInvite
+            inviteCode = data.inviteCode,
+            confirmButtonEnabled = viewModel.useInviteConfirmButtonEnabled(),
+            viewModel = viewModel
         )
     }
 

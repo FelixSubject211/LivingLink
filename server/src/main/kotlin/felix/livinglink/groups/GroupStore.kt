@@ -21,6 +21,7 @@ import org.ktorm.dsl.insert
 import org.ktorm.dsl.map
 import org.ktorm.dsl.select
 import org.ktorm.dsl.where
+import java.time.Instant
 import java.util.UUID
 
 interface GroupStore {
@@ -28,7 +29,7 @@ interface GroupStore {
     fun createGroup(name: String, creatorUserId: String): String?
     fun deleteGroup(groupId: String): Boolean
     fun createInviteCode(groupId: String, createdBy: String): String?
-    fun useInviteCode(code: String, userId: String): Boolean
+    fun useInviteCode(code: String, userId: String): String?
     fun getUserIdsInGroup(groupId: String): List<String>
     fun isUserIdInGroup(userId: String, groupId: String): Boolean
     fun getGroupIdsForUser(userId: String): List<String>
@@ -90,7 +91,7 @@ class GroupDefaultStore(
 
     override fun createGroup(name: String, creatorUserId: String): String? {
         val groupId = UUID.randomUUID().toString()
-        val now = java.time.Instant.ofEpochMilli(timeService.currentTimeMillis())
+        val now = Instant.ofEpochMilli(timeService.currentTimeMillis())
 
         return try {
             database.useTransaction {
@@ -132,7 +133,7 @@ class GroupDefaultStore(
     }
 
     override fun createInviteCode(groupId: String, createdBy: String): String? {
-        val now = java.time.Instant.ofEpochMilli(timeService.currentTimeMillis())
+        val now = Instant.ofEpochMilli(timeService.currentTimeMillis())
         val code = uuidFactory().take(8)
 
         return try {
@@ -162,8 +163,8 @@ class GroupDefaultStore(
         }
     }
 
-    override fun useInviteCode(code: String, userId: String): Boolean {
-        val now = java.time.Instant.ofEpochMilli(timeService.currentTimeMillis())
+    override fun useInviteCode(code: String, userId: String): String? {
+        val now = Instant.ofEpochMilli(timeService.currentTimeMillis())
 
         return try {
             database.useTransaction {
@@ -172,7 +173,7 @@ class GroupDefaultStore(
                     .select(GroupInvitesTable.groupId)
                     .where { GroupInvitesTable.code eq code }
                     .map { it[GroupInvitesTable.groupId] }
-                    .firstOrNull() ?: return false
+                    .firstOrNull() ?: return null
 
                 val alreadyMember = database
                     .from(GroupMembersTable)
@@ -183,7 +184,7 @@ class GroupDefaultStore(
                     }
                     .totalRecordsInAllPages > 0
 
-                if (alreadyMember) return false
+                if (alreadyMember) return null
 
                 database.insert(GroupMembersTable) {
                     set(it.groupId, groupId)
@@ -195,10 +196,10 @@ class GroupDefaultStore(
                     it.code eq code
                 }
 
-                return true
+                return groupId
             }
         } catch (e: Exception) {
-            false
+            null
         }
     }
 

@@ -28,19 +28,26 @@ class GroupListViewModel(
     }
 
     fun closeAddGroupDialog() = viewModelState.perform { data ->
-        data.copy(showAddGroupDialog = false)
+        data.copy(
+            showAddGroupDialog = false,
+            addGroupName = ""
+        )
     }
 
-    fun showJoinGroupDialog() = viewModelState.perform { data ->
-        data.copy(showJoinGroupDialog = true)
+    fun updateAddGroupName(groupName: String) {
+        viewModelState.perform { currentData ->
+            currentData.copy(addGroupName = groupName)
+        }
     }
 
-    fun closeJoinGroupDialog() = viewModelState.perform { data ->
-        data.copy(showJoinGroupDialog = false)
+    fun createGroupConfirmButtonEnabled(): Boolean {
+        return data.value.addGroupName.isNotBlank()
     }
 
-    fun createGroup(groupName: String) = viewModelState.perform(
-        request = { _ -> groupsRepository.createGroup(CreateGroupRequest(groupName)) },
+    fun createGroup() = viewModelState.perform(
+        request = { currentData ->
+            groupsRepository.createGroup(CreateGroupRequest(currentData.addGroupName))
+        },
         onSuccess = { currentData, result ->
             when (result) {
                 CreateGroupResponse.Error -> {
@@ -48,14 +55,32 @@ class GroupListViewModel(
                 }
 
                 is CreateGroupResponse.Success -> {
-                    LivingLinkResult.Success(currentData)
+                    LivingLinkResult.Success(
+                        currentData.copy(
+                            showAddGroupDialog = false,
+                            addGroupName = ""
+                        )
+                    )
                 }
             }
         }
     )
 
-    fun useInvite(code: String) = viewModelState.perform(
-        request = { _ -> groupsRepository.useInvite(UseInviteRequest((code))) },
+    fun showJoinGroupDialog() = viewModelState.perform { data ->
+        data.copy(showJoinGroupDialog = true)
+    }
+
+    fun closeJoinGroupDialog() = viewModelState.perform { data ->
+        data.copy(
+            showJoinGroupDialog = false,
+            inviteCode = ""
+        )
+    }
+
+    fun useInvite() = viewModelState.perform(
+        request = { currentData ->
+            groupsRepository.useInvite(UseInviteRequest((currentData.inviteCode)))
+        },
         onSuccess = { currentData, result ->
             when (result) {
                 UseInviteResponse.InvalidOrAlreadyUsed -> {
@@ -63,11 +88,26 @@ class GroupListViewModel(
                 }
 
                 UseInviteResponse.Success -> {
-                    LivingLinkResult.Success(currentData)
+                    LivingLinkResult.Success(
+                        currentData.copy(
+                            showJoinGroupDialog = false,
+                            inviteCode = ""
+                        )
+                    )
                 }
             }
         }
     )
+
+    fun updateInviteCode(inviteCode: String) {
+        viewModelState.perform { currentData ->
+            currentData.copy(inviteCode = inviteCode)
+        }
+    }
+
+    fun useInviteConfirmButtonEnabled(): Boolean {
+        return data.value.inviteCode.isNotBlank()
+    }
 
     fun showDeleteGroupDialog(groupId: String) = viewModelState.perform { data ->
         data.copy(groupIdToDelete = groupId)
@@ -89,14 +129,18 @@ class GroupListViewModel(
     companion object {
         val initialState = Data(
             showAddGroupDialog = false,
+            addGroupName = "",
             showJoinGroupDialog = false,
-            groupIdToDelete = null
+            inviteCode = "",
+            groupIdToDelete = null,
         )
     }
 
     data class Data(
         val showAddGroupDialog: Boolean,
+        val addGroupName: String,
         val showJoinGroupDialog: Boolean,
+        val inviteCode: String,
         val groupIdToDelete: String?
     )
 

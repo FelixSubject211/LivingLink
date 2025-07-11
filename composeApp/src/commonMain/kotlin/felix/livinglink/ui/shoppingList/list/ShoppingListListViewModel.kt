@@ -24,34 +24,45 @@ class ShoppingListListViewModel(
     override fun closeError() = viewModelState.closeError()
     override fun cancel() = viewModelState.cancel()
 
-    val shoppingListSuggestionAggregate = eventSourcingRepository.aggregateState(
-        groupId = groupId,
-        aggregationKey = ShoppingListSuggestionAggregate::class.qualifiedName!!,
-        payloadType = ShoppingListEvent::class,
-        initial = ShoppingListSuggestionAggregate.empty
-    )
-
     fun showAddItem() = viewModelState.perform { data ->
         data.copy(showAddItem = true)
     }
 
     fun closeAddItem() = viewModelState.perform { data ->
-        data.copy(showAddItem = false)
+        data.copy(
+            showAddItem = false,
+            addItemName = ""
+        )
+    }
+
+    fun updateAddItemName(addItemName: String) {
+        viewModelState.perform { currentData ->
+            currentData.copy(addItemName = addItemName)
+        }
+    }
+
+    fun addItemConfirmButtonEnabled(): Boolean {
+        return data.value.addItemName.isNotBlank()
     }
 
     @OptIn(ExperimentalUuidApi::class)
-    fun addItem(name: String) = viewModelState.perform(
-        request = {
+    fun addItem() = viewModelState.perform(
+        request = { currentData ->
             eventSourcingRepository.addEvent(
                 groupId = groupId,
                 payload = ShoppingListEvent.ItemAdded(
                     itemId = Uuid.random().toString(),
-                    itemName = name
+                    itemName = currentData.addItemName
                 )
             )
         },
         onSuccess = { currentData, _ ->
-            LivingLinkResult.Success(currentData.copy(showAddItem = false))
+            LivingLinkResult.Success(
+                currentData.copy(
+                    showAddItem = false,
+                    addItemName = ""
+                )
+            )
         }
     )
 
@@ -108,6 +119,7 @@ class ShoppingListListViewModel(
     companion object {
         val initialState = Data(
             showAddItem = false,
+            addItemName = "",
             showCompletedItems = false,
             completedItemsLimit = null
         )
@@ -115,11 +127,13 @@ class ShoppingListListViewModel(
 
     data class Data(
         val showAddItem: Boolean,
+        val addItemName: String,
         val showCompletedItems: Boolean,
         val completedItemsLimit: Int?
     )
 
     data class LoadableData(
-        val aggregate: ShoppingListAggregate
+        val shoppingListAggregate: ShoppingListAggregate,
+        val shoppingListSuggestionAggregate: ShoppingListSuggestionAggregate
     )
 }

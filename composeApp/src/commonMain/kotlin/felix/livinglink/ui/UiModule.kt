@@ -3,6 +3,7 @@ package felix.livinglink.ui
 import felix.livinglink.auth.AuthModule
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.model.RepositoryState
+import felix.livinglink.common.model.combineStates
 import felix.livinglink.common.model.mapState
 import felix.livinglink.eventSourcing.EventSourcingModule
 import felix.livinglink.groups.GroupsModule
@@ -10,6 +11,7 @@ import felix.livinglink.haptics.HapticsModule
 import felix.livinglink.shoppingList.ShoppingListAggregate
 import felix.livinglink.shoppingList.ShoppingListEvent
 import felix.livinglink.shoppingList.ShoppingListItemHistoryAggregate
+import felix.livinglink.shoppingList.ShoppingListSuggestionAggregate
 import felix.livinglink.taskBoard.TaskBoardAggregate
 import felix.livinglink.taskBoard.TaskBoardEvent
 import felix.livinglink.ui.common.navigation.Navigator
@@ -47,11 +49,18 @@ fun defaultUiModule(
     groupsModule: GroupsModule,
     eventSourcingModule: EventSourcingModule
 ): UiModule {
+    val defaultScope = commonModule.defaultScope
+    val authenticatedHttpClient = authModule.authenticatedHttpClient
+    val hapticsSettingsStore = hapticsModule.hapticsSettingsStore
+    val hapticsController = hapticsModule.hapticsController
+    val groupsRepository = groupsModule.groupsRepository
+    val eventSourcingRepository = eventSourcingModule.eventSourcingRepository
+
     return object : UiModule {
 
         val settingsViewModelInput = combine(
-            authModule.authenticatedHttpClient.session,
-            hapticsModule.hapticsSettingsStore.updates
+            authenticatedHttpClient.session,
+            hapticsSettingsStore.updates
         ) { session, hapticsOptions ->
             RepositoryState.Data<SettingsViewModel.LoadableData, Nothing>(
                 SettingsViewModel.LoadableData(
@@ -63,78 +72,98 @@ fun defaultUiModule(
 
         override val settingsViewModel = SettingsViewModel(
             navigator = navigator,
-            authenticatedHttpClient = authModule.authenticatedHttpClient,
-            hapticsSettingsStore = hapticsModule.hapticsSettingsStore,
+            authenticatedHttpClient = authenticatedHttpClient,
+            hapticsSettingsStore = hapticsSettingsStore,
             viewModelState = LoadableViewModelDefaultState(
                 input = settingsViewModelInput,
                 initialState = SettingsViewModel.initialState,
-                hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope.newChildScope()
+                hapticsController = hapticsController,
+                scope = defaultScope.newChildScope()
             )
         )
 
         override fun loginViewModel() = LoginViewModel(
             navigator = navigator,
-            authenticatedHttpClient = authModule.authenticatedHttpClient,
+            authenticatedHttpClient = authenticatedHttpClient,
             viewModelState = ViewModelDefaultState(
                 initialState = LoginViewModel.initialState,
-                hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope.newChildScope()
+                hapticsController = hapticsController,
+                scope = defaultScope.newChildScope()
             )
         )
 
         override fun registerViewModel() = RegisterViewModel(
             navigator = navigator,
-            authenticatedHttpClient = authModule.authenticatedHttpClient,
+            authenticatedHttpClient = authenticatedHttpClient,
             viewModelState = ViewModelDefaultState(
                 initialState = RegisterViewModel.initialState,
-                hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope.newChildScope()
+                hapticsController = hapticsController,
+                scope = defaultScope.newChildScope()
             )
         )
 
         override val groupListViewModel = GroupListViewModel(
             navigator = navigator,
-            groupsRepository = groupsModule.groupsRepository,
+            groupsRepository = groupsRepository,
             viewModelState = LoadableViewModelDefaultState(
-                input = groupsModule.groupsRepository.groups.map { flow ->
+                input = groupsRepository.groups.map { flow ->
                     flow.mapState { GroupListViewModel.LoadableData(it) }
                 },
                 initialState = GroupListViewModel.initialState,
-                hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope.newChildScope()
+                hapticsController = hapticsController,
+                scope = defaultScope.newChildScope()
             )
         )
 
         override fun groupDetailViewModel(groupId: String) = GroupDetailViewModel(
             navigator = navigator,
             groupId = groupId,
-            groupsRepository = groupsModule.groupsRepository,
+            groupsRepository = groupsRepository,
             viewModelState = LoadableViewModelDefaultState(
-                input = groupsModule.groupsRepository.group(groupId).mapState {
+                input = groupsRepository.group(groupId).mapState {
                     GroupDetailViewModel.LoadableData(it)
                 },
                 initialState = GroupDetailViewModel.initialState,
-                hapticsController = hapticsModule.hapticsController,
-                scope = commonModule.defaultScope.newChildScope()
+                hapticsController = hapticsController,
+                scope = defaultScope.newChildScope()
             )
         )
 
         override fun shoppingListViewModel(groupId: String): ShoppingListListViewModel {
+
+            val shoppingListAggregateFlow = eventSourcingRepository.aggregateState(
+                groupId = groupId,
+                aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
+                payloadType = ShoppingListEvent::class,
+                initial = ShoppingListAggregate.empty
+            )
+
+            val shoppingListSuggestionAggregateFlow = eventSourcingRepository.aggregateState(
+                groupId = groupId,
+                aggregationKey = ShoppingListSuggestionAggregate::class.qualifiedName!!,
+                payloadType = ShoppingListEvent::class,
+                initial = ShoppingListSuggestionAggregate.empty
+            )
+
+            val input = combineStates(
+                shoppingListAggregateFlow,
+                shoppingListSuggestionAggregateFlow
+            ) { shoppingListAggregate, shoppingListSuggestionAggregate ->
+                ShoppingListListViewModel.LoadableData(
+                    shoppingListAggregate = shoppingListAggregate,
+                    shoppingListSuggestionAggregate = shoppingListSuggestionAggregate
+                )
+            }
+
             return ShoppingListListViewModel(
                 groupId = groupId,
                 navigator = navigator,
-                eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
+                eventSourcingRepository = eventSourcingRepository,
                 viewModelState = LoadableViewModelDefaultState(
-                    input = eventSourcingModule.eventSourcingRepository.aggregateState(
-                        groupId = groupId,
-                        aggregationKey = ShoppingListAggregate::class.qualifiedName!!,
-                        payloadType = ShoppingListEvent::class,
-                        initial = ShoppingListAggregate.empty
-                    ).mapState { ShoppingListListViewModel.LoadableData(it) },
+                    input = input,
                     initialState = ShoppingListListViewModel.initialState,
-                    hapticsController = hapticsModule.hapticsController,
-                    scope = commonModule.defaultScope.newChildScope(),
+                    hapticsController = hapticsController,
+                    scope = defaultScope.newChildScope(),
                 )
             )
         }
@@ -143,24 +172,35 @@ fun defaultUiModule(
             groupId: String,
             itemId: String
         ): ShoppingListDetailViewModel {
-            val aggregateName = ShoppingListItemHistoryAggregate::class.qualifiedName!!
+            val groupFlow = groupsModule.groupsRepository.group(groupId)
+
+            val shoppingAggregateFlow = eventSourcingRepository.aggregateState(
+                groupId = groupId,
+                aggregationKey = "$ShoppingListItemHistoryAggregate::class.qualifiedName!!:$itemId",
+                payloadType = ShoppingListEvent::class,
+                initial = ShoppingListItemHistoryAggregate.empty(itemId)
+            )
+
+            val input = combineStates(
+                groupFlow,
+                shoppingAggregateFlow
+            ) { group, shoppingAggregate ->
+                ShoppingListDetailViewModel.LoadableData(
+                    group = group,
+                    historyItemAggregate = shoppingAggregate
+                )
+            }
 
             return ShoppingListDetailViewModel(
                 groupId = groupId,
                 itemId = itemId,
                 navigator = navigator,
-                eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
-                groupsRepository = groupsModule.groupsRepository,
+                eventSourcingRepository = eventSourcingRepository,
                 viewModelState = LoadableViewModelDefaultState(
-                    input = eventSourcingModule.eventSourcingRepository.aggregateState(
-                        groupId = groupId,
-                        aggregationKey = "$aggregateName:$itemId",
-                        payloadType = ShoppingListEvent::class,
-                        initial = ShoppingListItemHistoryAggregate.empty(itemId)
-                    ).mapState { ShoppingListDetailViewModel.LoadableData(it) },
+                    input = input,
                     initialState = ShoppingListDetailViewModel.initialState,
-                    hapticsController = hapticsModule.hapticsController,
-                    scope = commonModule.defaultScope.newChildScope()
+                    hapticsController = hapticsController,
+                    scope = defaultScope.newChildScope()
                 )
             )
         }
@@ -169,23 +209,23 @@ fun defaultUiModule(
             return TaskBoardListViewModel(
                 groupId = groupId,
                 navigator = navigator,
-                eventSourcingRepository = eventSourcingModule.eventSourcingRepository,
+                eventSourcingRepository = eventSourcingRepository,
                 viewModelState = LoadableViewModelDefaultState(
-                    input = eventSourcingModule.eventSourcingRepository.aggregateState(
+                    input = eventSourcingRepository.aggregateState(
                         groupId = groupId,
                         aggregationKey = TaskBoardAggregate::class.qualifiedName!!,
                         payloadType = TaskBoardEvent::class,
                         initial = TaskBoardAggregate.empty
                     ).mapState { TaskBoardListViewModel.LoadableData(it) },
                     initialState = TaskBoardListViewModel.initialState,
-                    hapticsController = hapticsModule.hapticsController,
-                    scope = commonModule.defaultScope.newChildScope()
+                    hapticsController = hapticsController,
+                    scope = defaultScope.newChildScope()
                 )
             )
         }
 
         private fun CoroutineScope.newChildScope(): CoroutineScope {
-            return CoroutineScope(this.coroutineContext + SupervisorJob())
+            return CoroutineScope(context = this.coroutineContext + SupervisorJob())
         }
     }
 }

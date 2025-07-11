@@ -39,6 +39,7 @@ fun TaskBoardListItemCard(
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = task.description
+                    .takeUnless { it.isBlank() }
                     ?: TaskBoardListScreenLocalizables.noDescriptionPlaceholder(),
                 style = MaterialTheme.typography.bodyMedium,
                 maxLines = 1,

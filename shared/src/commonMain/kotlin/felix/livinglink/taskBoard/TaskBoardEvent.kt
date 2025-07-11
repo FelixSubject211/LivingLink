@@ -11,6 +11,6 @@ sealed class TaskBoardEvent : EventSourcingEvent.Payload {
     data class TaskCreated(
         override val taskId: String,
         val title: String,
-        val description: String?
+        val description: String
     ) : TaskBoardEvent()
 }

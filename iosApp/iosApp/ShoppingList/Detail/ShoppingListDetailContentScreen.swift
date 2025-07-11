@@ -18,10 +18,11 @@ struct ShoppingListDetailContentScreen: View {
 
     var body: some View {
         VStack {
-            List(loadableData.aggregate.history()) { event in
+            List(loadableData.historyItemAggregate.history()) { event in
                 ShoppingListDetailEventHistoryItem(
                     event: event,
-                    viewModel: viewModel
+                    viewModel: viewModel,
+                    group: loadableData.group
                 )
             }
             .scrollContentBackground(.hidden)
@@ -42,7 +43,7 @@ struct ShoppingListDetailContentScreen: View {
             }
         }
         .ignoresSafeArea(.keyboard)
-        .navigationTitle(loadableData.aggregate.itemName ?? "")
+        .navigationTitle(loadableData.historyItemAggregate.itemName ?? "")
     }
 }
 

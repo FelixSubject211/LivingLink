@@ -16,7 +16,7 @@ data class TaskBoardAggregate(
     data class Task(
         val id: String,
         val title: String,
-        val description: String?
+        val description: String
     )
 
     fun tasksReversed(): List<Task> = tasks.values.reversed()

@@ -25,7 +25,7 @@ fun ShoppingListDetailScreen(
 
     val itemName = when (val loadableData = viewModel.loadableData.collectAsState().value) {
         is LoadableViewModelState.State.Data<ShoppingListDetailViewModel.LoadableData, *> -> {
-            loadableData.data.aggregate.itemName ?: ""
+            loadableData.data.historyItemAggregate.itemName ?: ""
         }
 
         else -> ""
@@ -61,8 +61,7 @@ fun ShoppingListDetailScreen(
             modifier = innerPadding,
             content = { loadableDate, _ ->
                 ShoppingListDetailScreenContent(
-                    loadableData = loadableDate,
-                    viewModel = viewModel
+                    loadableData = loadableDate
                 )
             }
         )

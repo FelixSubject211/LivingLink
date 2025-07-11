@@ -18,7 +18,7 @@ struct ShoppingListListContentScreen: View {
     @Namespace var itemNamespace
 
     var body: some View {
-        let aggregate = loadableData.aggregate
+        let aggregate = loadableData.shoppingListAggregate
         let openItems = aggregate.openItemsReversed()
         let completedItems = aggregate.completedItemsReversed()
         let visibleCompletedItems: [ShoppingListAggregate.Item] = {

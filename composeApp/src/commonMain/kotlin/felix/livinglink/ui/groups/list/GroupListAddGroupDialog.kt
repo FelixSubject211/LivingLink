@@ -9,22 +9,17 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun GroupListAddGroupDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    groupName: String,
+    confirmButtonEnabled: Boolean,
+    viewModel: GroupListViewModel
 ) {
-    var groupName by remember { mutableStateOf("") }
-
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = viewModel::closeAddGroupDialog,
         title = { Text(GroupListScreenLocalizables.createGroupDialogTitle()) },
         text = {
             Column {
@@ -32,25 +27,21 @@ fun GroupListAddGroupDialog(
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = groupName,
-                    onValueChange = { groupName = it },
+                    onValueChange = viewModel::updateAddGroupName,
                     singleLine = true
                 )
             }
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    if (groupName.isNotBlank()) {
-                        onConfirm(groupName)
-                        onDismiss()
-                    }
-                }
+                onClick = viewModel::createGroup,
+                enabled = confirmButtonEnabled
             ) {
                 Text(GroupListScreenLocalizables.createGroupDialogConfirm())
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = viewModel::closeAddGroupDialog) {
                 Text(GroupListScreenLocalizables.createGroupDialogCancel())
             }
         }

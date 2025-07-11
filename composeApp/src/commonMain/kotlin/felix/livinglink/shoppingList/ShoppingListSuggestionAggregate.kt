@@ -41,7 +41,7 @@ data class ShoppingListSuggestionAggregate(
 
 fun ShoppingListSuggestionAggregate.suggestItems(currentInput: String, max: Int): List<String> {
     val matches = itemFrequencies
-        .filterKeys { it.startsWith(currentInput) }
+        .filterKeys { it.startsWith(currentInput) && it != currentInput }
         .toList()
         .sortedByDescending { it.second }
         .map { it.first }
