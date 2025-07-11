@@ -1,95 +1,106 @@
 package felix.livinglink.ui.groups.detail
 
-import GroupDetailScreenLocalizables
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.padding
+import GroupsDetailScreenLocalizables
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import felix.livinglink.ui.common.BackAwareScaffold
-import felix.livinglink.ui.common.state.LoadableStatefulView
-import felix.livinglink.ui.common.state.LoadableViewModelState
-import felix.livinglink.ui.groups.common.GroupConfirmDeleteDialog
-import felix.livinglink.ui.groups.common.GroupInviteDialog
+import androidx.compose.ui.graphics.vector.ImageVector
+import felix.livinglink.ui.groups.settings.GroupSettingsScreen
+import felix.livinglink.ui.groups.settings.GroupSettingsViewModel
+import felix.livinglink.ui.shoppingList.list.ShoppingListListScreen
 import felix.livinglink.ui.shoppingList.list.ShoppingListListViewModel
+import felix.livinglink.ui.taskBoard.list.TaskBoardListScreen
 import felix.livinglink.ui.taskBoard.list.TaskBoardListViewModel
 
 @Composable
 fun GroupScreen(
-    groupDetailViewModel: GroupDetailViewModel,
     shoppingListListViewModel: ShoppingListListViewModel,
-    taskBoardListViewModel: TaskBoardListViewModel
+    taskBoardListViewModel: TaskBoardListViewModel,
+    groupSettingsViewModel: GroupSettingsViewModel,
 ) {
-    val data = groupDetailViewModel.data.collectAsState().value
+    var selectedTab by remember { mutableStateOf(GroupDetailTab.SHOPPING_LIST) }
 
-    val groupName = when (val loadableData = groupDetailViewModel.loadableData.collectAsState().value) {
-        is LoadableViewModelState.State.Data<GroupDetailViewModel.LoadableData, *> -> {
-            loadableData.data.group.name
+    Column(modifier = Modifier.fillMaxSize()) {
+
+        Box(modifier = Modifier.weight(1f)) {
+            when (selectedTab) {
+                GroupDetailTab.SHOPPING_LIST -> {
+                    ShoppingListListScreen(shoppingListListViewModel)
+                }
+
+                GroupDetailTab.TASK_BOARD -> {
+                    TaskBoardListScreen(taskBoardListViewModel)
+                }
+
+                GroupDetailTab.GROUP_SETTINGS -> {
+                    GroupSettingsScreen(groupSettingsViewModel)
+                }
+            }
         }
 
-        else -> ""
-    }
-
-    val title = GroupDetailScreenLocalizables.navigationTitle(groupName)
-
-    if (data.showDeleteGroupDialog) {
-        GroupConfirmDeleteDialog(
-            onConfirm = groupDetailViewModel::deleteGroup,
-            onDismiss = groupDetailViewModel::closeDeleteGroupDialog
+        GroupDetailTabs(
+            selected = selectedTab,
+            onTabSelected = { selectedTab = it }
         )
     }
+}
 
-    if (data.inviteCode != null) {
-        GroupInviteDialog(
-            inviteCode = data.inviteCode,
-            onDismissRequest = groupDetailViewModel::closeInviteCode
-        )
-    }
+@Composable
+private fun GroupDetailTabs(
+    selected: GroupDetailTab,
+    onTabSelected: (GroupDetailTab) -> Unit
+) {
+    val tabs = GroupDetailTab.entries.toTypedArray()
 
-    BackAwareScaffold(
-        navigator = groupDetailViewModel.navigator,
-        title = title,
-        actions = {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = GroupDetailScreenLocalizables.moreOptionsContentDescription(),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .clickable { groupDetailViewModel.expandMenu() }
+    TabRow(
+        selectedTabIndex = tabs.indexOf(selected),
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+    ) {
+        tabs.forEach { tab ->
+            Tab(
+                selected = tab == selected,
+                onClick = { onTabSelected(tab) },
+                text = {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(imageVector = tab.icon(), contentDescription = null)
+                        Text(tab.label())
+                    }
+                }
             )
-
-            DropdownMenu(
-                expanded = data.menuExpanded,
-                onDismissRequest = groupDetailViewModel::closeMenu
-            ) {
-                DropdownMenuItem(
-                    text = { Text(GroupDetailScreenLocalizables.menuDeleteGroup()) },
-                    onClick = groupDetailViewModel::showDeleteGroupDialog
-                )
-
-                DropdownMenuItem(
-                    text = { Text(GroupDetailScreenLocalizables.menuCreateInvite()) },
-                    onClick = groupDetailViewModel::createInviteCode
-                )
-            }
         }
-    ) { innerPadding ->
-        LoadableStatefulView(
-            viewModel = groupDetailViewModel,
-            modifier = innerPadding,
-            content = { _, _ ->
-                GroupDetailContent(
-                    shoppingListListViewModel = shoppingListListViewModel,
-                    taskBoardListViewModel = taskBoardListViewModel
-                )
-            }
-        )
+    }
+}
+
+private enum class GroupDetailTab {
+    SHOPPING_LIST,
+    TASK_BOARD,
+    GROUP_SETTINGS;
+
+    fun label() = when (this) {
+        SHOPPING_LIST -> GroupsDetailScreenLocalizables.tabShoppingList()
+        TASK_BOARD -> GroupsDetailScreenLocalizables.tabTaskBoard()
+        GROUP_SETTINGS -> GroupsDetailScreenLocalizables.tapGroupSettings()
+    }
+
+    fun icon(): ImageVector = when (this) {
+        SHOPPING_LIST -> Icons.AutoMirrored.Filled.List
+        TASK_BOARD -> Icons.Filled.Home
+        GROUP_SETTINGS -> Icons.Filled.Settings
     }
 }

@@ -11,7 +11,7 @@ import SwiftUI
 
 struct GroupInviteCodeSheet: View {
     let inviteCode: String
-    let localizables = GroupCommonLocalizables()
+    let localizables = GroupsCommonLocalizables()
 
     var body: some View {
         VStack(spacing: DesignSystem.Spacing.betweenElements) {

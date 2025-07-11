@@ -33,7 +33,6 @@ struct TextFieldAlertModifier: ViewModifier {
                 if !confirmTapped {
                     onCancel()
                 }
-                confirmTapped = false
             })) {
                 TextField(placeholder, text: .init(get: { text }, set: onTextChange))
 

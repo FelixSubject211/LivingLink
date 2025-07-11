@@ -1,6 +1,6 @@
 package felix.livinglink.ui.groups.list
 
-import GroupListScreenLocalizables
+import GroupsListScreenLocalizables
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -37,11 +37,11 @@ fun GroupListScreen(viewModel: GroupListViewModel) {
 
     BackAwareScaffold(
         navigator = viewModel.navigator,
-        title = GroupListScreenLocalizables.navigationTitle(),
+        title = GroupsListScreenLocalizables.navigationTitle(),
         actions = {
             Icon(
                 imageVector = Icons.Default.Settings,
-                contentDescription = GroupListScreenLocalizables
+                contentDescription = GroupsListScreenLocalizables
                     .showSettingsIconContentDescription(),
                 modifier = Modifier
                     .padding(16.dp)

@@ -12,7 +12,7 @@ import SwiftUI
 struct GroupListScaffoldModifier: ViewModifier {
     let data: GroupListViewModel.Data
     let viewModel: GroupListViewModel
-    let localizables = GroupListScreenLocalizables()
+    let localizables = GroupsListScreenLocalizables()
 
     func body(content: Content) -> some View {
         content

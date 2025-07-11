@@ -12,7 +12,7 @@ import SwiftUI
 struct GroupListGroupCard: View {
     let group: SharedGroup
     let viewModel: GroupListViewModel
-    let localizables = GroupListScreenLocalizables()
+    let localizables = GroupsListScreenLocalizables()
 
     var body: some View {
         Button(action: {

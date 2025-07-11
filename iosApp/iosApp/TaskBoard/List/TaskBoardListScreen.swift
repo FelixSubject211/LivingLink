@@ -11,6 +11,7 @@ import SwiftUI
 
 struct TaskBoardListScreen: View {
     let viewModel: TaskBoardListViewModel
+    let localizables = TaskBoardListScreenLocalizables()
 
     var body: some View {
         LoadableStatefulView(
@@ -33,6 +34,7 @@ struct TaskBoardListScreen: View {
             }
         )
         .fillMaxSize()
+        .navigationTitle(localizables.navigationTitle.localized)
     }
 }
 

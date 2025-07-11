@@ -17,8 +17,8 @@ import felix.livinglink.taskBoard.TaskBoardEvent
 import felix.livinglink.ui.common.navigation.Navigator
 import felix.livinglink.ui.common.state.LoadableViewModelDefaultState
 import felix.livinglink.ui.common.state.ViewModelDefaultState
-import felix.livinglink.ui.groups.detail.GroupDetailViewModel
 import felix.livinglink.ui.groups.list.GroupListViewModel
+import felix.livinglink.ui.groups.settings.GroupSettingsViewModel
 import felix.livinglink.ui.login.LoginViewModel
 import felix.livinglink.ui.register.RegisterViewModel
 import felix.livinglink.ui.settings.SettingsViewModel
@@ -35,10 +35,10 @@ interface UiModule {
     fun loginViewModel(): LoginViewModel
     fun registerViewModel(): RegisterViewModel
     val groupListViewModel: GroupListViewModel
-    fun groupDetailViewModel(groupId: String): GroupDetailViewModel
     fun shoppingListViewModel(groupId: String): ShoppingListListViewModel
     fun shoppingListItemViewModel(groupId: String, itemId: String): ShoppingListDetailViewModel
     fun taskBoardListViewModel(groupId: String): TaskBoardListViewModel
+    fun groupSettingsViewModel(groupId: String): GroupSettingsViewModel
 }
 
 fun defaultUiModule(
@@ -110,20 +110,6 @@ fun defaultUiModule(
                     flow.mapState { GroupListViewModel.LoadableData(it) }
                 },
                 initialState = GroupListViewModel.initialState,
-                hapticsController = hapticsController,
-                scope = defaultScope.newChildScope()
-            )
-        )
-
-        override fun groupDetailViewModel(groupId: String) = GroupDetailViewModel(
-            navigator = navigator,
-            groupId = groupId,
-            groupsRepository = groupsRepository,
-            viewModelState = LoadableViewModelDefaultState(
-                input = groupsRepository.group(groupId).mapState {
-                    GroupDetailViewModel.LoadableData(it)
-                },
-                initialState = GroupDetailViewModel.initialState,
                 hapticsController = hapticsController,
                 scope = defaultScope.newChildScope()
             )
@@ -218,6 +204,22 @@ fun defaultUiModule(
                         initial = TaskBoardAggregate.empty
                     ).mapState { TaskBoardListViewModel.LoadableData(it) },
                     initialState = TaskBoardListViewModel.initialState,
+                    hapticsController = hapticsController,
+                    scope = defaultScope.newChildScope()
+                )
+            )
+        }
+
+        override fun groupSettingsViewModel(groupId: String): GroupSettingsViewModel {
+            return GroupSettingsViewModel(
+                groupId = groupId,
+                navigator = navigator,
+                groupsRepository = groupsRepository,
+                viewModelState = LoadableViewModelDefaultState(
+                    input = groupsRepository.group(groupId).mapState {
+                        GroupSettingsViewModel.LoadableData(it)
+                    },
+                    initialState = GroupSettingsViewModel.initialState,
                     hapticsController = hapticsController,
                     scope = defaultScope.newChildScope()
                 )

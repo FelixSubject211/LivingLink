@@ -80,7 +80,6 @@ private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error:
     var body: some View {
         ZStack {
             loadableStateContent()
-                .disabled(loading.value.boolValue)
 
             if loading.value.boolValue {
                 VStack {

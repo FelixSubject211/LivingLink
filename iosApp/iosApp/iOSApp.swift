@@ -46,19 +46,19 @@ private struct NavigationView: View {
             GroupListScreen(viewModel: uiModule.groupListViewModel)
                 .navigationDestination(for: IosNavigator.Screen.GroupDetail.self) { group in
                     let groupId = group.groupId
-                    let groupDetailViewModel = ViewModelCache.getOrCreate(key: "groupViewModel_\(groupId)") {
-                        uiModule.groupDetailViewModel(groupId: groupId)
-                    }
                     let shoppingListViewModel = ViewModelCache.getOrCreate(key: "shoppingListViewModel_\(groupId)") {
                         uiModule.shoppingListViewModel(groupId: groupId)
                     }
                     let taskBoardListViewModel = ViewModelCache.getOrCreate(key: "taskBoardListViewModel_\(groupId)") {
                         uiModule.taskBoardListViewModel(groupId: groupId)
                     }
+                    let groupSettingsViewModel = ViewModelCache.getOrCreate(key: "groupSettingsViewModel_\(groupId)") {
+                        uiModule.groupSettingsViewModel(groupId: groupId)
+                    }
                     GroupDetailScreen(
-                        groupDetailViewModel: groupDetailViewModel,
                         shoppingListViewModel: shoppingListViewModel,
-                        taskBoardListViewModel: taskBoardListViewModel
+                        taskBoardListViewModel: taskBoardListViewModel,
+                        groupSettingsViewModel: groupSettingsViewModel
                     )
                 }
                 .navigationDestination(for: IosNavigator.Screen.Settings.self) { _ in

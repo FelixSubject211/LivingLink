@@ -20,7 +20,6 @@
 		3E36EA022DDBB28A00369930 /* ShoppingListListScreenScaffoldModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA012DDBB28A00369930 /* ShoppingListListScreenScaffoldModifier.swift */; };
 		3E36EA042DDBB41700369930 /* ShoppingListListContentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA032DDBB41700369930 /* ShoppingListListContentScreen.swift */; };
 		3E36EA062DDBBB9700369930 /* ShoppingListListItemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA052DDBBB9700369930 /* ShoppingListListItemCard.swift */; };
-		3E36EA0A2DDBBE4300369930 /* GroupDetailContentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA092DDBBE4300369930 /* GroupDetailContentScreen.swift */; };
 		3E36EA0D2DDBBFF600369930 /* GroupListEmptyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA0C2DDBBFF600369930 /* GroupListEmptyScreen.swift */; };
 		3E36EA0F2DDBC0A300369930 /* GroupListContentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA0E2DDBC0A300369930 /* GroupListContentScreen.swift */; };
 		3E36EA112DDBC14F00369930 /* GroupListGroupCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E36EA102DDBC14F00369930 /* GroupListGroupCard.swift */; };
@@ -39,6 +38,8 @@
 		3E9A64FA2E1BB3E700B2D61B /* TaskBoardListItemCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F92E1BB3E500B2D61B /* TaskBoardListItemCard.swift */; };
 		3E9A64FC2E1BBA5600B2D61B /* ModalBottomSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64FB2E1BBA5500B2D61B /* ModalBottomSheet.swift */; };
 		3E9A64FE2E1BFD9200B2D61B /* CustomTextEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64FD2E1BFD9100B2D61B /* CustomTextEditor.swift */; };
+		3EA3E57D2E211D68009D197A /* GroupSettingsScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA3E57C2E211D60009D197A /* GroupSettingsScreen.swift */; };
+		3EA3E57F2E211E81009D197A /* GroupSettingsContentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EA3E57E2E211E70009D197A /* GroupSettingsContentScreen.swift */; };
 		3EABCD312E1103F50067A6E0 /* KotlinFlowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABCD302E1103E80067A6E0 /* KotlinFlowExtension.swift */; };
 		3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */; };
 		3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */; };
@@ -73,7 +74,6 @@
 		3E36EA012DDBB28A00369930 /* ShoppingListListScreenScaffoldModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListListScreenScaffoldModifier.swift; sourceTree = "<group>"; };
 		3E36EA032DDBB41700369930 /* ShoppingListListContentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListListContentScreen.swift; sourceTree = "<group>"; };
 		3E36EA052DDBBB9700369930 /* ShoppingListListItemCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListListItemCard.swift; sourceTree = "<group>"; };
-		3E36EA092DDBBE4300369930 /* GroupDetailContentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDetailContentScreen.swift; sourceTree = "<group>"; };
 		3E36EA0C2DDBBFF600369930 /* GroupListEmptyScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupListEmptyScreen.swift; sourceTree = "<group>"; };
 		3E36EA0E2DDBC0A300369930 /* GroupListContentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupListContentScreen.swift; sourceTree = "<group>"; };
 		3E36EA102DDBC14F00369930 /* GroupListGroupCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupListGroupCard.swift; sourceTree = "<group>"; };
@@ -91,6 +91,8 @@
 		3E9A64F92E1BB3E500B2D61B /* TaskBoardListItemCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListItemCard.swift; sourceTree = "<group>"; };
 		3E9A64FB2E1BBA5500B2D61B /* ModalBottomSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalBottomSheet.swift; sourceTree = "<group>"; };
 		3E9A64FD2E1BFD9100B2D61B /* CustomTextEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomTextEditor.swift; sourceTree = "<group>"; };
+		3EA3E57C2E211D60009D197A /* GroupSettingsScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSettingsScreen.swift; sourceTree = "<group>"; };
+		3EA3E57E2E211E70009D197A /* GroupSettingsContentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupSettingsContentScreen.swift; sourceTree = "<group>"; };
 		3EABCD302E1103E80067A6E0 /* KotlinFlowExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinFlowExtension.swift; sourceTree = "<group>"; };
 		3EBEBF6A2D9033FC003DF183 /* I18n4kExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = I18n4kExtension.swift; sourceTree = "<group>"; };
 		3EBEBF6C2D90463B003DF183 /* LoginScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginScreen.swift; sourceTree = "<group>"; };
@@ -181,12 +183,22 @@
 			path = List;
 			sourceTree = "<group>";
 		};
+		3EA3E57B2E211D48009D197A /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				3EA3E57E2E211E70009D197A /* GroupSettingsContentScreen.swift */,
+				3EA3E57C2E211D60009D197A /* GroupSettingsScreen.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
 		3EE42FCA2E1A436D00CDC3BC /* Groups */ = {
 			isa = PBXGroup;
 			children = (
 				3EE42FCC2E1A438900CDC3BC /* Common */,
 				3EE42FCB2E1A438100CDC3BC /* Detail */,
 				3EE42FCD2E1A439100CDC3BC /* List */,
+				3EA3E57B2E211D48009D197A /* Settings */,
 			);
 			path = Groups;
 			sourceTree = "<group>";
@@ -195,7 +207,6 @@
 			isa = PBXGroup;
 			children = (
 				3EC4CD072DCC560D0044A642 /* GroupDetailScreen.swift */,
-				3E36EA092DDBBE4300369930 /* GroupDetailContentScreen.swift */,
 			);
 			path = Detail;
 			sourceTree = "<group>";
@@ -478,7 +489,6 @@
 				3E2599BF2D93F117009CDC00 /* SettingsScreen.swift in Sources */,
 				3E36EA162DDBC4A500369930 /* SettingsContentScreen.swift in Sources */,
 				3E36E9FF2DDBB13500369930 /* ShoppingListListEmptyScreen.swift in Sources */,
-				3E36EA0A2DDBBE4300369930 /* GroupDetailContentScreen.swift in Sources */,
 				3E9A64F82E1BB3CB00B2D61B /* TaskBoardListContentScreen.swift in Sources */,
 				3E36EA042DDBB41700369930 /* ShoppingListListContentScreen.swift in Sources */,
 				3E0CE1B72D953F4B00B97630 /* RegisterScreen.swift in Sources */,
@@ -486,6 +496,7 @@
 				3E9A64F02E1BB2AB00B2D61B /* TaskBoardListScreen.swift in Sources */,
 				3E2599C12D9400DA009CDC00 /* IosNavigator.swift in Sources */,
 				3EE42FD12E1A459900CDC3BC /* GroupInviteCodeSheet.swift in Sources */,
+				3EA3E57F2E211E81009D197A /* GroupSettingsContentScreen.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				3EBEBF712D90706C003DF183 /* DesignSystem.swift in Sources */,
 				7555FF83242A565900829871 /* ContentComposeView.swift in Sources */,
@@ -499,6 +510,7 @@
 				3ECB4A092E10061D00E5C540 /* InvisibleAlertHost.swift in Sources */,
 				3E9A64F42E1BB38300B2D61B /* TaskBoardListEmptyScreen.swift in Sources */,
 				3EEEF8202D8F6C5D00FE7D80 /* CustomSecureField.swift in Sources */,
+				3EA3E57D2E211D68009D197A /* GroupSettingsScreen.swift in Sources */,
 				3E773E932D94388000434B2D /* ViewExtension.swift in Sources */,
 				3ECB4A0E2E107E7200E5C540 /* ShoppingListDetailContentScreen.swift in Sources */,
 				3EEEF81E2D8F6C3800FE7D80 /* CustomTextField.swift in Sources */,

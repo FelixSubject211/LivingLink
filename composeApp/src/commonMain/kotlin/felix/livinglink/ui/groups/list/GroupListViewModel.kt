@@ -1,6 +1,6 @@
 package felix.livinglink.ui.groups.list
 
-import GroupListScreenLocalizables
+import GroupsListScreenLocalizables
 import felix.livinglink.common.model.LivingLinkError
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.group.CreateGroupRequest
@@ -151,12 +151,12 @@ class GroupListViewModel(
     sealed class Error : LivingLinkError {
         data object InviteInvalidOrAlreadyUsed : Error() {
             override fun title() =
-                GroupListScreenLocalizables.errorInviteInvalidOrAlreadyUsedTitle()
+                GroupsListScreenLocalizables.errorInviteInvalidOrAlreadyUsedTitle()
         }
 
         data object CreateGroupResponseError : Error() {
             override fun title() =
-                GroupListScreenLocalizables.errorCreateGroupResponseTitle()
+                GroupsListScreenLocalizables.errorCreateGroupResponseTitle()
         }
     }
 }

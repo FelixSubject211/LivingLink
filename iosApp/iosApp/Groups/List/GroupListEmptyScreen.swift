@@ -12,7 +12,7 @@ import SwiftUI
 struct GroupListEmptyScreen: View {
     let data: GroupListViewModel.Data
     let viewModel: GroupListViewModel
-    let localizables = GroupListScreenLocalizables()
+    let localizables = GroupsListScreenLocalizables()
 
     var body: some View {
         VStack(spacing: DesignSystem.Spacing.betweenSections) {

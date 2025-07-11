@@ -1,8 +1,9 @@
 package felix.livinglink.ui.shoppingList.list
 
+import ShoppingListListScreenLocalizables
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
+import felix.livinglink.ui.common.BackAwareScaffold
 import felix.livinglink.ui.common.state.LoadableStatefulView
 
 @Composable
@@ -20,20 +21,25 @@ fun ShoppingListListScreen(viewModel: ShoppingListListViewModel) {
         )
     }
 
-    LoadableStatefulView(
-        viewModel = viewModel,
-        modifier = Modifier,
-        emptyContent = {
-            ShoppingListListEmptyContent(
-                viewModel = viewModel
-            )
-        },
-        content = { loadableDate, _ ->
-            ShoppingListListScreenContent(
-                loadableData = loadableDate,
-                data = data,
-                viewModel = viewModel
-            )
-        }
-    )
+    BackAwareScaffold(
+        navigator = viewModel.navigator,
+        title = ShoppingListListScreenLocalizables.navigationTitle(),
+    ) { innerPadding ->
+        LoadableStatefulView(
+            viewModel = viewModel,
+            modifier = innerPadding,
+            emptyContent = {
+                ShoppingListListEmptyContent(
+                    viewModel = viewModel
+                )
+            },
+            content = { loadableDate, _ ->
+                ShoppingListListScreenContent(
+                    loadableData = loadableDate,
+                    data = data,
+                    viewModel = viewModel
+                )
+            }
+        )
+    }
 }

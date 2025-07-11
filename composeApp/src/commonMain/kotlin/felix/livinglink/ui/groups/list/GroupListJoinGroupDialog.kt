@@ -1,6 +1,6 @@
 package felix.livinglink.ui.groups.list
 
-import GroupListScreenLocalizables
+import GroupsListScreenLocalizables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -20,10 +20,10 @@ fun GroupListJoinGroupDialog(
 ) {
     AlertDialog(
         onDismissRequest = viewModel::closeJoinGroupDialog,
-        title = { Text(GroupListScreenLocalizables.joinGroupDialogTitle()) },
+        title = { Text(GroupsListScreenLocalizables.joinGroupDialogTitle()) },
         text = {
             Column {
-                Text(GroupListScreenLocalizables.joinGroupDialogLabel())
+                Text(GroupsListScreenLocalizables.joinGroupDialogLabel())
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = inviteCode,
@@ -37,12 +37,12 @@ fun GroupListJoinGroupDialog(
                 onClick = viewModel::useInvite,
                 enabled = confirmButtonEnabled
             ) {
-                Text(GroupListScreenLocalizables.joinGroupDialogConfirm())
+                Text(GroupsListScreenLocalizables.joinGroupDialogConfirm())
             }
         },
         dismissButton = {
             TextButton(onClick = viewModel::closeJoinGroupDialog) {
-                Text(GroupListScreenLocalizables.joinGroupDialogCancel())
+                Text(GroupsListScreenLocalizables.joinGroupDialogCancel())
             }
         }
     )

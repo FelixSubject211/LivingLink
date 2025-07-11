@@ -1,5 +1,6 @@
 package felix.livinglink.ui.groups.list
 
+import GroupsListScreenLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -50,7 +51,7 @@ fun GroupListScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(GroupListScreenLocalizables.joinGroupButtonTitle())
+            Text(GroupsListScreenLocalizables.joinGroupButtonTitle())
         }
 
         TextButton(
@@ -58,7 +59,7 @@ fun GroupListScreenContent(
             modifier = Modifier
                 .fillMaxWidth()
         ) {
-            Text(GroupListScreenLocalizables.createGroupButtonTitle())
+            Text(GroupsListScreenLocalizables.createGroupButtonTitle())
         }
     }
 }

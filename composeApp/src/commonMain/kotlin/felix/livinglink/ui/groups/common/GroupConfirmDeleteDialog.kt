@@ -1,6 +1,6 @@
 package felix.livinglink.ui.groups.common
 
-import GroupCommonLocalizables
+import GroupsCommonLocalizables
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -14,19 +14,19 @@ fun GroupConfirmDeleteDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(GroupCommonLocalizables.groupConfirmDeleteDialogTitle()) },
-        text = { Text(GroupCommonLocalizables.groupConfirmDeleteDialogText()) },
+        title = { Text(GroupsCommonLocalizables.groupConfirmDeleteDialogTitle()) },
+        text = { Text(GroupsCommonLocalizables.groupConfirmDeleteDialogText()) },
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = GroupCommonLocalizables.groupConfirmDeleteButton(),
+                    text = GroupsCommonLocalizables.groupConfirmDeleteButton(),
                     color = MaterialTheme.colorScheme.error
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(GroupCommonLocalizables.groupConfirmCancelButton())
+                Text(GroupsCommonLocalizables.groupConfirmCancelButton())
             }
         }
     )

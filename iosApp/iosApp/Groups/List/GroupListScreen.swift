@@ -11,7 +11,7 @@ import SwiftUI
 
 struct GroupListScreen: View {
     let viewModel: GroupListViewModel
-    let localizables = GroupListScreenLocalizables()
+    let localizables = GroupsListScreenLocalizables()
 
     var body: some View {
         LoadableStatefulView(

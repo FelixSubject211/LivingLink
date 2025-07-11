@@ -1,32 +1,29 @@
 //
-//  ShoppingListListScreen.swift
+//  GroupSettingsScreen.swift
 //  iosApp
 //
-//  Created by Felix Fischer on 16.05.25.
+//  Created by Felix Fischer on 11.07.25.
 //  Copyright © 2025 orgName. All rights reserved.
 //
 
 import ComposeApp
 import SwiftUI
 
-struct ShoppingListListScreen: View {
-    let viewModel: ShoppingListListViewModel
-    let localizables = ShoppingListListScreenLocalizables()
+struct GroupSettingsScreen: View {
+    let viewModel: GroupSettingsViewModel
+    let localizables = GroupsSettingsScreenLocalizables()
 
     var body: some View {
         LoadableStatefulView(
             viewModel: viewModel,
-            buildAlert: { (error: ShoppingListListScreenError) in
+            buildAlert: { (error: GroupSettingsScreenError) in
                 error.asAlert(
                     navigator: viewModel.navigator,
                     dismiss: viewModel.closeError
                 )
             },
-            emptyContent: { data in
-                ShoppingListListEmptyScreen(data: data, viewModel: viewModel)
-            },
             content: { loadbaleData, data in
-                ShoppingListListContentScreen(
+                GroupSettingsContentScreen(
                     loadableData: loadbaleData,
                     data: data,
                     viewModel: viewModel
@@ -37,4 +34,4 @@ struct ShoppingListListScreen: View {
     }
 }
 
-private typealias ShoppingListListScreenError = LoadableViewModelStateCombinedError<LivingLinkError, KotlinNothing, NetworkError>
+private typealias GroupSettingsScreenError = LoadableViewModelStateCombinedError<LivingLinkError, KotlinNothing, NetworkError>

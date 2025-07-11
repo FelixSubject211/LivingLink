@@ -13,7 +13,7 @@ struct GroupDeleteConfirmationAlert: ViewModifier {
     let isPresented: Bool
     let onConfirm: () -> Void
     let onCancel: () -> Void
-    let localizables = GroupCommonLocalizables()
+    let localizables = GroupsCommonLocalizables()
 
     func body(content: Content) -> some View {
         content
