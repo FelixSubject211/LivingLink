@@ -25,6 +25,8 @@ abstract class BaseIntegrationTest {
         override val pollingIntervalSeconds = 5
         override val pollingRetryDelaySeconds = 10
         override val aggregateTimeoutSeconds = 5
+        override val eventSourcingAppendRetryCount = 10
+        override val eventSourcingAppendRetryDelayMs = 300L
         override val secret = "secret"
         override val issuer = "issuer"
         override val jwtAudience = "jwtAudience"

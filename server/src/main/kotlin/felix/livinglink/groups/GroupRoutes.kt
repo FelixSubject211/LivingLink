@@ -4,6 +4,7 @@ import felix.livinglink.common.UserPrincipal
 import felix.livinglink.group.CreateGroupRequest
 import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.UseInviteRequest
+import felix.livinglink.group.LeaveGroupRequest
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
@@ -38,6 +39,13 @@ fun Route.groupRoutes(groupService: GroupService) {
             val groupId = call.parameters["groupId"] ?: return@delete call.respond(HttpStatusCode.BadRequest)
 
             val response = groupService.deleteGroup(groupId = groupId, userId = user.userId)
+            call.respond(HttpStatusCode.OK, response)
+        }
+
+        post("/leave") {
+            val user = call.principal<UserPrincipal>()!!
+            val request = call.receive<LeaveGroupRequest>()
+            val response = groupService.leaveGroup(groupId = request.groupId, userId = user.userId)
             call.respond(HttpStatusCode.OK, response)
         }
 

@@ -8,7 +8,7 @@ typealias GroupSettingsViewModelState = LoadableViewModelState<
         GroupSettingsViewModel.LoadableData,
         GroupSettingsViewModel.Data,
         NetworkError,
-        Nothing,
+        GroupSettingsViewModel.Error,
         NetworkError
         >
 
@@ -16,6 +16,6 @@ typealias GroupSettingsStatefulViewModel = LoadableStatefulViewModel<
         GroupSettingsViewModel.LoadableData,
         GroupSettingsViewModel.Data,
         NetworkError,
-        Nothing,
+        GroupSettingsViewModel.Error,
         NetworkError
         >

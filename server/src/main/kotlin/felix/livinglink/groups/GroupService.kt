@@ -7,6 +7,7 @@ import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.DeleteGroupResponse
 import felix.livinglink.group.GetGroupsForUserResponse
+import felix.livinglink.group.LeaveGroupResponse
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 
@@ -32,8 +33,7 @@ class GroupService(
     }
 
     fun deleteGroup(groupId: String, userId: String): DeleteGroupResponse {
-        val allowed = groupStore.getGroupsForUser(userId).any { it.id == groupId }
-        if (!allowed) return DeleteGroupResponse.NotAllowed
+        if (!isAdmin(userId = userId, groupId = groupId)) return DeleteGroupResponse.NotAllowed
 
         val userIds = groupStore.getUserIdsInGroup(groupId)
         val success = groupStore.deleteGroup(groupId)
@@ -46,9 +46,33 @@ class GroupService(
         return DeleteGroupResponse.Error
     }
 
+    fun leaveGroup(groupId: String, userId: String): LeaveGroupResponse {
+        if (!groupStore.isUserIdInGroup(userId = userId, groupId = groupId)) {
+            return LeaveGroupResponse.NotAllowed
+        }
+
+        val admins = groupStore.getAdminUserIdsInGroup(groupId)
+        if (admins.size == 1 && admins.first() == userId) {
+            return LeaveGroupResponse.LastAdminCannotLeave
+        }
+
+        val userIds = groupStore.getUserIdsInGroup(groupId)
+        val success = groupStore.removeUserFromGroup(userId = userId, groupId = groupId)
+
+        return if (success) {
+            userIds.forEach { changeNotifier.markGroupChangeForUser(it) }
+            LeaveGroupResponse.Success
+        } else {
+            LeaveGroupResponse.Error
+        }
+    }
+
     fun createInviteCode(request: CreateInviteRequest, userId: String): CreateInviteResponse? {
+        if (!isAdmin(userId = userId, groupId = request.groupId)) {
+            return CreateInviteResponse.Error
+        }
         val code = groupStore.createInviteCode(request.groupId, userId)
-        return code?.let { CreateInviteResponse(it) }
+        return code?.let { CreateInviteResponse.Success(it) }
     }
 
     fun useInviteCode(request: UseInviteRequest, userId: String): UseInviteResponse {
@@ -59,5 +83,11 @@ class GroupService(
             return UseInviteResponse.Success
         }
         return UseInviteResponse.InvalidOrAlreadyUsed
+    }
+
+    private fun isAdmin(userId: String, groupId: String): Boolean {
+        return groupStore
+            .getAdminUserIdsInGroup(groupId)
+            .contains(userId)
     }
 }

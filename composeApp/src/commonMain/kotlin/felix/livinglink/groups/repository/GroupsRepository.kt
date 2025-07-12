@@ -15,9 +15,11 @@ import felix.livinglink.group.CreateGroupResponse
 import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.DeleteGroupResponse
+import felix.livinglink.group.LeaveGroupResponse
 import felix.livinglink.group.Group
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
+import felix.livinglink.group.LeaveGroupRequest
 import felix.livinglink.groups.network.GroupsNetworkDataSource
 import felix.livinglink.groups.store.GroupStore
 import kotlinx.coroutines.CoroutineScope
@@ -42,6 +44,10 @@ interface GroupsRepository {
     suspend fun deleteGroup(
         groupId: String
     ): LivingLinkResult<DeleteGroupResponse, NetworkError>
+
+    suspend fun leaveGroup(
+        groupId: String
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError>
 
     suspend fun createInvite(
         request: CreateInviteRequest
@@ -109,6 +115,14 @@ class GroupsDefaultRepository(
     ): LivingLinkResult<DeleteGroupResponse, NetworkError> {
         return groupsNetworkDataSource
             .deleteGroup(groupId)
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
+    }
+
+    override suspend fun leaveGroup(
+        groupId: String
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError> {
+        return groupsNetworkDataSource
+            .leaveGroup(LeaveGroupRequest(groupId))
             .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 

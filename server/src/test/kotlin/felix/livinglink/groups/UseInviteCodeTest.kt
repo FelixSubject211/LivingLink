@@ -21,6 +21,7 @@ import org.ktorm.dsl.from
 import org.ktorm.dsl.select
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertTrue
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -77,6 +78,7 @@ class UseInviteCodeTest : BaseIntegrationTest() {
         )
 
         // Assert
+        assertIs<CreateInviteResponse.Success>(inviteResponse)
         assertEquals(inviteCode.take(8), inviteResponse.code)
 
         val useResponse = client.post<UseInviteRequest, UseInviteResponse>(

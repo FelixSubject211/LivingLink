@@ -11,6 +11,8 @@ import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.DeleteGroupResponse
 import felix.livinglink.group.GetGroupsForUserResponse
+import felix.livinglink.group.LeaveGroupRequest
+import felix.livinglink.group.LeaveGroupResponse
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 import io.ktor.client.HttpClient
@@ -25,6 +27,10 @@ interface GroupsNetworkDataSource {
     suspend fun deleteGroup(
         groupId: String
     ): LivingLinkResult<DeleteGroupResponse, NetworkError>
+
+    suspend fun leaveGroup(
+        request: LeaveGroupRequest
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError>
 
     suspend fun createInvite(
         request: CreateInviteRequest
@@ -56,6 +62,15 @@ class GroupNetworkDefaultDataSource(
         groupId: String
     ): LivingLinkResult<DeleteGroupResponse, NetworkError> {
         return authenticatedHttpClient.delete(urlString = "groups/$groupId")
+    }
+
+    override suspend fun leaveGroup(
+        request: LeaveGroupRequest
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError> {
+        return authenticatedHttpClient.post(
+            urlString = "groups/leave",
+            request = request
+        )
     }
 
     override suspend fun createInvite(

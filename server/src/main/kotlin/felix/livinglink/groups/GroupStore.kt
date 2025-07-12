@@ -30,7 +30,9 @@ interface GroupStore {
     fun deleteGroup(groupId: String): Boolean
     fun createInviteCode(groupId: String, createdBy: String): String?
     fun useInviteCode(code: String, userId: String): String?
+    fun removeUserFromGroup(userId: String, groupId: String): Boolean
     fun getUserIdsInGroup(groupId: String): List<String>
+    fun getAdminUserIdsInGroup(groupId: String): List<String>
     fun isUserIdInGroup(userId: String, groupId: String): Boolean
     fun getGroupIdsForUser(userId: String): List<String>
 }
@@ -61,7 +63,8 @@ class GroupDefaultStore(
                         id = groupId,
                         name = row[GroupsTable.name]!!,
                         createdAt = row[GroupsTable.createdAt]!!.toKotlinInstant(),
-                        groupMemberIdsToName = mutableMapOf()
+                        groupMemberIdsToName = mutableMapOf(),
+                        adminUserIds = mutableSetOf()
                     )
                 }
 
@@ -71,7 +74,8 @@ class GroupDefaultStore(
                 .select(
                     GroupMembersTable.groupId,
                     UsersTable.id,
-                    UsersTable.username
+                    UsersTable.username,
+                    GroupMembersTable.isAdmin
                 )
                 .where { GroupMembersTable.groupId inList groupIds }
                 .forEach { row ->
@@ -82,6 +86,9 @@ class GroupDefaultStore(
                     val group = groups[groupId]
                     if (group != null) {
                         (group.groupMemberIdsToName as MutableMap)[memberId] = username
+                        if (row[GroupMembersTable.isAdmin] == true) {
+                            (group.adminUserIds as MutableSet).add(memberId)
+                        }
                     }
                 }
 
@@ -106,12 +113,14 @@ class GroupDefaultStore(
                 val memberInsert = database.insert(GroupMembersTable) {
                     set(it.groupId, groupId)
                     set(it.userId, creatorUserId)
+                    set(it.isAdmin, true)
                     set(it.createdAt, now)
                 }
 
                 if (memberInsert > 0) groupId else null
             }
         } catch (e: Exception) {
+            println(e)
             null
         }
     }
@@ -189,6 +198,7 @@ class GroupDefaultStore(
                 database.insert(GroupMembersTable) {
                     set(it.groupId, groupId)
                     set(it.userId, userId)
+                    set(it.isAdmin, false)
                     set(it.createdAt, now)
                 }
 
@@ -203,11 +213,31 @@ class GroupDefaultStore(
         }
     }
 
+    override fun removeUserFromGroup(userId: String, groupId: String): Boolean {
+        return try {
+            database.delete(GroupMembersTable) {
+                (it.groupId eq groupId) and (it.userId eq userId)
+            } > 0
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     override fun getUserIdsInGroup(groupId: String): List<String> {
         return database
             .from(GroupMembersTable)
             .select(GroupMembersTable.userId)
             .where { GroupMembersTable.groupId eq groupId }
+            .map { it[GroupMembersTable.userId]!! }
+    }
+
+    override fun getAdminUserIdsInGroup(groupId: String): List<String> {
+        return database
+            .from(GroupMembersTable)
+            .select(GroupMembersTable.userId)
+            .where {
+                (GroupMembersTable.groupId eq groupId) and (GroupMembersTable.isAdmin eq true)
+            }
             .map { it[GroupMembersTable.userId]!! }
     }
 

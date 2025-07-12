@@ -3,7 +3,6 @@ package felix.livinglink.eventSourcing
 import felix.livinglink.common.BaseIntegrationTest
 import felix.livinglink.common.DatabaseInitializer
 import felix.livinglink.common.RawUser
-import felix.livinglink.common.UuidDefaultFactory
 import felix.livinglink.common.addSampleGroups
 import felix.livinglink.common.addSampleUsers
 import felix.livinglink.common.defaultAppModule
@@ -36,7 +35,8 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
             id = "sharedGroup",
             name = "Shared Group",
             groupMemberIdsToName = emptyMap(),
-            createdAt = now
+            createdAt = now,
+            adminUserIds = emptySet()
         )
         val users = (1..threadCount).map {
             RawUser(id = "user$it", username = "user$it", password = "pw")
@@ -89,7 +89,8 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
                     id = "group$it",
                     name = "Group $it",
                     groupMemberIdsToName = emptyMap(),
-                    createdAt = now
+                    createdAt = now,
+                    adminUserIds = emptySet()
                 )
             }
             val users = (1..threadCount).map {
@@ -154,7 +155,8 @@ class EventSourcingDefaultStorePerformanceTest : BaseIntegrationTest() {
             id = "sharedGroup",
             name = "Shared Group",
             groupMemberIdsToName = emptyMap(),
-            createdAt = Clock.System.now()
+            createdAt = Clock.System.now(),
+            adminUserIds = emptySet()
         )
         val user = RawUser(id = "user", username = "user", password = "pw")
 

@@ -1,6 +1,7 @@
 package felix.livinglink.common
 
 import org.ktorm.schema.Table
+import org.ktorm.schema.boolean
 import org.ktorm.schema.long
 import org.ktorm.schema.text
 import org.ktorm.schema.timestamp
@@ -28,6 +29,7 @@ object GroupsTable : Table<Nothing>("groups") {
 object GroupMembersTable : Table<Nothing>("group_members") {
     val groupId = varchar("group_id")
     val userId = varchar("user_id")
+    val isAdmin = boolean("is_admin")
     val createdAt = timestamp("created_at")
 }
 

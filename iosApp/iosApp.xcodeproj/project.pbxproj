@@ -50,8 +50,9 @@
 		3ECB4A0E2E107E7200E5C540 /* ShoppingListDetailContentScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECB4A0D2E107E6A00E5C540 /* ShoppingListDetailContentScreen.swift */; };
 		3ECB4A102E107FD000E5C540 /* ShoppingListDetailEventHistoryItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECB4A0F2E107FCF00E5C540 /* ShoppingListDetailEventHistoryItem.swift */; };
 		3ECD5E0E2DB62ADB00CA329F /* TextFieldAlertModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */; };
-		3EE42FCF2E1A456700CDC3BC /* GroupDeleteConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */; };
-		3EE42FD12E1A459900CDC3BC /* GroupInviteCodeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */; };
+               3EE42FCF2E1A456700CDC3BC /* GroupDeleteConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */; };
+               3EF1AAA22E1A99B100ABCDE /* GroupLeaveConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EF1AAA12E1A99B000ABCDE /* GroupLeaveConfirmationAlert.swift */; };
+               3EE42FD12E1A459900CDC3BC /* GroupInviteCodeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */; };
 		3EEC02402DB3685F0059D973 /* StateFlowCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEC023F2DB3685D0059D973 /* StateFlowCollector.swift */; };
 		3EEEF8182D8F53B100FE7D80 /* KotlinStateFlowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */; };
 		3EEEF81A2D8F541500FE7D80 /* StatefulView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8192D8F540700FE7D80 /* StatefulView.swift */; };
@@ -103,8 +104,9 @@
 		3ECB4A0D2E107E6A00E5C540 /* ShoppingListDetailContentScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListDetailContentScreen.swift; sourceTree = "<group>"; };
 		3ECB4A0F2E107FCF00E5C540 /* ShoppingListDetailEventHistoryItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShoppingListDetailEventHistoryItem.swift; sourceTree = "<group>"; };
 		3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldAlertModifier.swift; sourceTree = "<group>"; };
-		3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDeleteConfirmationAlert.swift; sourceTree = "<group>"; };
-		3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupInviteCodeSheet.swift; sourceTree = "<group>"; };
+               3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDeleteConfirmationAlert.swift; sourceTree = "<group>"; };
+               3EF1AAA12E1A99B000ABCDE /* GroupLeaveConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupLeaveConfirmationAlert.swift; sourceTree = "<group>"; };
+               3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupInviteCodeSheet.swift; sourceTree = "<group>"; };
 		3EEC023F2DB3685D0059D973 /* StateFlowCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateFlowCollector.swift; sourceTree = "<group>"; };
 		3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinStateFlowExtension.swift; sourceTree = "<group>"; };
 		3EEEF8192D8F540700FE7D80 /* StatefulView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulView.swift; sourceTree = "<group>"; };
@@ -213,11 +215,12 @@
 		};
 		3EE42FCC2E1A438900CDC3BC /* Common */ = {
 			isa = PBXGroup;
-			children = (
-				3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */,
-				3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */,
-			);
-			path = Common;
+                       children = (
+                                3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */,
+                                3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */,
+                                3EF1AAA12E1A99B000ABCDE /* GroupLeaveConfirmationAlert.swift */,
+                        );
+                       path = Common;
 			sourceTree = "<group>";
 		};
 		3EE42FCD2E1A439100CDC3BC /* List */ = {
@@ -504,8 +507,9 @@
 				3EBEBF6B2D90340D003DF183 /* I18n4kExtension.swift in Sources */,
 				3EBEBF6D2D90463D003DF183 /* LoginScreen.swift in Sources */,
 				3E36EA112DDBC14F00369930 /* GroupListGroupCard.swift in Sources */,
-				3EE42FCF2E1A456700CDC3BC /* GroupDeleteConfirmationAlert.swift in Sources */,
-				3E9A64FE2E1BFD9200B2D61B /* CustomTextEditor.swift in Sources */,
+                                3EE42FCF2E1A456700CDC3BC /* GroupDeleteConfirmationAlert.swift in Sources */,
+                                3EF1AAA22E1A99B100ABCDE /* GroupLeaveConfirmationAlert.swift in Sources */,
+                                3E9A64FE2E1BFD9200B2D61B /* CustomTextEditor.swift in Sources */,
 				3E9A64FA2E1BB3E700B2D61B /* TaskBoardListItemCard.swift in Sources */,
 				3ECB4A092E10061D00E5C540 /* InvisibleAlertHost.swift in Sources */,
 				3E9A64F42E1BB38300B2D61B /* TaskBoardListEmptyScreen.swift in Sources */,
