@@ -59,6 +59,7 @@ object DatabaseInitializer {
             CREATE TABLE IF NOT EXISTS group_members (
                 group_id VARCHAR(36) NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
                 user_id VARCHAR(36) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                is_admin BOOLEAN NOT NULL DEFAULT FALSE,
                 created_at TIMESTAMP NOT NULL,
                 PRIMARY KEY (group_id, user_id)
             )

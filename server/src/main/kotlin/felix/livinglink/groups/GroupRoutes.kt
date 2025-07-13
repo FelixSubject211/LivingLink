@@ -3,6 +3,9 @@ package felix.livinglink.groups
 import felix.livinglink.common.UserPrincipal
 import felix.livinglink.group.CreateGroupRequest
 import felix.livinglink.group.CreateInviteRequest
+import felix.livinglink.group.LeaveGroupRequest
+import felix.livinglink.group.MakeUserAdminRequest
+import felix.livinglink.group.RemoveUserFromGroupRequest
 import felix.livinglink.group.UseInviteRequest
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.principal
@@ -41,6 +44,13 @@ fun Route.groupRoutes(groupService: GroupService) {
             call.respond(HttpStatusCode.OK, response)
         }
 
+        post("/leave") {
+            val user = call.principal<UserPrincipal>()!!
+            val request = call.receive<LeaveGroupRequest>()
+            val response = groupService.leaveGroup(groupId = request.groupId, userId = user.userId)
+            call.respond(HttpStatusCode.OK, response)
+        }
+
         post("/invite/create") {
             val user = call.principal<UserPrincipal>()!!
             val request = call.receive<CreateInviteRequest>()
@@ -56,6 +66,20 @@ fun Route.groupRoutes(groupService: GroupService) {
             val user = call.principal<UserPrincipal>()!!
             val request = call.receive<UseInviteRequest>()
             val response = groupService.useInviteCode(request, user.userId)
+            call.respond(HttpStatusCode.OK, response)
+        }
+
+        post("/member/remove") {
+            val user = call.principal<UserPrincipal>()!!
+            val request = call.receive<RemoveUserFromGroupRequest>()
+            val response = groupService.removeUserFromGroup(request, user.userId)
+            call.respond(HttpStatusCode.OK, response)
+        }
+
+        post("/member/make-admin") {
+            val user = call.principal<UserPrincipal>()!!
+            val request = call.receive<MakeUserAdminRequest>()
+            val response = groupService.makeUserAdmin(request, user.userId)
             call.respond(HttpStatusCode.OK, response)
         }
     }

@@ -97,6 +97,7 @@ fun Database.addSampleGroups(
             insert(GroupMembersTable) {
                 set(it.groupId, singleGroup.id)
                 set(it.userId, memberId)
+                set(it.isAdmin, memberId in singleGroup.adminUserIds)
                 set(it.createdAt, singleGroup.createdAt.toJavaInstant())
             }
         }

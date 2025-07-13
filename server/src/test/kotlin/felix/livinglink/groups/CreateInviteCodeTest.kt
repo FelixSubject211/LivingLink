@@ -15,6 +15,7 @@ import io.ktor.server.testing.testApplication
 import org.junit.jupiter.api.assertThrows
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -23,7 +24,7 @@ class CreateInviteCodeTest : BaseIntegrationTest() {
 
     @OptIn(ExperimentalUuidApi::class)
     @Test
-    fun `should create invite code if user is member of group`() = testApplication {
+    fun `should create invite code if user is admin of group`() = testApplication {
         val group = TestData.groupOwnedByAlice1
         val uuid = Uuid.random().toString()
 
@@ -58,6 +59,7 @@ class CreateInviteCodeTest : BaseIntegrationTest() {
         )
 
         // Assert
+        assertIs<CreateInviteResponse.Success>(response)
         assertNotNull(response.code)
         assertEquals(uuid.take(8), response.code)
 

@@ -11,6 +11,12 @@ import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.DeleteGroupResponse
 import felix.livinglink.group.GetGroupsForUserResponse
+import felix.livinglink.group.LeaveGroupRequest
+import felix.livinglink.group.LeaveGroupResponse
+import felix.livinglink.group.MakeUserAdminRequest
+import felix.livinglink.group.MakeUserAdminResponse
+import felix.livinglink.group.RemoveUserFromGroupRequest
+import felix.livinglink.group.RemoveUserFromGroupResponse
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 import io.ktor.client.HttpClient
@@ -26,6 +32,10 @@ interface GroupsNetworkDataSource {
         groupId: String
     ): LivingLinkResult<DeleteGroupResponse, NetworkError>
 
+    suspend fun leaveGroup(
+        request: LeaveGroupRequest
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError>
+
     suspend fun createInvite(
         request: CreateInviteRequest
     ): LivingLinkResult<CreateInviteResponse, NetworkError>
@@ -33,6 +43,14 @@ interface GroupsNetworkDataSource {
     suspend fun useInvite(
         request: UseInviteRequest
     ): LivingLinkResult<UseInviteResponse, NetworkError>
+
+    suspend fun removeUserFromGroup(
+        request: RemoveUserFromGroupRequest
+    ): LivingLinkResult<RemoveUserFromGroupResponse, NetworkError>
+
+    suspend fun makeUserAdmin(
+        request: MakeUserAdminRequest
+    ): LivingLinkResult<MakeUserAdminResponse, NetworkError>
 }
 
 class GroupNetworkDefaultDataSource(
@@ -58,6 +76,15 @@ class GroupNetworkDefaultDataSource(
         return authenticatedHttpClient.delete(urlString = "groups/$groupId")
     }
 
+    override suspend fun leaveGroup(
+        request: LeaveGroupRequest
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError> {
+        return authenticatedHttpClient.post(
+            urlString = "groups/leave",
+            request = request
+        )
+    }
+
     override suspend fun createInvite(
         request: CreateInviteRequest
     ): LivingLinkResult<CreateInviteResponse, NetworkError> {
@@ -72,6 +99,24 @@ class GroupNetworkDefaultDataSource(
     ): LivingLinkResult<UseInviteResponse, NetworkError> {
         return authenticatedHttpClient.post(
             urlString = "groups/invite/use",
+            request = request
+        )
+    }
+
+    override suspend fun removeUserFromGroup(
+        request: RemoveUserFromGroupRequest
+    ): LivingLinkResult<RemoveUserFromGroupResponse, NetworkError> {
+        return authenticatedHttpClient.post(
+            urlString = "groups/member/remove",
+            request = request
+        )
+    }
+
+    override suspend fun makeUserAdmin(
+        request: MakeUserAdminRequest
+    ): LivingLinkResult<MakeUserAdminResponse, NetworkError> {
+        return authenticatedHttpClient.post(
+            urlString = "groups/member/make-admin",
             request = request
         )
     }

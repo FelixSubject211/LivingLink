@@ -16,6 +16,12 @@ import felix.livinglink.group.CreateInviteRequest
 import felix.livinglink.group.CreateInviteResponse
 import felix.livinglink.group.DeleteGroupResponse
 import felix.livinglink.group.Group
+import felix.livinglink.group.LeaveGroupRequest
+import felix.livinglink.group.LeaveGroupResponse
+import felix.livinglink.group.MakeUserAdminRequest
+import felix.livinglink.group.MakeUserAdminResponse
+import felix.livinglink.group.RemoveUserFromGroupRequest
+import felix.livinglink.group.RemoveUserFromGroupResponse
 import felix.livinglink.group.UseInviteRequest
 import felix.livinglink.group.UseInviteResponse
 import felix.livinglink.groups.network.GroupsNetworkDataSource
@@ -43,6 +49,10 @@ interface GroupsRepository {
         groupId: String
     ): LivingLinkResult<DeleteGroupResponse, NetworkError>
 
+    suspend fun leaveGroup(
+        groupId: String
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError>
+
     suspend fun createInvite(
         request: CreateInviteRequest
     ): LivingLinkResult<CreateInviteResponse, NetworkError>
@@ -50,6 +60,16 @@ interface GroupsRepository {
     suspend fun useInvite(
         request: UseInviteRequest
     ): LivingLinkResult<UseInviteResponse, NetworkError>
+
+    suspend fun removeUserFromGroup(
+        groupId: String,
+        userId: String
+    ): LivingLinkResult<RemoveUserFromGroupResponse, NetworkError>
+
+    suspend fun makeUserAdmin(
+        groupId: String,
+        userId: String
+    ): LivingLinkResult<MakeUserAdminResponse, NetworkError>
 }
 
 class GroupsDefaultRepository(
@@ -112,6 +132,14 @@ class GroupsDefaultRepository(
             .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 
+    override suspend fun leaveGroup(
+        groupId: String
+    ): LivingLinkResult<LeaveGroupResponse, NetworkError> {
+        return groupsNetworkDataSource
+            .leaveGroup(LeaveGroupRequest(groupId))
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
+    }
+
     override suspend fun createInvite(
         request: CreateInviteRequest
     ): LivingLinkResult<CreateInviteResponse, NetworkError> {
@@ -124,6 +152,24 @@ class GroupsDefaultRepository(
     ): LivingLinkResult<UseInviteResponse, NetworkError> {
         return groupsNetworkDataSource
             .useInvite(request)
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
+    }
+
+    override suspend fun removeUserFromGroup(
+        groupId: String,
+        userId: String
+    ): LivingLinkResult<RemoveUserFromGroupResponse, NetworkError> {
+        return groupsNetworkDataSource
+            .removeUserFromGroup(RemoveUserFromGroupRequest(groupId, userId))
+            .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
+    }
+
+    override suspend fun makeUserAdmin(
+        groupId: String,
+        userId: String
+    ): LivingLinkResult<MakeUserAdminResponse, NetworkError> {
+        return groupsNetworkDataSource
+            .makeUserAdmin(MakeUserAdminRequest(groupId, userId))
             .alsoIfIsSuccess { eventBus.emit(EventBus.Event.UpdateGroups) }
     }
 }

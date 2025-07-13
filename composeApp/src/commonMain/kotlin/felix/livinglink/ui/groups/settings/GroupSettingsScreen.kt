@@ -6,6 +6,9 @@ import androidx.compose.runtime.collectAsState
 import felix.livinglink.ui.common.BackAwareScaffold
 import felix.livinglink.ui.common.state.LoadableStatefulView
 import felix.livinglink.ui.groups.common.GroupConfirmDeleteDialog
+import felix.livinglink.ui.groups.common.GroupConfirmLeaveDialog
+import felix.livinglink.ui.groups.common.GroupConfirmMakeAdminDialog
+import felix.livinglink.ui.groups.common.GroupConfirmRemoveUserDialog
 import felix.livinglink.ui.groups.common.GroupInviteDialog
 
 @Composable
@@ -19,10 +22,31 @@ fun GroupSettingsScreen(viewModel: GroupSettingsViewModel) {
         )
     }
 
+    if (data.showLeaveGroupDialog) {
+        GroupConfirmLeaveDialog(
+            onConfirm = viewModel::leaveGroup,
+            onDismiss = viewModel::closeLeaveGroupDialog
+        )
+    }
+
     if (data.inviteCode != null) {
         GroupInviteDialog(
             inviteCode = data.inviteCode,
             onDismissRequest = viewModel::closeInviteCode
+        )
+    }
+
+    if (data.removeUserDialogUserId != null) {
+        GroupConfirmRemoveUserDialog(
+            onConfirm = { viewModel.removeUser(data.removeUserDialogUserId!!) },
+            onDismiss = viewModel::closeRemoveUserDialog
+        )
+    }
+
+    if (data.makeAdminDialogUserId != null) {
+        GroupConfirmMakeAdminDialog(
+            onConfirm = { viewModel.makeUserAdmin(data.makeAdminDialogUserId!!) },
+            onDismiss = viewModel::closeMakeAdminDialog
         )
     }
 
@@ -33,8 +57,9 @@ fun GroupSettingsScreen(viewModel: GroupSettingsViewModel) {
         LoadableStatefulView(
             viewModel = viewModel,
             modifier = innerPadding,
-            content = { _, _ ->
+            content = { loadableData, _ ->
                 GroupSettingsScreenContent(
+                    loadableData = loadableData,
                     viewModel = viewModel
                 )
             }

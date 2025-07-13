@@ -35,28 +35,32 @@ object TestData {
         id = "group-alice-1",
         name = "Study Group",
         groupMemberIdsToName = mapOf(alice.id to alice.username),
-        createdAt = fixedTime
+        createdAt = fixedTime,
+        adminUserIds = setOf(alice.id)
     )
 
     val groupOwnedByAlice2 = Group(
         id = "group-alice-2",
         name = "Project Team",
         groupMemberIdsToName = mapOf(alice.id to alice.username),
-        createdAt = fixedTime
+        createdAt = fixedTime,
+        adminUserIds = setOf(alice.id)
     )
 
     val groupOwnedByBob = Group(
         id = "group-bob-1",
         name = "Gaming Buddies",
         groupMemberIdsToName = mapOf(bob.id to bob.username),
-        createdAt = fixedTime
+        createdAt = fixedTime,
+        adminUserIds = setOf(bob.id)
     )
 
     val groupAliceAndBob = Group(
         id = "group-alice-bob-1",
         name = "Alice and Bob",
         groupMemberIdsToName = mapOf(alice.id to alice.username, bob.id to bob.username),
-        createdAt = fixedTime
+        createdAt = fixedTime,
+        adminUserIds = setOf(alice.id, bob.id)
     )
 
     private val event1 = ShoppingListEvent.ItemAdded(itemId = "itemId", itemName = "itemName")

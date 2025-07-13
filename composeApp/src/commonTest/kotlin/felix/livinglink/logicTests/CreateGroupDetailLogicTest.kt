@@ -64,8 +64,10 @@ class CreateGroupDetailLogicTest {
             val loading = viewModel.loading.testIn(backgroundScope)
             val error = viewModel.error.testIn(backgroundScope)
 
+            viewModel.updateAddGroupName(group.name)
+
             // Act
-            viewModel.createGroup(group.name)
+            viewModel.createGroup()
 
             // Assert
             loadableData.expectStates(

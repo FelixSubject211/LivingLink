@@ -1,6 +1,7 @@
 package felix.livinglink.ui
 
 import felix.livinglink.auth.AuthModule
+import felix.livinglink.auth.network.AuthenticatedHttpClient
 import felix.livinglink.common.CommonModule
 import felix.livinglink.common.model.RepositoryState
 import felix.livinglink.common.model.combineStates
@@ -211,14 +212,28 @@ fun defaultUiModule(
         }
 
         override fun groupSettingsViewModel(groupId: String): GroupSettingsViewModel {
+            val input = combineStates(
+                groupsRepository.group(groupId),
+                authenticatedHttpClient.session.map { session ->
+                    val userId = when (session) {
+                        is AuthenticatedHttpClient.AuthSession.LoggedIn -> session.userId
+                        else -> ""
+                    }
+                    RepositoryState.Data(userId)
+                }
+            ) { group, userId ->
+                GroupSettingsViewModel.LoadableData(
+                    group = group,
+                    currentUserId = userId
+                )
+            }
+
             return GroupSettingsViewModel(
                 groupId = groupId,
                 navigator = navigator,
                 groupsRepository = groupsRepository,
                 viewModelState = LoadableViewModelDefaultState(
-                    input = groupsRepository.group(groupId).mapState {
-                        GroupSettingsViewModel.LoadableData(it)
-                    },
+                    input = input,
                     initialState = GroupSettingsViewModel.initialState,
                     hapticsController = hapticsController,
                     scope = defaultScope.newChildScope()

@@ -3,4 +3,10 @@ package felix.livinglink.group
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class CreateInviteResponse(val code: String)
+sealed class CreateInviteResponse {
+    @Serializable
+    data class Success(val code: String) : CreateInviteResponse()
+
+    @Serializable
+    data object Error : CreateInviteResponse()
+}
