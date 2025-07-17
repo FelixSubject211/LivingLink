@@ -163,7 +163,7 @@ fun defaultUiModule(
 
             val shoppingAggregateFlow = eventSourcingRepository.aggregateState(
                 groupId = groupId,
-                aggregationKey = "$ShoppingListItemHistoryAggregate::class.qualifiedName!!:$itemId",
+                aggregationKey = "${ShoppingListItemHistoryAggregate::class.qualifiedName!!}:$itemId",
                 payloadType = ShoppingListEvent::class,
                 initial = ShoppingListItemHistoryAggregate.empty(itemId)
             )

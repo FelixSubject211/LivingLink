@@ -61,7 +61,7 @@ class AuthService(
             val accessToken = jwtService.generateToken(
                 userId = user.id,
                 username = request.username,
-                groupIds = groupStore.getUserIdsInGroup(user.id)
+                groupIds = groupStore.getGroupIdsForUser(user.id)
             )
             val refreshToken = jwtService.generateRefreshToken(
                 userId = user.id,
@@ -82,7 +82,7 @@ class AuthService(
             val newAccessToken = jwtService.generateToken(
                 userId = storedToken.userId,
                 username = storedToken.username,
-                groupIds = groupStore.getUserIdsInGroup(storedToken.userId)
+                groupIds = groupStore.getGroupIdsForUser(storedToken.userId)
             )
             val newRefreshToken = jwtService.generateRefreshToken(
                 userId = storedToken.userId,

@@ -8,7 +8,7 @@ import felix.livinglink.common.UserPrincipal
 import felix.livinglink.common.defaultAppModule
 import felix.livinglink.common.defaultServerConfig
 import felix.livinglink.event.eventRoutes
-import felix.livinglink.eventSourcing.eventSourcingRouts
+import felix.livinglink.eventSourcing.eventSourcingRoutes
 import felix.livinglink.groups.groupRoutes
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -97,7 +97,7 @@ fun Application.module(
             groupRoutes(
                 groupService = appModule.groupService
             )
-            eventSourcingRouts(eventSourcingService = appModule.eventSourcingService)
+            eventSourcingRoutes(eventSourcingService = appModule.eventSourcingService)
         }
     }
 }

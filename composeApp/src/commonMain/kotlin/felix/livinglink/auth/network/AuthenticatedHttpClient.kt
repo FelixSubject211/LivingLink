@@ -16,6 +16,7 @@ import felix.livinglink.common.network.NetworkError
 import felix.livinglink.defaultConfig
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.HttpClientEngine
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProvider
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -85,6 +86,10 @@ class AuthenticatedHttpDefaultClient(
         HttpClient(engine) {
             install(ContentNegotiation) {
                 json(felix.livinglink.json)
+            }
+            install(HttpTimeout) {
+                connectTimeoutMillis = 3000
+                socketTimeoutMillis = 3000
             }
             install(Auth) {
                 bearer {
