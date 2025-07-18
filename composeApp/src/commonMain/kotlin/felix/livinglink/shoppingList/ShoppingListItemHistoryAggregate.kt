@@ -18,25 +18,28 @@ data class ShoppingListItemHistoryAggregate(
 
     fun history(): List<EventSourcingEvent<ShoppingListEvent>> = events
 
-    override fun applyEvent(
-        event: EventSourcingEvent<ShoppingListEvent>
+    override fun applyEvents(
+        events: List<EventSourcingEvent<ShoppingListEvent>>
     ): ShoppingListItemHistoryAggregate {
-        return if (event.payload.itemId != itemId) {
-            this
-        } else {
-            when (val payload = event.payload) {
-                is ShoppingListEvent.ItemAdded -> {
-                    copy(
-                        itemName = payload.itemName,
-                        events = events + event
-                    )
-                }
+        var newName = itemName
+        val filteredEvents = mutableListOf<EventSourcingEvent<ShoppingListEvent>>()
 
-                else -> {
-                    copy(events = events + event)
-                }
+        for (event in events) {
+            if (event.payload.itemId != itemId) continue
+
+            if (event.payload is ShoppingListEvent.ItemAdded) {
+                newName = (event.payload as ShoppingListEvent.ItemAdded).itemName
             }
+
+            filteredEvents += event
         }
+
+        if (filteredEvents.isEmpty()) return this
+
+        return copy(
+            itemName = newName,
+            events = this.events + filteredEvents
+        )
     }
 
     override fun isEmpty(): Boolean = events.isEmpty()

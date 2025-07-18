@@ -129,7 +129,6 @@ class EventSourcingDefaultRepository(
         val key = CacheKey(
             groupId = groupId,
             aggregationKey = aggregationKey,
-            qualifiedTypeName = payloadType.qualifiedName!!
         )
 
         @Suppress("UNCHECKED_CAST")

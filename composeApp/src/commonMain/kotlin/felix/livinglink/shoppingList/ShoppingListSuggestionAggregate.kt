@@ -12,17 +12,21 @@ data class ShoppingListSuggestionAggregate(
     val itemFrequencies: Map<String, Int> = emptyMap()
 ) : Aggregate<ShoppingListSuggestionAggregate, ShoppingListEvent> {
 
-    override fun applyEvent(
-        event: EventSourcingEvent<ShoppingListEvent>
+    override fun applyEvents(
+        events: List<EventSourcingEvent<ShoppingListEvent>>
     ): ShoppingListSuggestionAggregate {
-        val payload = event.payload
-        if (payload is ShoppingListEvent.ItemAdded) {
-            val newItemFrequencies = itemFrequencies.toMutableMap()
-            newItemFrequencies[payload.itemName] = (newItemFrequencies[payload.itemName] ?: 0) + 1
+        if (events.isEmpty()) return this
 
-            return copy(itemFrequencies = newItemFrequencies)
+        val newFrequencies = itemFrequencies.toMutableMap()
+
+        for (event in events) {
+            val payload = event.payload
+            if (payload is ShoppingListEvent.ItemAdded) {
+                newFrequencies[payload.itemName] = (newFrequencies[payload.itemName] ?: 0) + 1
+            }
         }
-        return this
+
+        return copy(itemFrequencies = newFrequencies)
     }
 
     override fun isEmpty(): Boolean = itemFrequencies.isEmpty()

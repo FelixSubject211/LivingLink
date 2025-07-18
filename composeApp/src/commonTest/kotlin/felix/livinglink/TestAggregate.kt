@@ -11,8 +11,9 @@ import kotlinx.serialization.serializer
 data class TestAggregate(
     val events: List<EventSourcingEvent<TestEvent>>
 ) : Aggregate<TestAggregate, TestEvent> {
-    override fun applyEvent(event: EventSourcingEvent<TestEvent>): TestAggregate {
-        return this.copy(events = events + event)
+
+    override fun applyEvents(events: List<EventSourcingEvent<TestEvent>>): TestAggregate {
+        return this.copy(events = this.events + events)
     }
 
     override fun isEmpty(): Boolean {

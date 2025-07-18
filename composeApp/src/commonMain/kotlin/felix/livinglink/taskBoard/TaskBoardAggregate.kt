@@ -21,17 +21,21 @@ data class TaskBoardAggregate(
 
     fun tasksReversed(): List<Task> = tasks.values.reversed()
 
-    override fun applyEvent(event: EventSourcingEvent<TaskBoardEvent>): TaskBoardAggregate {
+    override fun applyEvents(events: List<EventSourcingEvent<TaskBoardEvent>>): TaskBoardAggregate {
+        if (events.isEmpty()) return this
+
         val newTasks = LinkedHashMap(tasks)
 
-        when (val payload = event.payload) {
-            is TaskBoardEvent.TaskCreated -> {
-                val task = Task(
-                    id = payload.taskId,
-                    title = payload.title,
-                    description = payload.description
-                )
-                newTasks[payload.taskId] = task
+        for (event in events) {
+            when (val payload = event.payload) {
+                is TaskBoardEvent.TaskCreated -> {
+                    val task = Task(
+                        id = payload.taskId,
+                        title = payload.title,
+                        description = payload.description
+                    )
+                    newTasks[payload.taskId] = task
+                }
             }
         }
 

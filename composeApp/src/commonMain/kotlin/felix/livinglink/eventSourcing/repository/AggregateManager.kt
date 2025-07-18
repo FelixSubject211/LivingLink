@@ -87,7 +87,7 @@ class AggregateManager<
         val newEvents = eventStore.getEventsSince(groupId, lastSeenId)
             .filterByPayloadType(payloadType)
 
-        val updated = newEvents.fold(base) { acc, ev -> acc.applyEvent(ev) }
+        val updated = base.applyEvents(newEvents)
         val latestId = newEvents.lastOrNull()?.eventId ?: lastSeenId
 
         val snapshot = AggregateSnapshot(updated, latestId)
@@ -112,7 +112,7 @@ class AggregateManager<
             else -> initial
         }
 
-        val updated = relevant.fold(current) { acc, ev -> acc.applyEvent(ev) }
+        val updated = current.applyEvents(relevant)
         val latestId = events.maxOf { it.eventId }
 
         val snapshot = AggregateSnapshot(updated, latestId)
@@ -135,6 +135,5 @@ class AggregateManager<
     private fun cacheKey() = CacheKey(
         groupId = groupId,
         aggregationKey = aggregationKey,
-        qualifiedTypeName = payloadType.qualifiedName!!
     )
 }

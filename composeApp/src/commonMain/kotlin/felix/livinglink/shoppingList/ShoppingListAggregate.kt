@@ -23,36 +23,38 @@ data class ShoppingListAggregate(
     fun openItemsReversed(): List<Item> = openItems.values.reversed()
     fun completedItemsReversed(): List<Item> = completedItems.values.reversed()
 
-    override fun applyEvent(event: EventSourcingEvent<ShoppingListEvent>): ShoppingListAggregate {
-        val newOpenItems = LinkedHashMap(openItems)
-        val newCompletedItems = LinkedHashMap(completedItems)
+    override fun applyEvents(events: List<EventSourcingEvent<ShoppingListEvent>>): ShoppingListAggregate {
+        val openItems = LinkedHashMap(this.openItems)
+        val completedItems = LinkedHashMap(this.completedItems)
 
-        when (val payload = event.payload) {
-            is ShoppingListEvent.ItemAdded -> {
-                val item = Item(id = payload.itemId, name = payload.itemName, isCompleted = false)
-                newOpenItems[payload.itemId] = item
-                newCompletedItems.remove(payload.itemId)
-            }
-
-            is ShoppingListEvent.ItemCompleted -> {
-                newOpenItems.remove(payload.itemId)?.let {
-                    newCompletedItems[payload.itemId] = it.copy(isCompleted = true)
+        for (event in events) {
+            when (val payload = event.payload) {
+                is ShoppingListEvent.ItemAdded -> {
+                    val item = Item(payload.itemId, payload.itemName, false)
+                    openItems[payload.itemId] = item
+                    completedItems.remove(payload.itemId)
                 }
-            }
 
-            is ShoppingListEvent.ItemUncompleted -> {
-                newCompletedItems.remove(payload.itemId)?.let {
-                    newOpenItems[payload.itemId] = it.copy(isCompleted = false)
+                is ShoppingListEvent.ItemCompleted -> {
+                    openItems.remove(payload.itemId)?.let {
+                        completedItems[payload.itemId] = it.copy(isCompleted = true)
+                    }
                 }
-            }
 
-            is ShoppingListEvent.ItemDeleted -> {
-                newOpenItems.remove(payload.itemId)
-                newCompletedItems.remove(payload.itemId)
+                is ShoppingListEvent.ItemUncompleted -> {
+                    completedItems.remove(payload.itemId)?.let {
+                        openItems[payload.itemId] = it.copy(isCompleted = false)
+                    }
+                }
+
+                is ShoppingListEvent.ItemDeleted -> {
+                    openItems.remove(payload.itemId)
+                    completedItems.remove(payload.itemId)
+                }
             }
         }
 
-        return copy(openItems = newOpenItems, completedItems = newCompletedItems)
+        return copy(openItems = openItems, completedItems = completedItems)
     }
 
     override fun isEmpty(): Boolean = openItems.isEmpty() && completedItems.isEmpty()

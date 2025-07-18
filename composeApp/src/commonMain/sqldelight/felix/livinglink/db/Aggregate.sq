@@ -1,0 +1,26 @@
+CREATE TABLE aggregate (
+    group_id TEXT NOT NULL,
+    aggregation_key TEXT NOT NULL,
+    last_seen_global_event_id INTEGER NOT NULL,
+    snapshot_json TEXT NOT NULL,
+
+    PRIMARY KEY (group_id, aggregation_key)
+);
+
+getAggregate:
+SELECT * FROM aggregate
+WHERE group_id = :groupId
+  AND aggregation_key = :aggregationKey;
+
+insertAggregate:
+INSERT OR REPLACE INTO aggregate(
+    group_id, aggregation_key, last_seen_global_event_id, snapshot_json
+) VALUES (?, ?, ?, ?);
+
+clear:
+DELETE FROM aggregate
+WHERE group_id = :groupId
+  AND aggregation_key = :aggregationKey;
+
+clearAll:
+DELETE FROM aggregate;
