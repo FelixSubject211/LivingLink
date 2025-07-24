@@ -2,6 +2,7 @@ package felix.livinglink.ui.taskBoard.list
 
 import felix.livinglink.common.model.LivingLinkResult
 import felix.livinglink.eventSourcing.repository.EventSourcingRepository
+import felix.livinglink.group.Group
 import felix.livinglink.taskBoard.TaskBoardAggregate
 import felix.livinglink.taskBoard.TaskBoardEvent
 import felix.livinglink.ui.common.navigation.Navigator
@@ -25,12 +26,8 @@ class TaskBoardListViewModel(
         data.copy(showAddTask = true)
     }
 
-    fun closeAddTask() = viewModelState.perform { data ->
-        data.copy(
-            showAddTask = false,
-            addTaskTitle = "",
-            addTaskDescription = ""
-        )
+    fun closeAddTask() = viewModelState.perform { _ ->
+        initialState
     }
 
     @OptIn(ExperimentalUuidApi::class)
@@ -41,17 +38,14 @@ class TaskBoardListViewModel(
                 payload = TaskBoardEvent.TaskCreated(
                     taskId = Uuid.random().toString(),
                     title = currentData.addTaskTitle,
-                    description = currentData.addTaskDescription
+                    description = currentData.addTaskDescription,
+                    memberIds = emptyList()
                 )
             )
         },
         onSuccess = { currentData, _ ->
             LivingLinkResult.Success(
-                currentData.copy(
-                    showAddTask = false,
-                    addTaskTitle = "",
-                    addTaskDescription = ""
-                )
+                data = initialState
             )
         }
     )
@@ -68,21 +62,31 @@ class TaskBoardListViewModel(
         current.copy(addTaskDescription = description)
     }
 
+    fun toggleMember(userId: String) = viewModelState.perform { current ->
+        val updated = current.selectedMemberIds.toMutableList().apply {
+            if (contains(userId)) remove(userId) else add(userId)
+        }
+        current.copy(selectedMemberIds = updated)
+    }
+
     companion object {
         val initialState = Data(
             showAddTask = false,
             addTaskTitle = "",
-            addTaskDescription = ""
+            addTaskDescription = "",
+            selectedMemberIds = emptyList()
         )
     }
 
     data class Data(
         val showAddTask: Boolean,
         val addTaskTitle: String,
-        val addTaskDescription: String
+        val addTaskDescription: String,
+        val selectedMemberIds: List<String>
     )
 
     data class LoadableData(
+        val group: Group,
         val aggregate: TaskBoardAggregate
     )
 }

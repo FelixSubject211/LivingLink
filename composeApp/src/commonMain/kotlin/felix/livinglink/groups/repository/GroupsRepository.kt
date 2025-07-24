@@ -103,7 +103,7 @@ class GroupsDefaultRepository(
         }.stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
-            initialValue = RepositoryState.Empty
+            initialValue = RepositoryState.Empty(null)
         )
 
     override fun group(groupId: String): Flow<RepositoryState<Group, NetworkError>> {

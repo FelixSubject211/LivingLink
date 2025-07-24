@@ -12,7 +12,7 @@ import SwiftUI
 func LoadableStatefulView<LoadableData: AnyObject, Data, Error: LivingLinkError>(
     viewModel: LoadableStatefulViewModel,
     buildAlert: @escaping (Error) -> Alert,
-    emptyContent: @escaping (Data) -> any View = { defaultEmptyContent($0) },
+    emptyContent: @escaping (LoadableData?, Data) -> any View = { defaultEmptyContent($0, $1) },
     loadingContent: @escaping () -> any View = defaultLoadingContent,
     content: @escaping (LoadableData, Data) -> any View
 ) -> some View {
@@ -25,7 +25,7 @@ func LoadableStatefulView<LoadableData: AnyObject, Data, Error: LivingLinkError>
     )
 }
 
-private func defaultEmptyContent<Data>(_ _: Data) -> AnyView {
+private func defaultEmptyContent<LoadableData, Data>(_ _: LoadableData?, _ _: Data) -> AnyView {
     EmptyView()
         .fillMaxSize()
         .background {
@@ -48,7 +48,7 @@ private func defaultLoadingContent() -> AnyView {
 private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error: LivingLinkError>: View {
     let viewModel: LoadableStatefulViewModel
     let buildAlert: (Error) -> Alert
-    let emptyContent: (Data) -> any View
+    let emptyContent: (LoadableData?, Data) -> any View
     let loadingContent: () -> any View
     let content: (LoadableData, Data) -> any View
 
@@ -60,7 +60,7 @@ private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error:
     init(
         viewModel: LoadableStatefulViewModel,
         buildAlert: @escaping (Error) -> Alert,
-        emptyContent: @escaping (Data) -> any View,
+        emptyContent: @escaping (LoadableData?, Data) -> any View,
         loadingContent: @escaping () -> any View,
         content: @escaping (LoadableData, Data) -> any View
     ) {
@@ -106,8 +106,12 @@ private struct LoadableStatefulViewContent<LoadableData: AnyObject, Data, Error:
     @ViewBuilder
     private func loadableStateContent() -> some View {
         switch loadableData.value {
-        case is LoadableViewModelStateStateEmpty<LoadableData, LivingLinkError>:
-            emptyContent(data.value).eraseToAnyView()
+        case let empyState as LoadableViewModelStateStateEmpty<LoadableData, LivingLinkError>:
+            if let emptyData = empyState.data {
+                emptyContent(empyState.data, data.value).eraseToAnyView()
+            } else {
+                emptyContent(nil, data.value).eraseToAnyView()
+            }
 
         case is LoadableViewModelStateStateLoading<LoadableData, LivingLinkError>:
             loadingContent().eraseToAnyView()

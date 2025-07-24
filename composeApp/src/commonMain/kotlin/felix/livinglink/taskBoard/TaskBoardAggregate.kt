@@ -16,7 +16,8 @@ data class TaskBoardAggregate(
     data class Task(
         val id: String,
         val title: String,
-        val description: String
+        val description: String,
+        val memberIds: List<String>
     )
 
     fun tasksReversed(): List<Task> = tasks.values.reversed()
@@ -32,7 +33,8 @@ data class TaskBoardAggregate(
                     val task = Task(
                         id = payload.taskId,
                         title = payload.title,
-                        description = payload.description
+                        description = payload.description,
+                        memberIds = payload.memberIds
                     )
                     newTasks[payload.taskId] = task
                 }

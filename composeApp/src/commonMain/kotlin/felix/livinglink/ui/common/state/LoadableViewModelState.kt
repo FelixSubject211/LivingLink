@@ -47,7 +47,8 @@ interface LoadableViewModelState<
     fun cancel()
 
     sealed class State<LOADABLE_DATA, LOADABLE_ERROR> {
-        class Empty<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
+        class Empty<LOADABLE_DATA, LOADABLE_ERROR>(val data: LOADABLE_DATA?) :
+            State<LOADABLE_DATA, LOADABLE_ERROR>()
         class Loading<LOADABLE_DATA, LOADABLE_ERROR> : State<LOADABLE_DATA, LOADABLE_ERROR>()
         data class Data<LOADABLE_DATA, LOADABLE_ERROR>(val data: LOADABLE_DATA) :
             State<LOADABLE_DATA, LOADABLE_ERROR>()
@@ -57,7 +58,8 @@ interface LoadableViewModelState<
         ): State<LOADABLE_DATA2, LOADABLE_ERROR> {
             return when (this) {
                 is Empty<*, *> -> {
-                    Empty()
+                    @Suppress("UNCHECKED_CAST")
+                    Empty(transform(this.data as LOADABLE_DATA1))
                 }
 
                 is Loading<*, *> -> {
@@ -75,8 +77,8 @@ interface LoadableViewModelState<
         fun dataOrNull(): LOADABLE_DATA? {
             @Suppress("UNCHECKED_CAST")
             return when (this) {
-                is Empty<*, *> -> null
                 is Loading<*, *> -> null
+                is Empty<*, *> -> this.data as LOADABLE_DATA?
                 is Data<*, *> -> this.data as LOADABLE_DATA
             }
         }
@@ -131,9 +133,9 @@ class LoadableViewModelDefaultState<
 
     override val loadableData = input.mapNotNull { repoState ->
         when (repoState) {
-            RepositoryState.Empty -> {
+            is RepositoryState.Empty -> {
                 _loading.value = false
-                LoadableViewModelState.State.Empty()
+                LoadableViewModelState.State.Empty(repoState.data)
             }
 
             is RepositoryState.Loading<LOADABLE_DATA> -> {

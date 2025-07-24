@@ -22,8 +22,12 @@ struct TaskBoardListScreen: View {
                     dismiss: viewModel.closeError
                 )
             },
-            emptyContent: { data in
-                TaskBoardListEmptyScreen(data: data, viewModel: viewModel)
+            emptyContent: { loadableData, data in
+                TaskBoardListEmptyScreen(
+                    loadableData: loadableData,
+                    data: data,
+                    viewModel: viewModel
+                )
             },
             content: { loadableData, data in
                 TaskBoardListContentScreen(

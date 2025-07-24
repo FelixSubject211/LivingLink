@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
 sealed class RepositoryState<out DATA, out ERROR> {
-    data object Empty : RepositoryState<Nothing, Nothing>()
+    data class Empty<out DATA>(val data: DATA?) : RepositoryState<DATA, Nothing>()
     data class Loading<out DATA>(val data: DATA?) : RepositoryState<DATA, Nothing>()
     data class Error<out ERROR>(val error: ERROR) : RepositoryState<Nothing, ERROR>()
     data class Data<out DATA, out ERROR>(val data: DATA) : RepositoryState<DATA, ERROR>()
@@ -13,8 +13,8 @@ sealed class RepositoryState<out DATA, out ERROR> {
 
 fun <DATA, ERROR> RepositoryState<DATA, ERROR>.dataOrNull(): DATA? {
     return when (this) {
-        RepositoryState.Empty -> null
         is RepositoryState.Error -> null
+        is RepositoryState.Empty -> this.data
         is RepositoryState.Loading -> this.data
         is RepositoryState.Data -> this.data
     }
@@ -30,8 +30,8 @@ fun <DATA1, DATA2, ERROR> RepositoryState<DATA1, ERROR>.mapState(
     transform: (DATA1) -> DATA2?
 ): RepositoryState<DATA2, ERROR> {
     return when (this) {
-        RepositoryState.Empty -> {
-            RepositoryState.Empty
+        is RepositoryState.Empty -> {
+            RepositoryState.Empty(this.data?.let { transform(it) })
         }
 
         is RepositoryState.Loading -> {
@@ -45,7 +45,7 @@ fun <DATA1, DATA2, ERROR> RepositoryState<DATA1, ERROR>.mapState(
         is RepositoryState.Data -> {
             val transformedData = transform(this.data)
             if (transformedData == null) {
-                RepositoryState.Empty
+                RepositoryState.Empty(null)
             } else {
                 RepositoryState.Data(transformedData)
             }
@@ -78,9 +78,16 @@ fun <T1, T2, E, R> combineStates(
                 RepositoryState.Data(result)
             }
 
-            value1 is RepositoryState.Empty || value2 is RepositoryState.Empty -> RepositoryState.Empty
+            else -> {
+                val data1 = value1.dataOrNull()
+                val data2 = value2.dataOrNull()
 
-            else -> RepositoryState.Empty
+                if (data1 != null && data2 != null) {
+                    RepositoryState.Empty(transform(data1, data2))
+                } else {
+                    RepositoryState.Empty(null)
+                }
+            }
         }
     }
 }

@@ -39,6 +39,10 @@ struct TaskBoardListContentScreen: View {
             .padding()
         }
         .ignoresSafeArea(.keyboard)
-        .modifier(TaskBoardListScreenScaffoldModifier(data: data, viewModel: viewModel))
+        .modifier(TaskBoardListScreenScaffoldModifier(
+            group: loadableData.group,
+            data: data,
+            viewModel: viewModel
+        ))
     }
 }

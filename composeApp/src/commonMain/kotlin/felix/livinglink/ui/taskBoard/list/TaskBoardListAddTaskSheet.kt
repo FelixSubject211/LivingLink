@@ -6,10 +6,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import felix.livinglink.group.Group
 import felix.livinglink.ui.common.ModalBottomSheet
+import felix.livinglink.ui.common.MultiSelectDropdown
 
 @Composable
 fun TaskBoardListAddTaskSheet(
+    group: Group?,
     data: TaskBoardListViewModel.Data,
     viewModel: TaskBoardListViewModel
 ) {
@@ -35,6 +38,18 @@ fun TaskBoardListAddTaskSheet(
             label = { Text(TaskBoardListScreenLocalizables.addTaskSheetDescriptionLabel()) },
             minLines = 2,
             modifier = Modifier.fillMaxWidth()
+        )
+
+        MultiSelectDropdown(
+            title = TaskBoardListScreenLocalizables.addTaskSheetMembersLabel(),
+            options = group?.groupMembersSortedByRoleAndName ?: emptyList(),
+            selected = data.selectedMemberIds.mapNotNull { id ->
+                group?.groupMembersSortedByRoleAndName?.find { it.id == id }
+            },
+            valueToString = { it.name },
+            onSelectionChanged = { user ->
+                viewModel.toggleMember(userId = user.id)
+            }
         )
     }
 }

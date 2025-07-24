@@ -33,6 +33,7 @@
 		3E5A65562DB5A94C007A66A8 /* GroupListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5A65552DB5A945007A66A8 /* GroupListScreen.swift */; };
 		3E5D4F502DD7CD1500A4C150 /* ShoppingListListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5D4F4F2DD7CD1400A4C150 /* ShoppingListListScreen.swift */; };
 		3E773E932D94388000434B2D /* ViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E773E922D94387A00434B2D /* ViewExtension.swift */; };
+		3E7A4FDE2E311A7A00303AB2 /* MultiPicker in Frameworks */ = {isa = PBXBuildFile; productRef = 3E7A4FDD2E311A7A00303AB2 /* MultiPicker */; };
 		3E9A64F02E1BB2AB00B2D61B /* TaskBoardListScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64EF2E1BB2A800B2D61B /* TaskBoardListScreen.swift */; };
 		3E9A64F42E1BB38300B2D61B /* TaskBoardListEmptyScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F32E1BB38100B2D61B /* TaskBoardListEmptyScreen.swift */; };
 		3E9A64F62E1BB3AB00B2D61B /* TaskBoardListScreenScaffoldModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E9A64F52E1BB3A900B2D61B /* TaskBoardListScreenScaffoldModifier.swift */; };
@@ -54,6 +55,8 @@
 		3ECD5E0E2DB62ADB00CA329F /* TextFieldAlertModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */; };
 		3EE42FCF2E1A456700CDC3BC /* GroupDeleteConfirmationAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */; };
 		3EE42FD12E1A459900CDC3BC /* GroupInviteCodeSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */; };
+		3EE7E9D32E31478D005628CC /* CustomMultiPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE7E9D22E31478B005628CC /* CustomMultiPicker.swift */; };
+		3EE7E9D52E316E30005628CC /* TaskBoardListAddTaskSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE7E9D42E316E2E005628CC /* TaskBoardListAddTaskSheet.swift */; };
 		3EEC02402DB3685F0059D973 /* StateFlowCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEC023F2DB3685D0059D973 /* StateFlowCollector.swift */; };
 		3EEEF8182D8F53B100FE7D80 /* KotlinStateFlowExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */; };
 		3EEEF81A2D8F541500FE7D80 /* StatefulView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EEEF8192D8F540700FE7D80 /* StatefulView.swift */; };
@@ -110,6 +113,8 @@
 		3ECD5E0D2DB62ADA00CA329F /* TextFieldAlertModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFieldAlertModifier.swift; sourceTree = "<group>"; };
 		3EE42FCE2E1A456500CDC3BC /* GroupDeleteConfirmationAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupDeleteConfirmationAlert.swift; sourceTree = "<group>"; };
 		3EE42FD02E1A459300CDC3BC /* GroupInviteCodeSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupInviteCodeSheet.swift; sourceTree = "<group>"; };
+		3EE7E9D22E31478B005628CC /* CustomMultiPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomMultiPicker.swift; sourceTree = "<group>"; };
+		3EE7E9D42E316E2E005628CC /* TaskBoardListAddTaskSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskBoardListAddTaskSheet.swift; sourceTree = "<group>"; };
 		3EEC023F2DB3685D0059D973 /* StateFlowCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StateFlowCollector.swift; sourceTree = "<group>"; };
 		3EEEF8172D8F53A300FE7D80 /* KotlinStateFlowExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinStateFlowExtension.swift; sourceTree = "<group>"; };
 		3EEEF8192D8F540700FE7D80 /* StatefulView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatefulView.swift; sourceTree = "<group>"; };
@@ -127,6 +132,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E7A4FDE2E311A7A00303AB2 /* MultiPicker in Frameworks */,
 				3E36EA252DDBCF2B00369930 /* SwiftFormat in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -180,6 +186,7 @@
 		3E9A64EE2E1BB29200B2D61B /* List */ = {
 			isa = PBXGroup;
 			children = (
+				3EE7E9D42E316E2E005628CC /* TaskBoardListAddTaskSheet.swift */,
 				3E9A64F92E1BB3E500B2D61B /* TaskBoardListItemCard.swift */,
 				3E9A64F72E1BB3C900B2D61B /* TaskBoardListContentScreen.swift */,
 				3E9A64F52E1BB3A900B2D61B /* TaskBoardListScreenScaffoldModifier.swift */,
@@ -275,6 +282,7 @@
 		3EEC02432DB37DFF0059D973 /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				3EE7E9D22E31478B005628CC /* CustomMultiPicker.swift */,
 				3E9A64FD2E1BFD9100B2D61B /* CustomTextEditor.swift */,
 				3E9A64FB2E1BBA5500B2D61B /* ModalBottomSheet.swift */,
 				3ECB4A082E10061C00E5C540 /* InvisibleAlertHost.swift */,
@@ -384,6 +392,7 @@
 			name = iosApp;
 			packageProductDependencies = (
 				3E36EA242DDBCF2B00369930 /* SwiftFormat */,
+				3E7A4FDD2E311A7A00303AB2 /* MultiPicker */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* LivingLink.app */;
@@ -416,6 +425,7 @@
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
 				3E36EA232DDBCF2B00369930 /* XCRemoteSwiftPackageReference "SwiftFormat" */,
+				3E7A4FDC2E311A7A00303AB2 /* XCRemoteSwiftPackageReference "MultiPicker" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -519,6 +529,7 @@
 				3E9A64FE2E1BFD9200B2D61B /* CustomTextEditor.swift in Sources */,
 				3E9A64FA2E1BB3E700B2D61B /* TaskBoardListItemCard.swift in Sources */,
 				3ECB4A092E10061D00E5C540 /* InvisibleAlertHost.swift in Sources */,
+				3EE7E9D32E31478D005628CC /* CustomMultiPicker.swift in Sources */,
 				3E9A64F42E1BB38300B2D61B /* TaskBoardListEmptyScreen.swift in Sources */,
 				3EEEF8202D8F6C5D00FE7D80 /* CustomSecureField.swift in Sources */,
 				3EA3E57D2E211D68009D197A /* GroupSettingsScreen.swift in Sources */,
@@ -531,6 +542,7 @@
 				3EEC02402DB3685F0059D973 /* StateFlowCollector.swift in Sources */,
 				3E2599BB2D93F06E009CDC00 /* LivingLinkErrorExtension.swift in Sources */,
 				3E2599BD2D93F0C1009CDC00 /* LoadbaleStatefulView.swift in Sources */,
+				3EE7E9D52E316E30005628CC /* TaskBoardListAddTaskSheet.swift in Sources */,
 				3ECD5E0E2DB62ADB00CA329F /* TextFieldAlertModifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -744,6 +756,14 @@
 				minimumVersion = 0.56.1;
 			};
 		};
+		3E7A4FDC2E311A7A00303AB2 /* XCRemoteSwiftPackageReference "MultiPicker" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/toastersocks/MultiPicker";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -751,6 +771,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3E36EA232DDBCF2B00369930 /* XCRemoteSwiftPackageReference "SwiftFormat" */;
 			productName = SwiftFormat;
+		};
+		3E7A4FDD2E311A7A00303AB2 /* MultiPicker */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3E7A4FDC2E311A7A00303AB2 /* XCRemoteSwiftPackageReference "MultiPicker" */;
+			productName = MultiPicker;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

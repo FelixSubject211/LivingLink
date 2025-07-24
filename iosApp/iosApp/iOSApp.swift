@@ -18,12 +18,11 @@ struct iOSApp: App {
             whenContainedInInstancesOf: [UIAlertController.self]
         ).tintColor = UIColor(DesignSystem.Colors.primary)
 
-        let appearance = UITabBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = UIColor(DesignSystem.Colors.uiTabBarBackgroundColor)
-
-        UITabBar.appearance().standardAppearance = appearance
-        UITabBar.appearance().scrollEdgeAppearance = appearance
+        let tabAppearance = UITabBarAppearance()
+        tabAppearance.configureWithOpaqueBackground()
+        tabAppearance.backgroundColor = UIColor(DesignSystem.Colors.uiTabBarBackgroundColor)
+        UITabBar.appearance().standardAppearance = tabAppearance
+        UITabBar.appearance().scrollEdgeAppearance = tabAppearance
     }
 
     var body: some Scene {

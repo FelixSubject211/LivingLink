@@ -8,10 +8,12 @@ import felix.livinglink.ui.common.state.LoadableStatefulView
 
 @Composable
 fun TaskBoardListScreen(viewModel: TaskBoardListViewModel) {
+    val loadableData = viewModel.loadableData.collectAsState().value
     val data = viewModel.data.collectAsState().value
 
     if (data.showAddTask) {
         TaskBoardListAddTaskSheet(
+            group = loadableData.dataOrNull()?.group,
             data = data,
             viewModel = viewModel
         )

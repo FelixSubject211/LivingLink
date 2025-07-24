@@ -10,9 +10,9 @@ import ComposeApp
 import SwiftUI
 
 struct TaskBoardListScreenScaffoldModifier: ViewModifier {
+    let group: SharedGroup?
     let data: TaskBoardListViewModel.Data
     let viewModel: TaskBoardListViewModel
-    let localizables = TaskBoardListScreenLocalizables()
 
     func body(content: Content) -> some View {
         content
@@ -21,26 +21,7 @@ struct TaskBoardListScreenScaffoldModifier: ViewModifier {
                 DesignSystem.background
                     .ignoresSafeArea()
             }.sheet(isPresented: .constant(data.showAddTask, onSetFalse: viewModel.closeAddTask)) {
-                ModalBottomSheet(
-                    title: localizables.addTaskSheetTitle.localized,
-                    onDismiss: viewModel.closeAddTask,
-                    onConfirm: viewModel.addTask,
-                    confirmButtonEnabled: viewModel.addTaskConfirmButtonEnabled()
-                ) {
-                    VStack(spacing: DesignSystem.Spacing.betweenElements) {
-                        CustomTextField(
-                            label: localizables.addTaskSheetTitleLabel.localized,
-                            text: data.addTaskTitle,
-                            onChange: viewModel.updateAddTaskTitle(title:)
-                        ).textFieldStyle(DesignSystem.CustomTextFieldStyle())
-
-                        CustomTextEditor(
-                            label: localizables.addTaskSheetDescriptionLabel.localized,
-                            text: data.addTaskDescription,
-                            onChange: viewModel.updateAddTaskDescription(description:)
-                        )
-                    }
-                }
+                TaskBoardListAddTaskSheet(group: group, data: data, viewModel: viewModel)
             }
     }
 }

@@ -55,8 +55,11 @@ class AggregateManager<
         scope.launch {
             try {
                 val snapshot = loadOrRebuild()
-                state.value = if (snapshot.aggregate.isEmpty())
-                    RepositoryState.Empty else RepositoryState.Data(snapshot.aggregate)
+                if (snapshot.aggregate.isEmpty()) {
+                    state.value =  RepositoryState.Empty(snapshot.aggregate)
+                } else {
+                    state.value = RepositoryState.Data(snapshot.aggregate)
+                }
 
                 scope.launch {
                     incomingEvents.collect { batch ->
@@ -118,7 +121,7 @@ class AggregateManager<
         val snapshot = AggregateSnapshot(updated, latestId)
         aggregateStore.store(cacheKey(), initial.serializer(), snapshot)
         state.value = if (updated.isEmpty()) {
-            RepositoryState.Empty
+            RepositoryState.Empty(updated)
         } else {
             RepositoryState.Data(updated)
         }

@@ -37,7 +37,7 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
         scope.launch {
             val initialData = loadFromDb().firstOrNull()
             if (initialData?.isEmpty() == true || initialData == null) {
-                stateFlow.value = RepositoryState.Empty
+                stateFlow.value = RepositoryState.Empty(null)
             } else {
                 stateFlow.value = RepositoryState.Data(initialData)
             }
@@ -47,7 +47,7 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
             events.collect { event ->
                 when (event) {
                     FetchAndStoreDataEvent.CLEAR -> {
-                        stateFlow.value = RepositoryState.Empty
+                        stateFlow.value = RepositoryState.Empty(null)
                         saveToDb(emptyList())
                     }
 
@@ -58,7 +58,7 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
                             is LivingLinkResult.Success<List<DATA>> -> {
                                 saveToDb(result.data)
                                 stateFlow.value = if (result.data.isEmpty()) {
-                                    RepositoryState.Empty
+                                    RepositoryState.Empty(null)
                                 } else {
                                     RepositoryState.Data(result.data)
                                 }
@@ -67,7 +67,9 @@ class FetchAndStoreDataDefaultHandler<DATA, ERROR : LivingLinkError>(
                             is LivingLinkResult.Error<ERROR> -> {
                                 stateFlow.value = RepositoryState.Error(error = result.error)
                                 if (stateFlow.value.dataOrNull()?.isEmpty() == true) {
-                                    stateFlow.value = RepositoryState.Empty
+                                    stateFlow.value = RepositoryState.Empty(
+                                        data = stateFlow.value.dataOrNull()
+                                    )
                                 }
                             }
                         }

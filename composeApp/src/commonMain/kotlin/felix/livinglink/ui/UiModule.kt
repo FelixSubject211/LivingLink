@@ -193,17 +193,27 @@ fun defaultUiModule(
         }
 
         override fun taskBoardListViewModel(groupId: String): TaskBoardListViewModel {
+            val input = combineStates(
+                eventSourcingRepository.aggregateState(
+                    groupId = groupId,
+                    aggregationKey = TaskBoardAggregate::class.qualifiedName!!,
+                    payloadType = TaskBoardEvent::class,
+                    initial = TaskBoardAggregate.empty
+                ),
+                groupsRepository.group(groupId),
+            ) { aggregate, group ->
+                TaskBoardListViewModel.LoadableData(
+                    aggregate = aggregate,
+                    group = group
+                )
+            }
+
             return TaskBoardListViewModel(
                 groupId = groupId,
                 navigator = navigator,
                 eventSourcingRepository = eventSourcingRepository,
                 viewModelState = LoadableViewModelDefaultState(
-                    input = eventSourcingRepository.aggregateState(
-                        groupId = groupId,
-                        aggregationKey = TaskBoardAggregate::class.qualifiedName!!,
-                        payloadType = TaskBoardEvent::class,
-                        initial = TaskBoardAggregate.empty
-                    ).mapState { TaskBoardListViewModel.LoadableData(it) },
+                    input = input,
                     initialState = TaskBoardListViewModel.initialState,
                     hapticsController = hapticsController,
                     scope = defaultScope.newChildScope()

@@ -22,7 +22,7 @@ struct GroupListScreen: View {
                     dismiss: viewModel.closeError
                 )
             },
-            emptyContent: { data in
+            emptyContent: { _, data in
                 GroupListEmptyScreen(
                     data: data,
                     viewModel: viewModel

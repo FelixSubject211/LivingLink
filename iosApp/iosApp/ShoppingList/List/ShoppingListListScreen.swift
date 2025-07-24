@@ -22,7 +22,7 @@ struct ShoppingListListScreen: View {
                     dismiss: viewModel.closeError
                 )
             },
-            emptyContent: { data in
+            emptyContent: { _, data in
                 ShoppingListListEmptyScreen(data: data, viewModel: viewModel)
             },
             content: { loadbaleData, data in

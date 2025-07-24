@@ -10,6 +10,7 @@ import ComposeApp
 import SwiftUI
 
 struct TaskBoardListEmptyScreen: View {
+    let loadableData: TaskBoardListViewModel.LoadableData?
     let data: TaskBoardListViewModel.Data
     let viewModel: TaskBoardListViewModel
     let localizables = TaskBoardListScreenLocalizables()
@@ -26,6 +27,10 @@ struct TaskBoardListEmptyScreen: View {
         }
         .ignoresSafeArea(.keyboard)
         .padding(DesignSystem.Padding.large)
-        .modifier(TaskBoardListScreenScaffoldModifier(data: data, viewModel: viewModel))
+        .modifier(TaskBoardListScreenScaffoldModifier(
+            group: loadableData?.group,
+            data: data,
+            viewModel: viewModel
+        ))
     }
 }
