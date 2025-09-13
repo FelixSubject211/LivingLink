@@ -1,0 +1,22 @@
+FROM gradle:8.11.1-jdk17 AS build
+WORKDIR /app
+
+COPY build.gradle.kts settings.gradle.kts gradle.properties ./
+COPY composeApp/build.gradle.kts composeApp/
+COPY shared/build.gradle.kts shared/
+RUN gradle :composeApp:wasmJsBrowserDevelopmentDistribution --no-daemon \
+    -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=512m" \
+    --max-workers=1 || true
+
+COPY . .
+
+RUN gradle :composeApp:wasmJsBrowserDevelopmentDistribution --no-daemon \
+    -Dorg.gradle.jvmargs="-Xmx4g -XX:+UseParallelGC -XX:MaxMetaspaceSize=512m" \
+    --max-workers=1
+
+FROM nginx:alpine
+WORKDIR /usr/share/nginx/html
+
+COPY --from=build /app/composeApp/build/dist/wasmJs/developmentExecutable/ ./
+
+EXPOSE 80

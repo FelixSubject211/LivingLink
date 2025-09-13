@@ -10,20 +10,32 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import livinglink.composeapp.generated.resources.Res
 import livinglink.composeapp.generated.resources.compose_multiplatform
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
 fun App() {
+    val scope = CoroutineScope(Dispatchers.Main)
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
+        var greatFromServer by remember { mutableStateOf<String?>(null) }
+
         Column(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.primaryContainer)
@@ -31,7 +43,12 @@ fun App() {
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Button(onClick = { showContent = !showContent }) {
+            Button(onClick = {
+                scope.launch {
+                    showContent = !showContent
+                    greatFromServer = client.get("").bodyAsText()
+                }
+            }) {
                 Text("Click me!")
             }
             AnimatedVisibility(showContent) {
@@ -40,8 +57,18 @@ fun App() {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Image(painterResource(Res.drawable.compose_multiplatform), null)
-                    Text("Compose: $greeting")
+                    Image(
+                        painterResource(
+                            resource = Res.drawable.compose_multiplatform
+                        ),
+                        contentDescription = null
+                    )
+
+                    Text(greeting)
+
+                    greatFromServer?.let {
+                        Text(it)
+                    }
                 }
             }
         }
