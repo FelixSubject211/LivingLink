@@ -6,15 +6,23 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.kotlinPluginSerialization)
+    alias(libs.plugins.i18n4k)
+    alias(libs.plugins.mokkery)
 }
 
 kotlin {
+    i18n4k {
+        sourceCodeLocales = listOf("en", "de")
+        languageFilesOutputDirectory = "$projectDir/src/commonMain/composeResources/files/i18n"
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
+
     listOf(
         iosArm64(),
         iosSimulatorArm64()
@@ -24,21 +32,23 @@ kotlin {
             isStatic = true
         }
     }
-    
+
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         browser()
         binaries.executable()
     }
-    
+
     sourceSets {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.ktor.client.okhttp)
+            implementation(libs.kvault)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.kvault)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -49,11 +59,20 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
+            implementation(libs.compose.icons.fontawesome)
+            implementation(libs.i18n4k.core)
+            implementation(libs.i18n4k.cldr)
+            implementation(libs.ktor.serialization.json)
             implementation(libs.ktor.client.core)
+            implementation(libs.kotlinx.serialization.json)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.client.auth)
+            implementation(libs.turbine)
             implementation(projects.shared)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
+            implementation(libs.coroutines.test)
         }
     }
 }

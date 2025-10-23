@@ -1,73 +1,32 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Server.
+### Project Structure
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+This is a Kotlin Multiplatform project targeting Android, iOS, Web, and Server.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+* [/composeApp](./composeApp/src) contains shared code for your Compose Multiplatform applications:
+    - **commonMain** (`./composeApp/src/commonMain/kotlin`): code shared across all targets
+    - Platform-specific folders (e.g., **iosMain**, **jvmMain**) contain code for specific targets such as iOS
+      CoreCrypto or JVM desktop features
 
-* [/server](./server/src/main/kotlin) is for the Ktor server application.
+* [/iosApp](./iosApp/iosApp) contains the iOS application entry point. Even if the UI is shared via Compose
+  Multiplatform, SwiftUI code and Xcode configuration live here.
 
-* [/shared](./shared/src) is for the code that will be shared between all targets in the project.
-  The most important subfolder is [commonMain](./shared/src/commonMain/kotlin). If preferred, you
-  can add code to the platform-specific folders here too.
+* [/server](./server/src/main/kotlin) contains the Ktor server application.
 
-### Build and Run Android Application
+* [/shared](./shared/src) contains shared code for all targets. The main folder is **commonMain** (
+  `./shared/src/commonMain/kotlin`). Platform-specific code can also live here if needed.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+### Docker Setup
 
-### Build and Run Server
+The project is configured to run via Docker Compose with the following services:
 
-To build and run the development version of the server, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :server:run
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :server:run
-  ```
+* **server** – Ktor server
+* **web** – Web/Compose app
+* **keycloak** – Keycloak authentication server
 
-### Build and Run Web Application
+Environment variables for development are stored in `Developer.env`. **You should rename this file to `.env`** to
+use it with Docker Compose.
+> Don't commit your personal `.env` with secrets to version control.
 
-To build and run the development version of the web app, use the run configuration from the run widget
-in your IDE’s toolbar or run it directly from the terminal:
+Make sure the Compose app uses these variables to connect to the server and Keycloak.
 
-- wasm on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:wasmJsBrowserDevelopmentRun
-  ```
-- wasm on Windows
-  ```shell
-  .\gradlew.bat :composeApp:wasmJsBrowserDevelopmentRun
-  ```
-
-### Build and Run iOS Application
-
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
-
----
-
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
-
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+**Note:** The server depends on Keycloak; it will not start correctly without it.

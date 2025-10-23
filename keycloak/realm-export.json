@@ -1,0 +1,30 @@
+{
+  "realm": "${KEYCLOAK_REALM}",
+  "sslRequired": "NONE",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "${KEYCLOAK_USER_ROLE}"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "${KEYCLOAK_CLIENT_ID}",
+      "secret": "${KEYCLOAK_CLIENT_SECRET}",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": true,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ]
+    }
+  ]
+}

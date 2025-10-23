@@ -1,0 +1,50 @@
+package felix.projekt.livinglink.composeApp.ui.listGroups.viewModel
+
+import felix.projekt.livinglink.composeApp.ui.core.viewmodel.Reducer
+
+class ListGroupsReducer : Reducer<ListGroupsState, ListGroupsResult> {
+    override fun invoke(
+        state: ListGroupsState,
+        result: ListGroupsResult
+    ) = when (result) {
+        ListGroupsResult.GroupsChangedToLoading -> {
+            state.copy(groupsLoading = true)
+        }
+
+        is ListGroupsResult.GroupsChanged -> {
+            state.copy(
+                groups = result.groups,
+                groupsLoading = false
+            )
+        }
+
+        is ListGroupsResult.ShowAddGroupDialog -> {
+            state.copy(showAddGroup = true)
+        }
+
+        is ListGroupsResult.AddGroupNameChanged -> {
+            state.copy(addGroupName = result.value)
+        }
+
+        is ListGroupsResult.ConfirmAddGroup -> {
+            state.copy(
+                addGroupName = "",
+                addGroupIsOngoing = true
+            )
+        }
+
+        ListGroupsResult.CloseAddGroupDialog -> {
+            state.copy(
+                showAddGroup = false,
+                addGroupName = ""
+            )
+        }
+
+        ListGroupsResult.AddGroupFinished -> {
+            state.copy(
+                showAddGroup = false,
+                addGroupIsOngoing = false
+            )
+        }
+    }
+}
