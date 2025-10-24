@@ -1,0 +1,42 @@
+package felix.projekt.livinglink.composeApp.ui.core.view
+
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.ui.graphics.Color
+
+val customLightScheme = lightColorScheme(
+    primary = Color(0xFF4B6076),
+    onPrimary = Color(0xFFFFFFFF),
+    primaryContainer = Color(0xFF9BB1C9),
+    onPrimaryContainer = Color(0xFF2F4458),
+    secondary = Color(0xFF4A5C71),
+    onSecondary = Color(0xFFFFFFFF),
+    secondaryContainer = Color(0xFF62758B),
+    onSecondaryContainer = Color(0xFFF9FAFF),
+    tertiary = Color(0xFF1B3043),
+    onTertiary = Color(0xFFFFFFFF),
+    tertiaryContainer = Color(0xFF32465A),
+    onTertiaryContainer = Color(0xFF9FB4CB),
+    error = Color(0xFFAE2F34),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFF6B6B),
+    onErrorContainer = Color(0xFF6D0010),
+    background = Color(0xFFFBF9FA),
+    onBackground = Color(0xFF1B1C1D),
+    surface = Color(0xFFFBF9FA),
+    onSurface = Color(0xFF1B1C1D),
+    surfaceVariant = Color(0xFFE0E2E9),
+    onSurfaceVariant = Color(0xFF43474C),
+    outline = Color(0xFF74777D),
+    outlineVariant = Color(0xFFC3C7CD),
+    scrim = Color(0xFF000000),
+    inverseSurface = Color(0xFF303032),
+    inverseOnSurface = Color(0xFFF2F0F2),
+    inversePrimary = Color(0xFFB3C9E1),
+    surfaceDim = Color(0xFFDBD9DB),
+    surfaceBright = Color(0xFFFBF9FA),
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF5F3F5),
+    surfaceContainer = Color(0xFFEFEDEF),
+    surfaceContainerHigh = Color(0xFFE9E8E9),
+    surfaceContainerHighest = Color(0xFFE3E2E4),
+)

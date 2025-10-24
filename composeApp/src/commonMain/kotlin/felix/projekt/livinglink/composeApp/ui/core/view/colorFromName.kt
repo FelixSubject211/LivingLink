@@ -1,17 +1,24 @@
 package felix.projekt.livinglink.composeApp.ui.core.view
 
 import androidx.compose.ui.graphics.Color
-import kotlin.math.pow
 
 fun colorFromName(name: String): Color {
-    if (name.isBlank()) return Color.Gray
+    if (name.isBlank()) return Color(0xFF9CAAB6)
+    val normalized = name.lowercase().trim()
 
-    val lowercase = name.lowercase()
-    val weightedSum = lowercase.mapIndexed { index, c ->
-        val weight = 1.0 / (index + 1.0).pow(0.1)
-        ((c.code + index * 37) % 256) * weight
-    }.sum()
-    val totalWeight = lowercase.mapIndexed { i, _ -> 1.0 / (i + 1.0).pow(0.8) }.sum()
-    val hue = ((weightedSum / totalWeight) * 10 % 360).toFloat()
-    return Color.hsl(hue, 0.65f, 0.55f)
+    val similarityValue = normalized.foldIndexed(0) { index, acc, char ->
+        acc + (char.code * (index + 1))
+    }
+    val palette = listOf(
+        Color(0xFF4E6E81),
+        Color(0xFF6B7A8F),
+        Color(0xFF8298A5),
+        Color(0xFF374B58),
+        Color(0xFF9FA8B2),
+        Color(0xFF8B9EA8),
+        Color(0xFF557A95),
+        Color(0xFF3E5C76)
+    )
+    val index = (similarityValue % palette.size).coerceAtLeast(0)
+    return palette[index]
 }

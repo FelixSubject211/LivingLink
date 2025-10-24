@@ -19,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import felix.projekt.livinglink.composeApp.ui.core.view.ListItem
 import felix.projekt.livinglink.composeApp.ui.core.view.TextStack
-import felix.projekt.livinglink.composeApp.ui.core.view.colorFromName
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsGroup
 
 @Composable
@@ -30,12 +29,12 @@ fun ListGroupsItem(group: ListGroupsGroup, modifier: Modifier) {
                 modifier = modifier
                     .size(54.dp)
                     .clip(CircleShape)
-                    .background(colorFromName(group.name)),
+                    .background(MaterialTheme.colorScheme.secondary),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     text = group.name.firstOrNull()?.uppercase() ?: "?",
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = MaterialTheme.colorScheme.onSecondary,
                     style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp),
                     textAlign = TextAlign.Center
                 )
