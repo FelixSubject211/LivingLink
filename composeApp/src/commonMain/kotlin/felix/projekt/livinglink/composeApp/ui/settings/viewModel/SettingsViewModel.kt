@@ -24,6 +24,12 @@ class SettingsViewModel(
     override val sideEffect = _sideEffect
 
     override fun dispatch(action: SettingsAction) = when (action) {
+        SettingsAction.NavigateBack -> {
+            executionScope.launchJob {
+                sideEffect.emit(SettingsSideEffect.NavigateBack)
+            }
+        }
+
         SettingsAction.LogoutSubmitted -> {
             executionScope.launchJob {
                 performLogout()
@@ -46,20 +52,18 @@ class SettingsViewModel(
     }
 
     fun start() {
-        executionScope.launchJob {
-            getAuthSessionUseCase().collect { session ->
-                when (session) {
-                    is GetAuthSessionUseCase.AuthSession.LoggedIn -> {
-                        _state.update(
-                            SettingsResult.UserIsLoggedIn(
-                                username = session.username
-                            )
+        executionScope.launchCollector(getAuthSessionUseCase()) { session ->
+            when (session) {
+                is GetAuthSessionUseCase.AuthSession.LoggedIn -> {
+                    _state.update(
+                        SettingsResult.UserIsLoggedIn(
+                            username = session.username
                         )
-                    }
+                    )
+                }
 
-                    is GetAuthSessionUseCase.AuthSession.LoggedOut -> {
-                        _state.update(SettingsResult.UserIsLoggedOut)
-                    }
+                is GetAuthSessionUseCase.AuthSession.LoggedOut -> {
+                    _state.update(SettingsResult.UserIsLoggedOut)
                 }
             }
         }

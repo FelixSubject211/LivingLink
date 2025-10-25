@@ -57,9 +57,9 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+            implementation(libs.navigation.compose)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
-            implementation(libs.compose.icons.fontawesome)
             implementation(libs.i18n4k.core)
             implementation(libs.i18n4k.cldr)
             implementation(libs.ktor.serialization.json)
@@ -67,12 +67,14 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.auth)
-            implementation(libs.turbine)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.napier)
             implementation(projects.shared)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.coroutines.test)
+            implementation(libs.turbine)
         }
     }
 }

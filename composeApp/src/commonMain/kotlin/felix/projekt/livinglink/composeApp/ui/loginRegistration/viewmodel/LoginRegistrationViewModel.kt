@@ -19,7 +19,8 @@ class LoginRegistrationViewModel(
     private val _state = MutableStateFlowWithReducer(LoginRegistrationState.Login(), reducer)
     override val state: StateFlow<LoginRegistrationState> = _state
 
-    override val sideEffect: MutableSharedFlow<Nothing> = MutableSharedFlow()
+    private val _sideEffect: MutableSharedFlow<Nothing> = MutableSharedFlow()
+    override val sideEffect: MutableSharedFlow<Nothing> = _sideEffect
 
     override fun dispatch(action: LoginRegistrationAction) = when (action) {
         is LoginRegistrationAction.LoginUsernameChanged -> {

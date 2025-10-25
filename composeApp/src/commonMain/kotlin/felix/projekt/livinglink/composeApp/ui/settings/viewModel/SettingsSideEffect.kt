@@ -6,4 +6,6 @@ sealed class SettingsSideEffect {
         data object DeleteUserError : ShowSnackbar()
         data object DeleteUserNetworkError : ShowSnackbar()
     }
+
+    object NavigateBack : SettingsSideEffect()
 }

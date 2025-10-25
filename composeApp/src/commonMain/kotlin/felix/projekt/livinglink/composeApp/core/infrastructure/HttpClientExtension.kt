@@ -2,6 +2,7 @@ package felix.projekt.livinglink.composeApp.core.infrastructure
 
 import felix.projekt.livinglink.composeApp.core.domain.NetworkError
 import felix.projekt.livinglink.composeApp.core.domain.Result
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.delete
@@ -30,7 +31,7 @@ suspend inline fun <reified RESPONSE> HttpClient.get(
         }
         return Result.Success(response.body())
     } catch (e: IOException) {
-        println(e)
+        Napier.w("", e)
         return Result.Error(NetworkError.IO)
     }
 }
@@ -53,7 +54,7 @@ suspend inline fun <reified REQUEST, reified RESPONSE> HttpClient.post(
         }
         return Result.Success(response.body())
     } catch (e: IOException) {
-        println(e)
+        Napier.w("", e)
         return Result.Error(NetworkError.IO)
     }
 }
@@ -72,7 +73,7 @@ suspend inline fun <reified RESPONSE> HttpClient.delete(
         }
         return Result.Success(response.body())
     } catch (e: IOException) {
-        println(e)
+        Napier.w("", e)
         return Result.Error(NetworkError.IO)
     }
 }

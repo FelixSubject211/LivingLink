@@ -13,10 +13,6 @@ import felix.projekt.livinglink.composeApp.groups.application.CreateGroupDefault
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
-import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ExecutionDefaultScope
-import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsViewModel
-import felix.projekt.livinglink.composeApp.ui.loginRegistration.viewmodel.LoginRegistrationViewModel
-import felix.projekt.livinglink.composeApp.ui.settings.viewModel.SettingsViewModel
 import felix.projekt.livinglink.shared.json
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -93,23 +89,6 @@ object AppModule {
         )
     }
 
-    val loginRegistrationViewModel by lazy {
-        LoginRegistrationViewModel(
-            loginUserUseCase = loginUseCase,
-            registerUserUseCase = registerUseCase,
-            executionScope = ExecutionDefaultScope(parentScope = scope)
-        )
-    }
-
-    val settingsViewModel by lazy {
-        SettingsViewModel(
-            getAuthSessionUseCase = getAuthSessionUseCase,
-            logoutUserUseCase = logoutUserUseCase,
-            deleteUserUseCase = deleteUserUseCase,
-            executionScope = ExecutionDefaultScope(parentScope = scope)
-        ).also { it.start() }
-    }
-
     val groupsNetworkDataSource by lazy {
         GroupsNetworkDefaultDataSource(
             httpClient = authTokenManager.client
@@ -134,13 +113,5 @@ object AppModule {
         CreateGroupDefaultUseCase(
             groupsRepository = groupsRepository
         )
-    }
-
-    val listGroupsViewModel by lazy {
-        ListGroupsViewModel(
-            getGroupsUseCase = getGroupsUseCase,
-            createGroupUseCase = createGroupUseCase,
-            executionScope = ExecutionDefaultScope(parentScope = scope)
-        ).also { it.start() }
     }
 }

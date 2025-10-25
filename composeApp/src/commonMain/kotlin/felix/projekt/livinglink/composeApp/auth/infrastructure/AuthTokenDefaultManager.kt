@@ -8,6 +8,7 @@ import felix.projekt.livinglink.composeApp.auth.domain.RefreshResponse
 import felix.projekt.livinglink.composeApp.auth.domain.TokenStorage
 import felix.projekt.livinglink.composeApp.core.domain.Result
 import felix.projekt.livinglink.shared.json
+import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProvider
@@ -16,6 +17,9 @@ import io.ktor.client.plugins.auth.providers.BearerTokens
 import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.decodeBase64Bytes
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +65,16 @@ class AuthTokenDefaultManager(
                     loadTokens { _bearerTokens.value }
                     refreshTokens { refresh() }
                 }
+            }
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        if (message.startsWith("RESPONSE:")) {
+                            Napier.d(message, tag = "HttpClient")
+                        }
+                    }
+                }
+                level = LogLevel.INFO
             }
             defaultRequest {
                 url {

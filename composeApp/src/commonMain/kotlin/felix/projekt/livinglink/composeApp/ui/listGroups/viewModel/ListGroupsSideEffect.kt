@@ -4,4 +4,6 @@ sealed class ListGroupsSideEffect {
     sealed class ShowSnackbar : ListGroupsSideEffect() {
         data object CreateGroupNetworkError : ShowSnackbar()
     }
+
+    data object NavigateToSettings : ListGroupsSideEffect()
 }

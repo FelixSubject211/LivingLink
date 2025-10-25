@@ -6,6 +6,9 @@ import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ExecutionScope
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.MutableStateFlowWithReducer
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.Reducer
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ViewModel
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsResult.AddGroupNameChanged
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsResult.CloseAddGroupDialog
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsResult.ShowAddGroupDialog
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -18,15 +21,22 @@ class ListGroupsViewModel(
     private val _state = MutableStateFlowWithReducer(ListGroupsState(), reducer)
     override val state: StateFlow<ListGroupsState> = _state
 
-    override val sideEffect: MutableSharedFlow<ListGroupsSideEffect> = MutableSharedFlow()
+    private val _sideEffect: MutableSharedFlow<ListGroupsSideEffect> = MutableSharedFlow()
+    override val sideEffect: MutableSharedFlow<ListGroupsSideEffect> = _sideEffect
 
     override fun dispatch(action: ListGroupsAction) = when (action) {
+        ListGroupsAction.NavigateToSettings -> {
+            executionScope.launchJob {
+                _sideEffect.emit(ListGroupsSideEffect.NavigateToSettings)
+            }
+        }
+
         is ListGroupsAction.AddGroupSubmitted -> {
-            _state.update(ListGroupsResult.ShowAddGroupDialog)
+            _state.update(ShowAddGroupDialog)
         }
 
         is ListGroupsAction.AddGroupNameChanged -> {
-            _state.update(ListGroupsResult.AddGroupNameChanged(action.value))
+            _state.update(AddGroupNameChanged(action.value))
         }
 
         is ListGroupsAction.AddGroupConfirmed -> {
@@ -36,25 +46,23 @@ class ListGroupsViewModel(
         }
 
         is ListGroupsAction.AddGroupCanceled -> {
-            _state.update(ListGroupsResult.CloseAddGroupDialog)
+            _state.update(CloseAddGroupDialog)
         }
     }
 
     fun start() {
-        executionScope.launchJob {
-            getGroupsUseCase().collect { response ->
-                when (response) {
-                    GetGroupsUseCase.Response.Loading -> {
-                        _state.update(ListGroupsResult.GroupsChangedToLoading)
-                    }
+        executionScope.launchCollector(getGroupsUseCase()) { response ->
+            when (response) {
+                GetGroupsUseCase.Response.Loading -> {
+                    _state.update(ListGroupsResult.GroupsChangedToLoading)
+                }
 
-                    is GetGroupsUseCase.Response.Data -> {
-                        _state.update(
-                            ListGroupsResult.GroupsChanged(
-                                groups = response.groups.toListGroupsGroups()
-                            )
+                is GetGroupsUseCase.Response.Data -> {
+                    _state.update(
+                        ListGroupsResult.GroupsChanged(
+                            groups = response.groups.toListGroupsGroups()
                         )
-                    }
+                    )
                 }
             }
         }
@@ -74,7 +82,7 @@ class ListGroupsViewModel(
         when (response) {
             CreateGroupUseCase.Response.Success -> {}
             CreateGroupUseCase.Response.NetworkError -> {
-                sideEffect.emit(ListGroupsSideEffect.ShowSnackbar.CreateGroupNetworkError)
+                _sideEffect.emit(ListGroupsSideEffect.ShowSnackbar.CreateGroupNetworkError)
             }
         }
         _state.update(ListGroupsResult.AddGroupFinished)

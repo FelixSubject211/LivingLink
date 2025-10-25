@@ -24,6 +24,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.selects.onTimeout
 import kotlinx.coroutines.selects.select
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
 
 class GroupsDefaultRepository(
     private val groupsNetworkDataSource: GroupsNetworkDataSource,
@@ -34,6 +35,7 @@ class GroupsDefaultRepository(
     private val logoutChannel = Channel<Unit>(Channel.UNLIMITED)
     private val loginChannel = Channel<Unit>(Channel.UNLIMITED)
     private var currentGroups = MutableStateFlow<Map<String, Group>>(emptyMap())
+    private var hasWaitedForLogin = false
 
     sealed class ManualUpdateItem {
         data class AddGroup(val group: Group) : ManualUpdateItem()
@@ -75,9 +77,12 @@ class GroupsDefaultRepository(
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+    @OptIn(ExperimentalCoroutinesApi::class, ExperimentalAtomicApi::class)
     private fun pollGroups(): Flow<Map<String, Group>?> = flow {
-        loginChannel.receive()
+        if (!hasWaitedForLogin) {
+            loginChannel.receive()
+            hasWaitedForLogin = true
+        }
 
         while (scope.isActive) {
             val currentGroupVersions = currentGroups.value.mapValues { it.value.version }
