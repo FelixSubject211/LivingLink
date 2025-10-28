@@ -12,22 +12,22 @@ class GetGroupsDefaultUseCase(
     override fun invoke(): Flow<GetGroupsUseCase.Response> {
         return groupsRepository.getGroups.map { repositoryState ->
             when (repositoryState) {
-                GroupsRepository.GroupRepositoryState.Loading -> {
+                GroupsRepository.GroupsRepositoryState.Loading -> {
                     GetGroupsUseCase.Response.Loading
                 }
 
-                is GroupsRepository.GroupRepositoryState.Data -> {
+                is GroupsRepository.GroupsRepositoryState.Data -> {
                     GetGroupsUseCase.Response.Data(repositoryState.groups.toResponse())
                 }
             }
         }
     }
 
-    private fun List<Group>.toResponse() = this.map { group ->
+    private fun Map<String, Group>.toResponse() = this.mapValues { group ->
         GetGroupsUseCase.Group(
-            id = group.id,
-            name = group.name,
-            memberCount = group.memberIdToMember.size
+            id = group.value.id,
+            name = group.value.name,
+            memberCount = group.value.memberIdToMember.size
         )
-    }
+    }.values.toList()
 }

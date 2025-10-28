@@ -10,6 +10,7 @@ import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthNetworkDefaul
 import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthTokenDefaultManager
 import felix.projekt.livinglink.composeApp.auth.infrastructure.getTokenPlatformStorage
 import felix.projekt.livinglink.composeApp.groups.application.CreateGroupDefaultUseCase
+import felix.projekt.livinglink.composeApp.groups.application.GetGroupDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
@@ -105,6 +106,12 @@ object AppModule {
 
     val getGroupsUseCase by lazy {
         GetGroupsDefaultUseCase(
+            groupsRepository = groupsRepository
+        )
+    }
+
+    val getGroupUseCase by lazy {
+        GetGroupDefaultUseCase(
             groupsRepository = groupsRepository
         )
     }

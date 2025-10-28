@@ -48,6 +48,12 @@ class ListGroupsViewModel(
         is ListGroupsAction.AddGroupCanceled -> {
             _state.update(CloseAddGroupDialog)
         }
+
+        is ListGroupsAction.NavigateToGroup -> {
+            executionScope.launchJob {
+                _sideEffect.emit(ListGroupsSideEffect.NavigateToGroup(action.groupId))
+            }
+        }
     }
 
     fun start() {
@@ -60,7 +66,7 @@ class ListGroupsViewModel(
                 is GetGroupsUseCase.Response.Data -> {
                     _state.update(
                         ListGroupsResult.GroupsChanged(
-                            groups = response.groups.toListGroupsGroups()
+                            groups = response.groups.toStateGroup()
                         )
                     )
                 }
@@ -68,8 +74,8 @@ class ListGroupsViewModel(
         }
     }
 
-    private fun List<GetGroupsUseCase.Group>.toListGroupsGroups() = this.map { group ->
-        ListGroupsGroup(
+    private fun List<GetGroupsUseCase.Group>.toStateGroup() = this.map { group ->
+        ListGroupsState.Group(
             id = group.id,
             name = group.name,
             memberCount = group.memberCount

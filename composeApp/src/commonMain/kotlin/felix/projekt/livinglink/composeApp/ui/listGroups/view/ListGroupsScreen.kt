@@ -40,7 +40,8 @@ import org.jetbrains.compose.resources.painterResource
 @Composable
 fun ListGroupsScreen(
     viewModel: ViewModel<ListGroupsState, ListGroupsAction, ListGroupsSideEffect>,
-    onNavigateToSettings: () -> Unit
+    onNavigateToSettings: () -> Unit,
+    onNavigateToGroup: (String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -54,6 +55,10 @@ fun ListGroupsScreen(
 
                 is ListGroupsSideEffect.NavigateToSettings -> {
                     onNavigateToSettings()
+                }
+
+                is ListGroupsSideEffect.NavigateToGroup -> {
+                    onNavigateToGroup(sideEffect.groupId)
                 }
             }
         }
@@ -117,6 +122,7 @@ fun ListGroupsScreen(
                     items(items = state.groups, key = { it.id }) { group ->
                         ListGroupsItem(
                             group = group,
+                            dispatch = viewModel::dispatch,
                             modifier = Modifier.animateItem()
                         )
                     }

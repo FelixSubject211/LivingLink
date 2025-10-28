@@ -19,11 +19,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import felix.projekt.livinglink.composeApp.ui.core.view.ListItem
 import felix.projekt.livinglink.composeApp.ui.core.view.TextStack
-import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsGroup
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsAction
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsState
 
 @Composable
-fun ListGroupsItem(group: ListGroupsGroup, modifier: Modifier) {
-    ListItem(modifier = modifier) {
+fun ListGroupsItem(
+    group: ListGroupsState.Group,
+    dispatch: (ListGroupsAction) -> Unit,
+    modifier: Modifier
+) {
+    ListItem(
+        modifier = modifier,
+        onClick = {
+            dispatch(ListGroupsAction.NavigateToGroup(groupId = group.id))
+        }
+    ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 modifier = modifier

@@ -67,7 +67,7 @@ class GroupsDefaultRepositoryTest {
         )
 
         sut.getGroups.test {
-            val expected = GroupsRepository.GroupRepositoryState.Data(groupResponse.values.toList())
+            val expected = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
             assertEquals(expected, awaitItem())
         }
     }
@@ -87,7 +87,7 @@ class GroupsDefaultRepositoryTest {
 
         val job = launch {
             sut.getGroups.test {
-                val expected = GroupsRepository.GroupRepositoryState.Data(groupResponse.values.toList())
+                val expected = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
                 assertEquals(expected, awaitItem())
             }
         }
@@ -135,15 +135,15 @@ class GroupsDefaultRepositoryTest {
         )
 
         sut.getGroups.test {
-            val expected1 = GroupsRepository.GroupRepositoryState.Data(groupResponse.values.toList())
+            val expected1 = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
             assertEquals(expected1, awaitItem())
 
             getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedOut)
-            val expected2 = GroupsRepository.GroupRepositoryState.Loading
+            val expected2 = GroupsRepository.GroupsRepositoryState.Loading
             assertEquals(expected2, awaitItem())
 
             getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
-            val expected3 = GroupsRepository.GroupRepositoryState.Data(groupResponse.values.toList())
+            val expected3 = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
             assertEquals(expected3, awaitItem())
         }
     }

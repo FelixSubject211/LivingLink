@@ -74,22 +74,6 @@ services:
     networks:
       - livinglink_net
 
-  mongo-express:
-    image: mongo-express:1.0.0
-    container_name: mongo-express
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=${GROUPS_MONGO_ROOT_USERNAME}
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=${GROUPS_MONGO_ROOT_PASSWORD}
-      - ME_CONFIG_MONGODB_SERVER=groups-mongodb
-      - ME_CONFIG_BASICAUTH_USERNAME=${MONGO_EXPRESS_USER}
-      - ME_CONFIG_BASICAUTH_PASSWORD=${MONGO_EXPRESS_PASSWORD}
-    ports:
-      - "${MONGO_EXPRESS_PORT}:8081"
-    depends_on:
-      - groups-mongodb
-    networks:
-      - livinglink_net
-
 networks:
   livinglink_net:
     driver: bridge

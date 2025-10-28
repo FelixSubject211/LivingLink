@@ -9,15 +9,17 @@ import androidx.lifecycle.coroutineScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.toRoute
 import felix.projekt.livinglink.composeApp.AppModule
 import felix.projekt.livinglink.composeApp.auth.domain.AuthSession
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ExecutionDefaultScope
+import felix.projekt.livinglink.composeApp.ui.group.view.GroupScreen
+import felix.projekt.livinglink.composeApp.ui.group.viewModel.GroupViewModel
 import felix.projekt.livinglink.composeApp.ui.listGroups.view.ListGroupsScreen
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsViewModel
 import felix.projekt.livinglink.composeApp.ui.loginRegistration.view.LoginRegistrationScreen
 import felix.projekt.livinglink.composeApp.ui.loginRegistration.viewmodel.LoginRegistrationViewModel
 import felix.projekt.livinglink.composeApp.ui.settings.view.SettingsScreen
-import felix.projekt.livinglink.composeApp.ui.settings.viewModel.SettingsAction
 import felix.projekt.livinglink.composeApp.ui.settings.viewModel.SettingsViewModel
 import kotlin.concurrent.atomics.AtomicLong
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -41,9 +43,9 @@ fun NavigationHost(navController: NavHostController) {
 private fun LoggedInNavHost(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "ListGroups"
+        startDestination = Route.ListGroupsRoute
     ) {
-        composable("ListGroups") {
+        composable<Route.ListGroupsRoute> {
             val (executionScope, viewModel) = rememberScreenSetup {
                 ListGroupsViewModel(
                     getGroupsUseCase = AppModule.getGroupsUseCase,
@@ -61,15 +63,22 @@ private fun LoggedInNavHost(navController: NavHostController) {
                 viewModel = viewModel,
                 onNavigateToSettings = {
                     navigationId.incrementAndFetch()
-                    navController.navigate("Settings") {
+                    navController.navigate(Route.SettingsRoute) {
                         launchSingleTop = true
-                        popUpTo("ListGroups") { inclusive = true }
+                        popUpTo(Route.ListGroupsRoute) { inclusive = true }
+                    }
+                },
+                onNavigateToGroup = { groupId ->
+                    navigationId.incrementAndFetch()
+                    navController.navigate(Route.GroupRoute(groupId)) {
+                        launchSingleTop = true
+                        popUpTo(Route.ListGroupsRoute) { inclusive = true }
                     }
                 }
             )
         }
 
-        composable("Settings") {
+        composable<Route.SettingsRoute> {
             val (executionScope, viewModel) = rememberScreenSetup {
                 SettingsViewModel(
                     getAuthSessionUseCase = AppModule.getAuthSessionUseCase,
@@ -84,15 +93,41 @@ private fun LoggedInNavHost(navController: NavHostController) {
                 onDispose { executionScope.destroy() }
             }
 
-            HandleBack { viewModel.dispatch(SettingsAction.NavigateBack) }
-
             SettingsScreen(
                 viewModel = viewModel,
                 onNavigateBack = {
                     navigationId.incrementAndFetch()
-                    navController.navigate("ListGroups") {
+                    navController.navigate(Route.ListGroupsRoute) {
                         launchSingleTop = true
-                        popUpTo("Settings") { inclusive = true }
+                        popUpTo(Route.SettingsRoute) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable<Route.GroupRoute> { backStackEntry ->
+            val groupId = backStackEntry.toRoute<Route.GroupRoute>().groupId
+
+            val (executionScope, viewModel) = rememberScreenSetup {
+                GroupViewModel(
+                    groupId = groupId,
+                    getGroupUseCase = AppModule.getGroupUseCase,
+                    executionScope = it
+                )
+            }
+
+            DisposableEffect(Unit) {
+                viewModel.start()
+                onDispose { executionScope.destroy() }
+            }
+
+            GroupScreen(
+                viewModel = viewModel,
+                onNavigateBack = {
+                    navigationId.incrementAndFetch()
+                    navController.navigate(Route.ListGroupsRoute) {
+                        launchSingleTop = true
+                        popUpTo(Route.GroupRoute(groupId)) { inclusive = true }
                     }
                 }
             )

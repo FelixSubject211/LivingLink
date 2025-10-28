@@ -46,16 +46,16 @@ class GroupsDefaultRepository(
         launchAuthCollector()
     }
 
-    override val getGroups: StateFlow<GroupsRepository.GroupRepositoryState> = pollingFlow
+    override val getGroups: StateFlow<GroupsRepository.GroupsRepositoryState> = pollingFlow
         .map { groups ->
             groups?.let {
-                GroupsRepository.GroupRepositoryState.Data(groups = it.values.toList())
-            } ?: GroupsRepository.GroupRepositoryState.Loading
+                GroupsRepository.GroupsRepositoryState.Data(groups = groups)
+            } ?: GroupsRepository.GroupsRepositoryState.Loading
         }
         .stateIn(
             scope = scope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5000),
-            initialValue = GroupsRepository.GroupRepositoryState.Loading
+            initialValue = GroupsRepository.GroupsRepositoryState.Loading
         )
 
     override suspend fun createGroup(groupName: String): Result<CreateGroupResponse, NetworkError> {

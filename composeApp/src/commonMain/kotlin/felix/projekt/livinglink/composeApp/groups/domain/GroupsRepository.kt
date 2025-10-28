@@ -5,11 +5,11 @@ import felix.projekt.livinglink.composeApp.core.domain.Result
 import kotlinx.coroutines.flow.Flow
 
 interface GroupsRepository {
-    val getGroups: Flow<GroupRepositoryState>
+    val getGroups: Flow<GroupsRepositoryState>
     suspend fun createGroup(groupName: String): Result<CreateGroupResponse, NetworkError>
 
-    sealed class GroupRepositoryState {
-        data object Loading : GroupRepositoryState()
-        data class Data(val groups: List<Group>) : GroupRepositoryState()
+    sealed class GroupsRepositoryState {
+        data object Loading : GroupsRepositoryState()
+        data class Data(val groups: Map<String, Group>) : GroupsRepositoryState()
     }
 }

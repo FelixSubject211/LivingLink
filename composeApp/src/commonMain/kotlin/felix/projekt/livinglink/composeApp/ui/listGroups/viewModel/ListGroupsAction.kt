@@ -6,4 +6,6 @@ sealed class ListGroupsAction {
     data class AddGroupNameChanged(val value: String) : ListGroupsAction()
     data object AddGroupConfirmed : ListGroupsAction()
     data object AddGroupCanceled : ListGroupsAction()
+
+    data class NavigateToGroup(val groupId: String) : ListGroupsAction()
 }

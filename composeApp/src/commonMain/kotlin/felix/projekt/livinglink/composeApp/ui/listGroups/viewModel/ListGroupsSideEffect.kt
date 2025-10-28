@@ -6,4 +6,6 @@ sealed class ListGroupsSideEffect {
     }
 
     data object NavigateToSettings : ListGroupsSideEffect()
+
+    data class NavigateToGroup(val groupId: String) : ListGroupsSideEffect()
 }
