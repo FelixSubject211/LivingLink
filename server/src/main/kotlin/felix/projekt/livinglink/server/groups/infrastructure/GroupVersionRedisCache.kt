@@ -8,7 +8,7 @@ import io.lettuce.core.api.async.RedisAsyncCommands
 import kotlinx.coroutines.future.await
 
 class GroupVersionRedisCache(
-    groupsConfig: GroupsConfig
+    private val groupsConfig: GroupsConfig
 ) : GroupVersionCache {
 
     private val redisClient = RedisClient.create(groupsConfig.groupRedisUri)
@@ -42,6 +42,8 @@ class GroupVersionRedisCache(
             arrayOf(userId),
             *args
         ).await()
+
+        connection.expire(userId, groupsConfig.cacheLifetimeSeconds).await()
     }
 
     override suspend fun getGroupVersions(userId: String): GroupVersionCache.GroupVersions? {
@@ -73,6 +75,8 @@ class GroupVersionRedisCache(
             groupId,
             version.toString()
         ).await()
+
+        connection.expire(userId, groupsConfig.cacheLifetimeSeconds).await()
     }
 
     override suspend fun deleteGroupVersions(userId: String) {

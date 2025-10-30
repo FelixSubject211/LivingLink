@@ -7,6 +7,9 @@ import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode.Companion.exhaustiveOrder
+import dev.mokkery.verifyNoMoreCalls
+import dev.mokkery.verifySuspend
 import felix.projekt.livinglink.composeApp.auth.interfaces.GetAuthStateService
 import felix.projekt.livinglink.composeApp.core.domain.Result
 import felix.projekt.livinglink.composeApp.groups.domain.GetGroupsResponse
@@ -67,7 +70,7 @@ class GroupsDefaultRepositoryTest {
         )
 
         sut.getGroups.test {
-            val expected = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
+            val expected = GroupsRepository.GroupsRepositoryState.Data(groupResponse)
             assertEquals(expected, awaitItem())
         }
     }
@@ -87,7 +90,7 @@ class GroupsDefaultRepositoryTest {
 
         val job = launch {
             sut.getGroups.test {
-                val expected = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
+                val expected = GroupsRepository.GroupsRepositoryState.Data(groupResponse)
                 assertEquals(expected, awaitItem())
             }
         }
@@ -129,13 +132,13 @@ class GroupsDefaultRepositoryTest {
 
         everySuspend { mockGroupsNetworkDataSource.getGroups(any()) } returns Result.Success(
             GetGroupsResponse.Success(
-                groups = mapOf("1" to group),
+                groups = groupResponse,
                 nextPollAfterMillis = 1000L
             )
         )
 
         sut.getGroups.test {
-            val expected1 = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
+            val expected1 = GroupsRepository.GroupsRepositoryState.Data(groupResponse)
             assertEquals(expected1, awaitItem())
 
             getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedOut)
@@ -143,8 +146,36 @@ class GroupsDefaultRepositoryTest {
             assertEquals(expected2, awaitItem())
 
             getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
-            val expected3 = GroupsRepository.GroupsRepositoryState.Data(groupResponse.values.toList())
+            val expected3 = GroupsRepository.GroupsRepositoryState.Data(groupResponse)
             assertEquals(expected3, awaitItem())
         }
+    }
+
+    @Test
+    fun `multiple collectors share same polling flow`() = runTest(UnconfinedTestDispatcher()) {
+        val group = Group(id = "1", name = "Group1", memberIdToMember = emptyMap(), version = 0)
+        val groupResponse = mapOf(group.id to group)
+
+        everySuspend { mockGroupsNetworkDataSource.getGroups(any()) } returns Result.Success(
+            GetGroupsResponse.Success(
+                groups = groupResponse,
+                nextPollAfterMillis = 1000L
+            )
+        )
+
+        getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
+
+        val job1 = launch { sut.getGroups.test { awaitItem() } }
+        val job2 = launch { sut.getGroups.test { awaitItem() } }
+
+        advanceTimeBy(3000)
+
+        job1.cancel()
+        job2.cancel()
+
+        verifySuspend(exhaustiveOrder) {
+            mockGroupsNetworkDataSource.getGroups(any())
+        }
+        verifyNoMoreCalls(mockGroupsNetworkDataSource)
     }
 }

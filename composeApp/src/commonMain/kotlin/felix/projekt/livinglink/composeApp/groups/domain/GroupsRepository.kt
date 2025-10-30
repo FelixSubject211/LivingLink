@@ -10,6 +10,6 @@ interface GroupsRepository {
 
     sealed class GroupsRepositoryState {
         data object Loading : GroupsRepositoryState()
-        data class Data(val groups: Map<String, Group>) : GroupsRepositoryState()
+        data class Data(val groupIdToGroup: Map<String, Group>) : GroupsRepositoryState()
     }
 }

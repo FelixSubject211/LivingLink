@@ -12,6 +12,5 @@ interface GroupRepository {
     ): Group
 
     fun deleteGroup(groupId: String)
-    fun getGroupByInviteCode(inviteCode: String): Group?
     fun close()
 }

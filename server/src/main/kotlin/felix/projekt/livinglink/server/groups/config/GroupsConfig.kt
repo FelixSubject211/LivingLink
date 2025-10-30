@@ -11,6 +11,7 @@ interface GroupsConfig {
     val groupRedisUri: String
     val defaultPollAfterMillis: Long
     val notModifiedPollAfterMillis: Long
+    val cacheLifetimeSeconds: Long
 }
 
 fun groupsDefaultConfig(): GroupsConfig {
@@ -25,5 +26,6 @@ fun groupsDefaultConfig(): GroupsConfig {
         override val groupRedisUri: String = dotenv["GROUPS_REDIS_URI"]!!
         override val defaultPollAfterMillis: Long = dotenv["GROUPS_POLL_AFTER_DEFAULT_MILLIS"]!!.toLong()
         override val notModifiedPollAfterMillis: Long = dotenv["GROUPS_POLL_AFTER_NOT_MODIFIED_MILLIS"]!!.toLong()
+        override val cacheLifetimeSeconds: Long = dotenv["GROUPS_CACHE_LIFETIME_SECONDS"]!!.toLong()
     }
 }

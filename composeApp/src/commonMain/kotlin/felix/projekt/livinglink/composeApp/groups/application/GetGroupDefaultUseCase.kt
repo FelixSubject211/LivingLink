@@ -17,7 +17,7 @@ class GetGroupDefaultUseCase(
                 }
 
                 is GroupsRepository.GroupsRepositoryState.Data -> {
-                    val group = repositoryState.groups[groupId]
+                    val group = repositoryState.groupIdToGroup[groupId]
                     if (group == null) {
                         GetGroupUseCase.Response.Loading
                     } else {

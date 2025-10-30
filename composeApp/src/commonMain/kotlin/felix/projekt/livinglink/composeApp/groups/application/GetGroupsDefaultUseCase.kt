@@ -17,7 +17,7 @@ class GetGroupsDefaultUseCase(
                 }
 
                 is GroupsRepository.GroupsRepositoryState.Data -> {
-                    GetGroupsUseCase.Response.Data(repositoryState.groups.toResponse())
+                    GetGroupsUseCase.Response.Data(repositoryState.groupIdToGroup.toResponse())
                 }
             }
         }

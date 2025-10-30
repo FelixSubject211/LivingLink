@@ -10,10 +10,13 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 
 class ExecutionDefaultScope(
     private val parentScope: CoroutineScope,
     private val lifecycle: Lifecycle,
+    private val mutex: Mutex = Mutex()
 ) : ExecutionScope {
     private val job = SupervisorJob(parentScope.coroutineContext[Job])
     private val scope = CoroutineScope(Dispatchers.Default + job)
@@ -26,8 +29,17 @@ class ExecutionDefaultScope(
             } catch (_: CancellationException) {
             }
         }
-        activeJobs += job
-        job.invokeOnCompletion { activeJobs -= job }
+
+        job.invokeOnCompletion {
+            scope.launch {
+                mutex.withLock { activeJobs -= job }
+            }
+        }
+
+        scope.launch {
+            mutex.withLock { activeJobs += job }
+            job.start()
+        }
     }
 
     override fun <T> launchCollector(
@@ -45,8 +57,12 @@ class ExecutionDefaultScope(
     }
 
     override fun cancelCurrentJobs() {
-        activeJobs.forEach { it.cancel() }
-        activeJobs.clear()
+        scope.launch {
+            mutex.withLock {
+                activeJobs.forEach { it.cancel() }
+                activeJobs.clear()
+            }
+        }
     }
 
     override fun destroy() {

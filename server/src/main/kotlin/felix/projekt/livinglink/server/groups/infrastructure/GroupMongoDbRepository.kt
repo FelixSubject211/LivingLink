@@ -85,12 +85,6 @@ class GroupMongoDbRepository(
         collection.deleteOne(filter)
     }
 
-    override fun getGroupByInviteCode(inviteCode: String): Group? {
-        val filter = Document("inviteCodes.code", inviteCode)
-        return collection.find(filter).firstOrNull()?.toGroup()
-    }
-
-
     override fun close() {
         mongoClient.close()
     }

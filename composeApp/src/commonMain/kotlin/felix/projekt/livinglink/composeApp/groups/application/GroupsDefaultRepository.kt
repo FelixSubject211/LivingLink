@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -31,25 +32,40 @@ class GroupsDefaultRepository(
     private val getAuthStateService: GetAuthStateService,
     private val scope: CoroutineScope
 ) : GroupsRepository {
-    private val manualUpdateChannel = Channel<ManualUpdateItem>(Channel.CONFLATED)
+    private val manualUpdateChannel = Channel<ManualUpdateItem>(Channel.UNLIMITED)
     private val logoutChannel = Channel<Unit>(Channel.UNLIMITED)
     private val loginChannel = Channel<Unit>(Channel.UNLIMITED)
     private var currentGroups = MutableStateFlow<Map<String, Group>>(emptyMap())
-    private var hasWaitedForLogin = false
 
     sealed class ManualUpdateItem {
         data class AddGroup(val group: Group) : ManualUpdateItem()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    private val pollingFlow: Flow<Map<String, Group>?> = pollGroups().also {
-        launchAuthCollector()
+    init {
+        scope.launch {
+            getAuthStateService()
+                .drop(1)
+                .collect { authState ->
+                    when (authState) {
+                        GetAuthStateService.AuthState.LoggedOut -> {
+                            logoutChannel.send(Unit)
+                        }
+
+                        GetAuthStateService.AuthState.LoggedIn -> {
+                            loginChannel.send(Unit)
+                        }
+                    }
+                }
+        }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val pollingFlow: Flow<Map<String, Group>?> = pollGroups()
+
     override val getGroups: StateFlow<GroupsRepository.GroupsRepositoryState> = pollingFlow
-        .map { groups ->
-            groups?.let {
-                GroupsRepository.GroupsRepositoryState.Data(groups = groups)
+        .map { groupIdToGroup ->
+            groupIdToGroup?.let {
+                GroupsRepository.GroupsRepositoryState.Data(groupIdToGroup = groupIdToGroup)
             } ?: GroupsRepository.GroupsRepositoryState.Loading
         }
         .stateIn(
@@ -66,24 +82,8 @@ class GroupsDefaultRepository(
         }
     }
 
-    private fun launchAuthCollector() {
-        scope.launch {
-            getAuthStateService().collect { authState ->
-                when (authState) {
-                    GetAuthStateService.AuthState.LoggedOut -> logoutChannel.send(Unit)
-                    GetAuthStateService.AuthState.LoggedIn -> loginChannel.send(Unit)
-                }
-            }
-        }
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class, ExperimentalAtomicApi::class)
     private fun pollGroups(): Flow<Map<String, Group>?> = flow {
-        if (!hasWaitedForLogin) {
-            loginChannel.receive()
-            hasWaitedForLogin = true
-        }
-
         while (scope.isActive) {
             val currentGroupVersions = currentGroups.value.mapValues { it.value.version }
             val result = groupsNetworkDataSource.getGroups(currentGroupVersions)
