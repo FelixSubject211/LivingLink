@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import felix.projekt.livinglink.composeApp.ui.core.view.DialogWithTextField
+import felix.projekt.livinglink.composeApp.ui.core.view.EmptyScreen
 import felix.projekt.livinglink.composeApp.ui.core.view.LoadableText
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ViewModel
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsAction
@@ -96,12 +97,15 @@ fun ListGroupsScreen(
             }
         }
     ) { innerPadding ->
+        val modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()
+            .padding(8.dp)
+
         when {
             state.groupsLoading -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
+                    modifier = modifier,
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator()
@@ -109,46 +113,48 @@ fun ListGroupsScreen(
             }
 
             state.groups.isEmpty() -> {
-                ListGroupsEmptyScreen(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding),
-                    dispatch = viewModel::dispatch
+                EmptyScreen(
+                    text = ListGroupsLocalizables.EmptyStateText(),
+                    buttonTitle = ListGroupsLocalizables.AddGroupButtonTitle(),
+                    onButtonClick = { viewModel.dispatch(ListGroupsAction.AddGroupSubmitted) },
+                    modifier = modifier,
                 )
             }
 
             else -> {
-                LazyColumn(modifier = Modifier.padding(innerPadding)) {
+                LazyColumn(modifier = modifier) {
                     items(items = state.groups, key = { it.id }) { group ->
                         ListGroupsItem(
                             group = group,
                             dispatch = viewModel::dispatch,
-                            modifier = Modifier.animateItem()
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .animateItem()
                         )
                     }
                 }
             }
         }
-
-        DialogWithTextField(
-            isShowing = state.showAddGroup,
-            onDismiss = { viewModel.dispatch(ListGroupsAction.AddGroupCanceled) },
-            title = { Text(ListGroupsLocalizables.AddGroupDialogTitle()) },
-            text = { Text(ListGroupsLocalizables.AddGroupDialogText()) },
-            textFieldLabel = { Text(ListGroupsLocalizables.AddGroupDialogGroupNameTextFieldLabel()) },
-            textFieldValue = state.addGroupName,
-            onTextValueChange = { viewModel.dispatch(ListGroupsAction.AddGroupNameChanged(it)) },
-            confirmButton = {
-                TextButton(
-                    onClick = { viewModel.dispatch(ListGroupsAction.AddGroupConfirmed) },
-                    enabled = state.addGroupConfirmButtonIsEnabled()
-                ) {
-                    LoadableText(
-                        text = ListGroupsLocalizables.AddGroupDialogConfirmButtonTitle(),
-                        isLoading = state.addGroupIsOngoing
-                    )
-                }
-            }
-        )
     }
+
+    DialogWithTextField(
+        isShowing = state.showAddGroup,
+        onDismiss = { viewModel.dispatch(ListGroupsAction.AddGroupCanceled) },
+        title = { Text(ListGroupsLocalizables.AddGroupDialogTitle()) },
+        text = { Text(ListGroupsLocalizables.AddGroupDialogText()) },
+        textFieldLabel = { Text(ListGroupsLocalizables.AddGroupDialogGroupNameTextFieldLabel()) },
+        textFieldValue = state.addGroupName,
+        onTextValueChange = { viewModel.dispatch(ListGroupsAction.AddGroupNameChanged(it)) },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.dispatch(ListGroupsAction.AddGroupConfirmed) },
+                enabled = state.addGroupConfirmButtonIsEnabled()
+            ) {
+                LoadableText(
+                    text = ListGroupsLocalizables.AddGroupDialogConfirmButtonTitle(),
+                    isLoading = state.addGroupIsOngoing
+                )
+            }
+        }
+    )
 }
