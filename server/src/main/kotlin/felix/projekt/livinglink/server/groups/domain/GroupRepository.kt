@@ -8,8 +8,8 @@ interface GroupRepository {
     fun updateWithOptimisticLocking(
         groupId: String,
         maxRetries: Int = 3,
-        update: (Group) -> Group
-    ): Group
+        update: (Group) -> Group?
+    ): Group?
 
     fun deleteGroup(groupId: String)
     fun close()

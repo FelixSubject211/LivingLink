@@ -16,11 +16,11 @@ class SettingsReducer : Reducer<SettingsState, SettingsResult> {
         }
 
         is SettingsResult.LogoutLoading -> {
-            state.copy(logoutIsOnGoing = true)
+            state.copy(logoutIsLoading = true)
         }
 
         is SettingsResult.LogoutFinished -> {
-            state.copy(logoutIsOnGoing = false)
+            state.copy(logoutIsLoading = false)
         }
 
         is SettingsResult.ShowDeleteUserConfirmation -> {
@@ -34,12 +34,12 @@ class SettingsReducer : Reducer<SettingsState, SettingsResult> {
         is SettingsResult.DeleteUserLoading -> {
             state.copy(
                 showDeleteUserConfirmation = false,
-                deleteUserIsOnGoing = true
+                deleteUserIsLoading = true
             )
         }
 
         is SettingsResult.DeleteUserFinished -> {
-            state.copy(deleteUserIsOnGoing = false)
+            state.copy(deleteUserIsLoading = false)
         }
     }
 }

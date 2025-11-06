@@ -18,7 +18,8 @@ class RemoveUserFromGroupsDefaultService(
                     groupId = group.id
                 ) { currentGroup ->
                     currentGroup.removeMember(userId = userId)
-                }
+                } ?: throw IllegalStateException()
+
                 updatedGroup.memberIdToMember.keys.forEach { memberId ->
                     groupVersionCache.addOrUpdateGroupVersionIfUserExists(
                         userId = memberId,

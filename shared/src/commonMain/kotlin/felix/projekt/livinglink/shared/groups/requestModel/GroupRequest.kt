@@ -9,4 +9,16 @@ sealed class GroupRequest {
 
     @Serializable
     data class CreateGroup(val groupName: String) : GroupRequest()
+
+    @Serializable
+    data class CreateInviteCode(
+        val groupId: String,
+        val inviteCodeName: String
+    ) : GroupRequest()
+
+    @Serializable
+    data class DeleteInviteCode(
+        val groupId: String,
+        val inviteCodeId: String
+    ) : GroupRequest()
 }

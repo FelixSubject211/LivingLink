@@ -112,6 +112,8 @@ private fun LoggedInNavHost(navController: NavHostController) {
                 GroupViewModel(
                     groupId = groupId,
                     getGroupUseCase = AppModule.getGroupUseCase,
+                    createInviteCodeUseCase = AppModule.createInviteCodeUseCase,
+                    deleteInviteCodeUseCase = AppModule.deleteInviteCodeUseCase,
                     executionScope = it
                 )
             }

@@ -30,6 +30,15 @@ class GetGroupDefaultUseCase(
 
     private fun Group.toResponse() = GetGroupUseCase.Group(
         id = this.id,
-        name = this.name
+        name = this.name,
+        memberIdToMemberName = this.memberIdToMember.mapValues { it.value.username },
+        inviteCodes = this.inviteCodes.map { inviteCode ->
+            GetGroupUseCase.Group.InviteCode(
+                id = inviteCode.id,
+                name = inviteCode.name,
+                creatorId = inviteCode.creatorId,
+                usages = inviteCode.usages
+            )
+        }
     )
 }

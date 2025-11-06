@@ -12,6 +12,8 @@ import felix.projekt.livinglink.server.auth.infrastructure.KeycloakClient
 import felix.projekt.livinglink.server.auth.routes.authRoutes
 import felix.projekt.livinglink.server.config.appDefaultConfig
 import felix.projekt.livinglink.server.groups.application.CreateGroupDefaultUseCase
+import felix.projekt.livinglink.server.groups.application.CreateInviteCodeDefaultUseCase
+import felix.projekt.livinglink.server.groups.application.DeleteInviteCodeDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.GetUserGroupsDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.RemoveUserFromGroupsDefaultService
 import felix.projekt.livinglink.server.groups.config.GroupsConfig
@@ -146,6 +148,15 @@ fun Application.module(
                     groupVersionCache = groupVersionCache
                 ),
                 createGroupUseCase = CreateGroupDefaultUseCase(
+                    groupRepository = groupMongoDbRepository,
+                    groupVersionCache = groupVersionCache
+                ),
+                createInviteCodeUseCase = CreateInviteCodeDefaultUseCase(
+                    groupRepository = groupMongoDbRepository,
+                    groupVersionCache = groupVersionCache,
+                    uuidProvider = uuidProvider
+                ),
+                deleteInviteCodeUseCase = DeleteInviteCodeDefaultUseCase(
                     groupRepository = groupMongoDbRepository,
                     groupVersionCache = groupVersionCache
                 )

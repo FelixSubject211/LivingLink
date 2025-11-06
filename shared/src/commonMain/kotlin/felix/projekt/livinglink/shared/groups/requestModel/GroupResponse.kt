@@ -25,16 +25,37 @@ sealed class GroupResponse {
     }
 
     @Serializable
+    sealed class CreateInviteCode {
+        @Serializable
+        data class Success(val key: String) : CreateInviteCode()
+    }
+
+    @Serializable
+    sealed class DeleteInviteCode {
+        @Serializable
+        data object Success : DeleteInviteCode()
+    }
+
+    @Serializable
     data class Group(
         val id: String,
         val name: String,
         val memberIdToMember: Map<String, Member>,
+        val inviteCodes: List<InviteCode>,
         val version: Long
     ) {
         @Serializable
         data class Member(
             val id: String,
             val username: String
+        )
+
+        @Serializable
+        data class InviteCode(
+            val id: String,
+            val name: String,
+            val creatorId: String,
+            val usages: Int
         )
     }
 }

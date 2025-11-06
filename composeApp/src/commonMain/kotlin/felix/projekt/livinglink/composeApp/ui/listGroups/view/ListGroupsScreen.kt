@@ -33,6 +33,7 @@ import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ViewModel
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsAction
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsSideEffect
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsState
+import kotlinx.coroutines.flow.collectLatest
 import livinglink.composeapp.generated.resources.Res
 import livinglink.composeapp.generated.resources.settings_36px
 import org.jetbrains.compose.resources.painterResource
@@ -48,7 +49,7 @@ fun ListGroupsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
-        viewModel.sideEffect.collect { sideEffect ->
+        viewModel.sideEffect.collectLatest { sideEffect ->
             when (sideEffect) {
                 is ListGroupsSideEffect.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(sideEffect.localized())
@@ -152,7 +153,7 @@ fun ListGroupsScreen(
             ) {
                 LoadableText(
                     text = ListGroupsLocalizables.AddGroupDialogConfirmButtonTitle(),
-                    isLoading = state.addGroupIsOngoing
+                    isLoading = state.addGroupIsLoading
                 )
             }
         }

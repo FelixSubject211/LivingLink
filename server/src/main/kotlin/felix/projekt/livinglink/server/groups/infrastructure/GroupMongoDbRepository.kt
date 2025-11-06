@@ -38,6 +38,7 @@ class GroupMongoDbRepository(
             id = uuidProvider(),
             name = groupName,
             memberIdToMember = emptyMap(),
+            inviteCodeIdToInviteCode = emptyMap(),
             version = 0L
         )
         collection.insertOne(group.toDocument())
@@ -47,15 +48,15 @@ class GroupMongoDbRepository(
     override fun updateWithOptimisticLocking(
         groupId: String,
         maxRetries: Int,
-        update: (Group) -> Group
-    ): Group {
+        update: (Group) -> Group?
+    ): Group? {
         var attempt = 0
 
         while (attempt < maxRetries) {
             val group = this.getGroupById(groupId)
                 ?: throw IllegalStateException("Group $groupId not found")
 
-            val updatedGroup = update(group)
+            val updatedGroup = update(group) ?: return null
             val success = this.updateGroup(updatedGroup)
 
             if (success) return updatedGroup.copy(version = updatedGroup.version + 1)
@@ -90,30 +91,51 @@ class GroupMongoDbRepository(
     }
 
     private fun Group.toDocument(): Document = Document().apply {
-        put("_id", this@toDocument.id)
-        put("name", this@toDocument.name)
-        put("version", this@toDocument.version)
-        put("memberIdToMember", this@toDocument.memberIdToMember.mapValues { (_, member) ->
+        put("_id", id)
+        put("name", name)
+        put("memberIdToMember", memberIdToMember.mapValues { (_, member) ->
             mapOf(
                 "id" to member.id,
                 "username" to member.username
             )
         })
+        put("inviteCodeIdToInviteCode", inviteCodeIdToInviteCode.mapValues { (_, code) ->
+            mapOf(
+                "id" to code.id,
+                "key" to code.key,
+                "name" to code.name,
+                "creatorId" to code.creatorId,
+                "usages" to code.usages
+            )
+        })
+        put("version", version)
     }
 
     @Suppress("UNCHECKED_CAST")
     private fun Document.toGroup(): Group {
-        val members = (this["memberIdToMember"] as Map<String, Map<String, String>>).mapValues { (_, v) ->
+        val members = (this["memberIdToMember"] as? Map<String, Map<String, String>>)?.mapValues { (_, v) ->
             Group.Member(
                 id = v["id"]!!,
                 username = v["username"]!!
             )
-        }
+        } ?: emptyMap()
+
+        val inviteCodes =
+            (this["inviteCodeIdToInviteCode"] as? Map<String, Map<String, Any>>)?.mapValues { (_, v) ->
+                Group.InviteCode(
+                    id = v["id"] as String,
+                    key = v["key"] as String,
+                    name = v["name"] as String,
+                    creatorId = v["creatorId"] as String,
+                    usages = (v["usages"] as Number).toInt()
+                )
+            } ?: emptyMap()
 
         return Group(
             id = this["_id"] as String,
             name = this["name"] as String,
             memberIdToMember = members,
+            inviteCodeIdToInviteCode = inviteCodes,
             version = (this["version"] as Number).toLong()
         )
     }

@@ -5,6 +5,8 @@ import felix.projekt.livinglink.composeApp.auth.interfaces.GetAuthStateService
 import felix.projekt.livinglink.composeApp.core.domain.NetworkError
 import felix.projekt.livinglink.composeApp.core.domain.Result
 import felix.projekt.livinglink.composeApp.groups.domain.CreateGroupResponse
+import felix.projekt.livinglink.composeApp.groups.domain.CreateInviteCodeResponse
+import felix.projekt.livinglink.composeApp.groups.domain.DeleteInviteCodeResponse
 import felix.projekt.livinglink.composeApp.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.composeApp.groups.domain.Group
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsNetworkDataSource
@@ -39,6 +41,7 @@ class GroupsDefaultRepository(
 
     sealed class ManualUpdateItem {
         data class AddGroup(val group: Group) : ManualUpdateItem()
+        data object Update : ManualUpdateItem()
     }
 
     init {
@@ -79,6 +82,30 @@ class GroupsDefaultRepository(
             if (result is Result.Success && result.data is CreateGroupResponse.Success) {
                 manualUpdateChannel.send(ManualUpdateItem.AddGroup(result.data.group))
             }
+        }
+    }
+
+    override suspend fun createInviteCode(
+        groupId: String,
+        inviteCodeName: String
+    ): Result<CreateInviteCodeResponse, NetworkError> {
+        return groupsNetworkDataSource.createInviteCode(
+            groupId = groupId,
+            inviteCodeName = inviteCodeName
+        ).also {
+            manualUpdateChannel.send(ManualUpdateItem.Update)
+        }
+    }
+
+    override suspend fun deleteInviteCode(
+        groupId: String,
+        inviteCodeId: String
+    ): Result<DeleteInviteCodeResponse, NetworkError> {
+        return groupsNetworkDataSource.deleteInviteCode(
+            groupId = groupId,
+            inviteCodeId = inviteCodeId
+        ).also {
+            manualUpdateChannel.send(ManualUpdateItem.Update)
         }
     }
 
@@ -129,6 +156,8 @@ class GroupsDefaultRepository(
                     current + (item.group.id to item.group)
                 }
             }
+
+            is ManualUpdateItem.Update -> {}
         }
     }
 }

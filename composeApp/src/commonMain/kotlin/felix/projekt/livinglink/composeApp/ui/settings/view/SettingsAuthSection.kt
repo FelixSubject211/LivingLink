@@ -53,7 +53,7 @@ fun SettingsAuthSection(
                 ) {
                     LoadableText(
                         text = SettingsLocalizables.LogoutButtonTitle(),
-                        isLoading = state.logoutIsOnGoing,
+                        isLoading = state.logoutIsLoading,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )
@@ -65,7 +65,7 @@ fun SettingsAuthSection(
                 ) {
                     LoadableText(
                         text = SettingsLocalizables.DeleteUserButtonTitle(),
-                        isLoading = state.deleteUserIsOnGoing,
+                        isLoading = state.deleteUserIsLoading,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

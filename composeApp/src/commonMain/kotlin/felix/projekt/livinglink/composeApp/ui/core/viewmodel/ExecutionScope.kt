@@ -9,6 +9,7 @@ interface ExecutionScope {
         flow: Flow<T>,
         collector: suspend (T) -> Unit
     )
+
     fun cancelCurrentJobs()
     fun destroy()
 }

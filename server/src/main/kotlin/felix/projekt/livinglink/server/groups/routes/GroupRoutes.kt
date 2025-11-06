@@ -3,9 +3,13 @@ package felix.projekt.livinglink.server.groups.routes
 import felix.projekt.livinglink.server.core.routes.userId
 import felix.projekt.livinglink.server.core.routes.username
 import felix.projekt.livinglink.server.groups.config.GroupsConfig
+import felix.projekt.livinglink.server.groups.domain.CreateInviteCodeResponse
+import felix.projekt.livinglink.server.groups.domain.DeleteInviteCodeResponse
 import felix.projekt.livinglink.server.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.server.groups.domain.Group
 import felix.projekt.livinglink.server.groups.interfaces.CreateGroupUseCase
+import felix.projekt.livinglink.server.groups.interfaces.CreateInviteCodeUseCase
+import felix.projekt.livinglink.server.groups.interfaces.DeleteInviteCodeUseCase
 import felix.projekt.livinglink.server.groups.interfaces.GetUserGroupsUseCase
 import felix.projekt.livinglink.shared.groups.requestModel.GroupRequest
 import felix.projekt.livinglink.shared.groups.requestModel.GroupResponse
@@ -18,7 +22,9 @@ import io.ktor.server.routing.route
 fun Route.groupRoutes(
     groupsConfig: GroupsConfig,
     getUserGroupsUseCase: GetUserGroupsUseCase,
-    createGroupUseCase: CreateGroupUseCase
+    createGroupUseCase: CreateGroupUseCase,
+    createInviteCodeUseCase: CreateInviteCodeUseCase,
+    deleteInviteCodeUseCase: DeleteInviteCodeUseCase
 ) {
     fun Group.toResponse() = GroupResponse.Group(
         id = this.id,
@@ -27,6 +33,14 @@ fun Route.groupRoutes(
             GroupResponse.Group.Member(
                 id = member.value.id,
                 username = member.value.username
+            )
+        },
+        inviteCodes = this.inviteCodeIdToInviteCode.values.map { inviteCode ->
+            GroupResponse.Group.InviteCode(
+                id = inviteCode.id,
+                name = inviteCode.name,
+                creatorId = inviteCode.creatorId,
+                usages = inviteCode.usages
             )
         },
         version = this.version
@@ -72,6 +86,38 @@ fun Route.groupRoutes(
             call.respond<GroupResponse.CreateGroup>(
                 GroupResponse.CreateGroup.Success(group.toResponse())
             )
+        }
+
+        post("/inviteCode/create") {
+            val request: GroupRequest.CreateInviteCode = call.receive()
+            val response = createInviteCodeUseCase(
+                userId = call.userId,
+                groupId = request.groupId,
+                inviteCodeName = request.inviteCodeName
+            )
+            when (response) {
+                is CreateInviteCodeResponse.Success -> {
+                    call.respond<GroupResponse.CreateInviteCode>(
+                        GroupResponse.CreateInviteCode.Success(key = response.key)
+                    )
+                }
+            }
+        }
+
+        post("/inviteCode/delete") {
+            val request: GroupRequest.DeleteInviteCode = call.receive()
+            val response = deleteInviteCodeUseCase(
+                userId = call.userId,
+                groupId = request.groupId,
+                inviteCodeId = request.inviteCodeId
+            )
+            when (response) {
+                is DeleteInviteCodeResponse.Success -> {
+                    call.respond<GroupResponse.DeleteInviteCode>(
+                        GroupResponse.DeleteInviteCode.Success
+                    )
+                }
+            }
         }
     }
 }

@@ -15,7 +15,7 @@ class CreateGroupDefaultUseCase(
 
         val updatedGroup = groupRepository.updateWithOptimisticLocking(groupId = newGroup.id) { group ->
             group.addMember(userId = userId, username = username)
-        }
+        } ?: throw IllegalStateException()
 
         groupVersionCache.addOrUpdateGroupVersionIfUserExists(
             userId = userId,

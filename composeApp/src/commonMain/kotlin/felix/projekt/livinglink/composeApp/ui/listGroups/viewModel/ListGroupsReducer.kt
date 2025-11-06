@@ -29,7 +29,7 @@ class ListGroupsReducer : Reducer<ListGroupsState, ListGroupsResult> {
         is ListGroupsResult.ConfirmAddGroup -> {
             state.copy(
                 addGroupName = "",
-                addGroupIsOngoing = true
+                addGroupIsLoading = true
             )
         }
 
@@ -43,7 +43,7 @@ class ListGroupsReducer : Reducer<ListGroupsState, ListGroupsResult> {
         ListGroupsResult.AddGroupFinished -> {
             state.copy(
                 showAddGroup = false,
-                addGroupIsOngoing = false
+                addGroupIsLoading = false
             )
         }
     }

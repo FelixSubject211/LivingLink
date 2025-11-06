@@ -1,18 +1,23 @@
 package felix.projekt.livinglink.server.groups.domain
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class Group(
     val id: String,
     val name: String,
     val memberIdToMember: Map<String, Member>,
+    val inviteCodeIdToInviteCode: Map<String, InviteCode>,
     val version: Long
 ) {
-    @Serializable
     data class Member(
         val id: String,
         val username: String
+    )
+
+    data class InviteCode(
+        val id: String,
+        val key: String,
+        val name: String,
+        val creatorId: String,
+        val usages: Int
     )
 
     fun addMember(userId: String, username: String) = copy(
@@ -24,4 +29,12 @@ data class Group(
     )
 
     fun isSingleMember(userId: String) = memberIdToMember.size == 1 && memberIdToMember.containsKey(userId)
+
+    fun addInviteCode(inviteCode: InviteCode) = copy(
+        inviteCodeIdToInviteCode = inviteCodeIdToInviteCode + (inviteCode.id to inviteCode)
+    )
+
+    fun removeInviteCode(inviteCodeId: String) = copy(
+        inviteCodeIdToInviteCode = inviteCodeIdToInviteCode - inviteCodeId
+    )
 }

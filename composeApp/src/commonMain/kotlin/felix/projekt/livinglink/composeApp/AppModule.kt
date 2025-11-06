@@ -10,6 +10,8 @@ import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthNetworkDefaul
 import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthTokenDefaultManager
 import felix.projekt.livinglink.composeApp.auth.infrastructure.getTokenPlatformStorage
 import felix.projekt.livinglink.composeApp.groups.application.CreateGroupDefaultUseCase
+import felix.projekt.livinglink.composeApp.groups.application.CreateInviteCodeDefaultUseCase
+import felix.projekt.livinglink.composeApp.groups.application.DeleteInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
@@ -118,6 +120,18 @@ object AppModule {
 
     val createGroupUseCase by lazy {
         CreateGroupDefaultUseCase(
+            groupsRepository = groupsRepository
+        )
+    }
+
+    val createInviteCodeUseCase by lazy {
+        CreateInviteCodeDefaultUseCase(
+            groupsRepository = groupsRepository
+        )
+    }
+
+    val deleteInviteCodeUseCase by lazy {
+        DeleteInviteCodeDefaultUseCase(
             groupsRepository = groupsRepository
         )
     }

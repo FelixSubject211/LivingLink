@@ -12,6 +12,15 @@ interface GetGroupUseCase {
 
     data class Group(
         val id: String,
-        val name: String
-    )
+        val name: String,
+        val memberIdToMemberName: Map<String, String>,
+        val inviteCodes: List<InviteCode>,
+    ) {
+        data class InviteCode(
+            val id: String,
+            val name: String,
+            val creatorId: String,
+            val usages: Int
+        )
+    }
 }

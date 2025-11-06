@@ -5,10 +5,10 @@ data class ListGroupsState(
     val groupsLoading: Boolean = true,
     val showAddGroup: Boolean = false,
     val addGroupName: String = "",
-    val addGroupIsOngoing: Boolean = false
+    val addGroupIsLoading: Boolean = false
 ) {
     fun addGroupConfirmButtonIsEnabled(): Boolean {
-        return !addGroupName.isBlank() && !addGroupIsOngoing
+        return !addGroupName.isBlank() && !addGroupIsLoading
     }
 
     data class Group(

@@ -41,7 +41,7 @@ fun ListGroupsItem(
             modifier = Modifier.padding(8.dp)
         ) {
             Box(
-                modifier = modifier
+                modifier = Modifier
                     .size(54.dp)
                     .clip(CircleShape)
                     .background(MaterialTheme.colorScheme.secondary),
