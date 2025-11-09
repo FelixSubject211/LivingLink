@@ -9,20 +9,27 @@ class CreateGroupDefaultUseCase(
     private val groupRepository: GroupRepository,
     private val groupVersionCache: GroupVersionCache
 ) : CreateGroupUseCase {
+    override suspend fun invoke(
+        userId: String,
+        username: String,
+        groupName: String
+    ): Group {
+        val newGroup = groupRepository.createGroup(groupName)
+        val result = groupRepository.updateWithOptimisticLocking(newGroup.id) { group ->
+            GroupRepository.UpdateOperationResult.Updated(
+                newEntity = group.addMember(userId, username),
+                response = Unit
+            )
+        }
 
-    override suspend fun invoke(userId: String, username: String, groupName: String): Group {
-        val newGroup = groupRepository.createGroup(groupName = groupName)
+        result.entity?.memberIdToMember?.values?.forEach { member ->
+            groupVersionCache.addOrUpdateGroupVersionIfUserExists(
+                userId = member.id,
+                groupId = newGroup.id,
+                version = result.entity.version
+            )
+        }
 
-        val updatedGroup = groupRepository.updateWithOptimisticLocking(groupId = newGroup.id) { group ->
-            group.addMember(userId = userId, username = username)
-        } ?: throw IllegalStateException()
-
-        groupVersionCache.addOrUpdateGroupVersionIfUserExists(
-            userId = userId,
-            groupId = updatedGroup.id,
-            version = updatedGroup.version,
-        )
-
-        return updatedGroup
+        return result.entity ?: throw IllegalStateException()
     }
 }

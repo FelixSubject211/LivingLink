@@ -45,28 +45,35 @@ class GroupMongoDbRepository(
         return group
     }
 
-    override fun updateWithOptimisticLocking(
+    override fun <R> updateWithOptimisticLocking(
         groupId: String,
         maxRetries: Int,
-        update: (Group) -> Group?
-    ): Group? {
+        update: (Group) -> GroupRepository.UpdateOperationResult<Group, R>
+    ): GroupRepository.UpdateResult<Group, R> {
         var attempt = 0
 
         while (attempt < maxRetries) {
-            val group = this.getGroupById(groupId)
+            val current = getGroupById(groupId)
                 ?: throw IllegalStateException("Group $groupId not found")
 
-            val updatedGroup = update(group) ?: return null
-            val success = this.updateGroup(updatedGroup)
+            when (val op = update(current)) {
+                is GroupRepository.UpdateOperationResult.NoUpdate -> {
+                    return GroupRepository.UpdateResult(null, op.response)
+                }
 
-            if (success) return updatedGroup.copy(version = updatedGroup.version + 1)
+                is GroupRepository.UpdateOperationResult.Updated -> {
+                    val success = updateGroup(op.newEntity)
+                    if (success) {
+                        val updatedWithNewVersion = op.newEntity.copy(version = op.newEntity.version + 1)
+                        return GroupRepository.UpdateResult(updatedWithNewVersion, op.response)
+                    }
+                }
+            }
 
             attempt++
         }
 
-        throw OptimisticLockingException(
-            "Failed to update group $groupId after $maxRetries attempts due to version conflict"
-        )
+        throw OptimisticLockingException("Failed to update group $groupId after $maxRetries attempts due to version conflict")
     }
 
     private fun updateGroup(group: Group): Boolean {

@@ -26,21 +26,25 @@ class CreateInviteCodeDefaultUseCase(
             usages = 0
         )
 
-        val updatedGroup = groupRepository.updateWithOptimisticLocking(groupId = groupId) { group ->
-            group.addInviteCode(inviteCode)
-        } ?: throw IllegalStateException()
+        val result = groupRepository.updateWithOptimisticLocking(groupId) { group ->
+            GroupRepository.UpdateOperationResult.Updated(
+                newEntity = group.addInviteCode(inviteCode),
+                response = CreateInviteCodeResponse.Success(inviteCode.key)
+            )
+        }
 
-        updatedGroup.memberIdToMember.values.forEach { member ->
+        result.entity?.memberIdToMember?.values?.forEach { member ->
             groupVersionCache.addOrUpdateGroupVersionIfUserExists(
                 userId = member.id,
                 groupId = groupId,
-                version = updatedGroup.version
+                version = result.entity.version
             )
         }
-        return CreateInviteCodeResponse.Success(key = inviteCode.key)
+
+        return result.response
     }
 
-    fun generateInviteCode(bytes: Int = 14): String {
+    private fun generateInviteCode(bytes: Int = 14): String {
         val random = SecureRandom()
         val buffer = ByteArray(bytes)
         random.nextBytes(buffer)

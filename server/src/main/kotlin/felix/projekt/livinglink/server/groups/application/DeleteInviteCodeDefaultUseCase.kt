@@ -14,21 +14,29 @@ class DeleteInviteCodeDefaultUseCase(
         groupId: String,
         inviteCodeId: String
     ): DeleteInviteCodeResponse {
-        val updatedGroup = groupRepository.updateWithOptimisticLocking(groupId = groupId) { group ->
-            if (!group.memberIdToMember.contains(userId)) {
-                return@updateWithOptimisticLocking null
+        val result = groupRepository.updateWithOptimisticLocking(
+            groupId = groupId
+        ) { group ->
+            require(group.memberIdToMember.containsKey(userId)) {
+                "User $userId is not a member of group $groupId"
             }
-            group.removeInviteCode(inviteCodeId = inviteCodeId)
-        } ?: throw IllegalStateException()
 
-        updatedGroup.memberIdToMember.values.forEach { member ->
-            groupVersionCache.addOrUpdateGroupVersionIfUserExists(
-                userId = member.id,
-                groupId = groupId,
-                version = updatedGroup.version
+            val updated = group.removeInviteCode(inviteCodeId)
+            GroupRepository.UpdateOperationResult.Updated(
+                newEntity = updated,
+                response = DeleteInviteCodeResponse.Success
             )
         }
 
-        return DeleteInviteCodeResponse.Success
+        result.entity?.memberIdToMember?.values?.forEach { member ->
+            groupVersionCache.addOrUpdateGroupVersionIfUserExists(
+                userId = member.id,
+                groupId = groupId,
+                version = result.entity.version
+            )
+        }
+
+        return result.response
     }
+
 }

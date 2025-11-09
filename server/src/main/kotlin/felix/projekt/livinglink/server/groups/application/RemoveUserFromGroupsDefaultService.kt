@@ -9,26 +9,27 @@ class RemoveUserFromGroupsDefaultService(
     private val groupVersionCache: GroupVersionCache
 ) : RemoveUserFromGroupsService {
     override suspend fun invoke(userId: String) {
-        val allGroups = groupRepository.getGroupsForMember(userId = userId)
-        allGroups.forEach { (_, group) ->
-            if (group.isSingleMember(userId = userId)) {
-                groupRepository.deleteGroup(groupId = group.id)
+        val allGroups = groupRepository.getGroupsForMember(userId)
+        allGroups.values.forEach { group ->
+            if (group.isSingleMember(userId)) {
+                groupRepository.deleteGroup(group.id)
             } else {
-                val updatedGroup = groupRepository.updateWithOptimisticLocking(
-                    groupId = group.id
-                ) { currentGroup ->
-                    currentGroup.removeMember(userId = userId)
-                } ?: throw IllegalStateException()
+                val result = groupRepository.updateWithOptimisticLocking(group.id) { currentGroup ->
+                    GroupRepository.UpdateOperationResult.Updated(
+                        newEntity = currentGroup.removeMember(userId),
+                        response = Unit
+                    )
+                }
 
-                updatedGroup.memberIdToMember.keys.forEach { memberId ->
+                result.entity?.memberIdToMember?.keys?.forEach { memberId ->
                     groupVersionCache.addOrUpdateGroupVersionIfUserExists(
                         userId = memberId,
-                        groupId = updatedGroup.id,
-                        version = updatedGroup.version
+                        groupId = group.id,
+                        version = result.entity.version
                     )
                 }
             }
         }
-        groupVersionCache.deleteGroupVersions(userId = userId)
+        groupVersionCache.deleteGroupVersions(userId)
     }
 }

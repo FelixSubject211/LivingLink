@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinJvm)
     alias(libs.plugins.ktor)
     alias(libs.plugins.kotlinPluginSerialization)
+    alias(libs.plugins.mokkery)
     application
 }
 
@@ -72,6 +73,8 @@ dependencies {
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
+    testImplementation(libs.coroutines.test)
+    testImplementation(libs.turbine)
 
     gatlingImplementation(libs.gatling.core.java)
     gatlingImplementation(libs.gatling.http.java)
