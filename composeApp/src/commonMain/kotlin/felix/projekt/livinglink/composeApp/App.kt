@@ -1,7 +1,8 @@
 package felix.projekt.livinglink.composeApp
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -14,6 +15,7 @@ import felix.projekt.livinglink.composeApp.ui.navigation.NavigationHost
 import io.github.aakira.napier.DebugAntilog
 import io.github.aakira.napier.Napier
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun App() {
     Napier.base(DebugAntilog())
@@ -27,7 +29,7 @@ fun App() {
 
         val navHostController = rememberNavController()
 
-        MaterialTheme(colorScheme) {
+        MaterialExpressiveTheme(colorScheme) {
             NavigationHost(navController = navHostController)
         }
     }

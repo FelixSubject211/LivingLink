@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -37,6 +36,7 @@ import kotlinx.coroutines.flow.collectLatest
 import livinglink.composeapp.generated.resources.Res
 import livinglink.composeapp.generated.resources.settings_36px
 import org.jetbrains.compose.resources.painterResource
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,16 +86,10 @@ fun ListGroupsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            if (!state.groupsLoading && state.groups.isNotEmpty()) {
-                FloatingActionButton(
-                    onClick = { viewModel.dispatch(ListGroupsAction.AddGroupSubmitted) }
-                ) {
-                    Text(
-                        text = ListGroupsLocalizables.AddGroupButtonTitle(),
-                        modifier = Modifier.padding(horizontal = 12.dp)
-                    )
-                }
-            }
+            ListGroupsFabMenu(
+                state = state,
+                dispatch = viewModel::dispatch
+            )
         }
     ) { innerPadding ->
         val modifier = Modifier

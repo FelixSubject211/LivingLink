@@ -3,6 +3,7 @@ package felix.projekt.livinglink.composeApp.ui.listGroups.viewModel
 data class ListGroupsState(
     val groups: List<Group> = emptyList(),
     val groupsLoading: Boolean = true,
+    val menuExpanded: Boolean = false,
     val showAddGroup: Boolean = false,
     val addGroupName: String = "",
     val addGroupIsLoading: Boolean = false

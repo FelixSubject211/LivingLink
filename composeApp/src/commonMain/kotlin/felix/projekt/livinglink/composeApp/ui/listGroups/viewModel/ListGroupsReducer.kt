@@ -18,8 +18,19 @@ class ListGroupsReducer : Reducer<ListGroupsState, ListGroupsResult> {
             )
         }
 
+        is ListGroupsResult.MenuExpanded -> {
+            state.copy(menuExpanded = true)
+        }
+
+        is ListGroupsResult.MenuClosed -> {
+            state.copy(menuExpanded = false)
+        }
+
         is ListGroupsResult.ShowAddGroupDialog -> {
-            state.copy(showAddGroup = true)
+            state.copy(
+                menuExpanded = false,
+                showAddGroup = true
+            )
         }
 
         is ListGroupsResult.AddGroupNameChanged -> {

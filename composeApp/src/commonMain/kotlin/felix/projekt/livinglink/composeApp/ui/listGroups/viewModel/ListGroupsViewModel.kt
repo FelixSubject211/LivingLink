@@ -9,6 +9,8 @@ import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ViewModel
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsResult.AddGroupNameChanged
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsResult.CloseAddGroupDialog
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsResult.ShowAddGroupDialog
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsSideEffect.NavigateToGroup
+import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsSideEffect.NavigateToSettings
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -27,8 +29,16 @@ class ListGroupsViewModel(
     override fun dispatch(action: ListGroupsAction) = when (action) {
         ListGroupsAction.NavigateToSettings -> {
             executionScope.launchJob {
-                _sideEffect.emit(ListGroupsSideEffect.NavigateToSettings)
+                _sideEffect.emit(NavigateToSettings)
             }
+        }
+
+        ListGroupsAction.ExpandMenu -> {
+            _state.update(ListGroupsResult.MenuExpanded)
+        }
+
+        ListGroupsAction.CloseMenu -> {
+            _state.update(ListGroupsResult.MenuClosed)
         }
 
         is ListGroupsAction.AddGroupSubmitted -> {
@@ -51,7 +61,7 @@ class ListGroupsViewModel(
 
         is ListGroupsAction.NavigateToGroup -> {
             executionScope.launchJob {
-                _sideEffect.emit(ListGroupsSideEffect.NavigateToGroup(action.groupId))
+                _sideEffect.emit(NavigateToGroup(action.groupId))
             }
         }
     }
