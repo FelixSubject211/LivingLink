@@ -56,7 +56,7 @@ class ListGroupsViewModel(
         }
     }
 
-    fun start() {
+    override fun start() {
         executionScope.launchCollector(getGroupsUseCase()) { response ->
             when (response) {
                 GetGroupsUseCase.Response.Loading -> {

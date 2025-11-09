@@ -85,7 +85,7 @@ class GroupViewModel(
         }
     }
 
-    fun start() {
+    override fun start() {
         executionScope.launchCollector(getGroupUseCase(groupId)) { response ->
             when (response) {
                 is GetGroupUseCase.Response.Loading -> {

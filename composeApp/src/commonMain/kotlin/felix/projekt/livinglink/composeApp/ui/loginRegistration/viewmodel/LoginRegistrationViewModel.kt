@@ -68,6 +68,8 @@ class LoginRegistrationViewModel(
         }
     }
 
+    override fun start() {}
+
     private suspend fun performLogin(loginState: LoginRegistrationState.Login) {
         _state.update(LoginRegistrationResult.LoginLoading)
         val response = loginUserUseCase(username = loginState.username, password = loginState.password)

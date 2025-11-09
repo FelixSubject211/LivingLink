@@ -36,6 +36,20 @@ class GroupsDefaultRepositoryTest {
     private lateinit var getAuthStateServiceFlow: MutableSharedFlow<GetAuthStateService.AuthState>
     private lateinit var sut: GroupsDefaultRepository
     private lateinit var testScope: CoroutineScope
+    val group1 = Group(
+        id = "1",
+        name = "Group1",
+        memberIdToMember = emptyMap(),
+        inviteCodes = emptyList(),
+        version = 0
+    )
+    val group2 = Group(
+        id = "2",
+        name = "Group2",
+        memberIdToMember = emptyMap(),
+        inviteCodes = emptyList(),
+        version = 1
+    )
 
     @BeforeTest
     fun setup() {
@@ -56,8 +70,6 @@ class GroupsDefaultRepositoryTest {
 
     @Test
     fun `polling starts only when flow is collected`() = runTest(UnconfinedTestDispatcher()) {
-        val group1 = Group(id = "1", name = "Group1", memberIdToMember = emptyMap(), version = 0)
-        val group2 = Group(id = "2", name = "Group2", memberIdToMember = emptyMap(), version = 1)
         val groupResponse = mapOf(group1.id to group1, group2.id to group2)
 
         getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
@@ -78,8 +90,7 @@ class GroupsDefaultRepositoryTest {
     @Test
     fun `polling stops 5 seconds after flow collection stops`() = runTest {
         var callCount = 0
-        val group = Group(id = "1", name = "Group1", memberIdToMember = emptyMap(), version = 0)
-        val groupResponse = mapOf(group.id to group)
+        val groupResponse = mapOf(group1.id to group1)
 
         everySuspend { mockGroupsNetworkDataSource.getGroups(any()) } returns Result.Success(
             GetGroupsResponse.Success(
@@ -106,12 +117,11 @@ class GroupsDefaultRepositoryTest {
 
     @Test
     fun `UserLoggedIn triggers polling`() = runTest(UnconfinedTestDispatcher()) {
-        val group = Group(id = "1", name = "Group1", memberIdToMember = emptyMap(), version = 0)
         var callCount = 0
 
         everySuspend { mockGroupsNetworkDataSource.getGroups(any()) } returns Result.Success(
             GetGroupsResponse.Success(
-                groups = mapOf("1" to group),
+                groups = mapOf(group1.id to group1),
                 nextPollAfterMillis = 1000L
             )
         ).also { callCount++ }
@@ -125,8 +135,7 @@ class GroupsDefaultRepositoryTest {
 
     @Test
     fun `UserLoggedOut stops polling and clears groups`() = runTest(UnconfinedTestDispatcher()) {
-        val group = Group(id = "1", name = "Group1", memberIdToMember = emptyMap(), version = 0)
-        val groupResponse = mapOf(group.id to group)
+        val groupResponse = mapOf(group1.id to group1)
 
         getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
 
@@ -153,8 +162,7 @@ class GroupsDefaultRepositoryTest {
 
     @Test
     fun `multiple collectors share same polling flow`() = runTest(UnconfinedTestDispatcher()) {
-        val group = Group(id = "1", name = "Group1", memberIdToMember = emptyMap(), version = 0)
-        val groupResponse = mapOf(group.id to group)
+        val groupResponse = mapOf(group1.id to group1)
 
         everySuspend { mockGroupsNetworkDataSource.getGroups(any()) } returns Result.Success(
             GetGroupsResponse.Success(

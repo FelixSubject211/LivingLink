@@ -51,7 +51,7 @@ class SettingsViewModel(
         }
     }
 
-    fun start() {
+    override fun start() {
         executionScope.launchCollector(getAuthSessionUseCase()) { session ->
             when (session) {
                 is GetAuthSessionUseCase.AuthSession.LoggedIn -> {
