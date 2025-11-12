@@ -86,10 +86,12 @@ fun ListGroupsScreen(
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
         floatingActionButton = {
-            ListGroupsFabMenu(
-                state = state,
-                dispatch = viewModel::dispatch
-            )
+            if (state.groups.isNotEmpty()) {
+                ListGroupsFabMenu(
+                    state = state,
+                    dispatch = viewModel::dispatch
+                )
+            }
         }
     ) { innerPadding ->
         val modifier = Modifier
@@ -110,8 +112,10 @@ fun ListGroupsScreen(
             state.groups.isEmpty() -> {
                 EmptyScreen(
                     text = ListGroupsLocalizables.EmptyStateText(),
-                    buttonTitle = ListGroupsLocalizables.AddGroupButtonTitle(),
-                    onButtonClick = { viewModel.dispatch(ListGroupsAction.AddGroupSubmitted) },
+                    buttonTitle = ListGroupsLocalizables.JoinGroupButtonTitle(),
+                    onButtonClick = { viewModel.dispatch(ListGroupsAction.JoinGroupSubmitted) },
+                    secondButtonTitle = ListGroupsLocalizables.AddGroupButtonTitle(),
+                    onSecondButtonClick = { viewModel.dispatch(ListGroupsAction.AddGroupSubmitted) },
                     modifier = modifier,
                 )
             }
@@ -148,6 +152,27 @@ fun ListGroupsScreen(
                 LoadableText(
                     text = ListGroupsLocalizables.AddGroupDialogConfirmButtonTitle(),
                     isLoading = state.addGroupIsLoading
+                )
+            }
+        }
+    )
+
+    DialogWithTextField(
+        isShowing = state.showJoinGroup,
+        onDismiss = { viewModel.dispatch(ListGroupsAction.JoinGroupCanceled) },
+        title = { Text(ListGroupsLocalizables.JoinGroupDialogTitle()) },
+        text = { Text(ListGroupsLocalizables.JoinGroupDialogText()) },
+        textFieldLabel = { Text(ListGroupsLocalizables.JoinGroupDialogInviteCodeTextFieldLabel()) },
+        textFieldValue = state.joinGroupInviteCode,
+        onTextValueChange = { viewModel.dispatch(ListGroupsAction.JoinGroupInviteCodeChanged(it)) },
+        confirmButton = {
+            TextButton(
+                onClick = { viewModel.dispatch(ListGroupsAction.JoinGroupConfirmed) },
+                enabled = state.joinGroupConfirmButtonIsEnabled()
+            ) {
+                LoadableText(
+                    text = ListGroupsLocalizables.JoinGroupDialogConfirmButtonTitle(),
+                    isLoading = state.joinGroupIsLoading
                 )
             }
         }

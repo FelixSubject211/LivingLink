@@ -1,4 +1,4 @@
-package felix.projekt.livinglink.groups.application
+package felix.projekt.common
 
 import dev.mokkery.matcher.capture.Capture
 import felix.projekt.livinglink.server.groups.domain.Group

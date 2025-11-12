@@ -17,6 +17,8 @@ interface GroupsRepository {
         inviteCodeId: String
     ): Result<DeleteInviteCodeResponse, NetworkError>
 
+    suspend fun joinGroup(inviteCodeKey: String): Result<JoinGroupResponse, NetworkError>
+
     sealed class GroupsRepositoryState {
         data object Loading : GroupsRepositoryState()
         data class Data(val groupIdToGroup: Map<String, Group>) : GroupsRepositoryState()

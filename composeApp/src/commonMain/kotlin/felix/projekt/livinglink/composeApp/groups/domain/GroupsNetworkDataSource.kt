@@ -15,4 +15,6 @@ interface GroupsNetworkDataSource {
         groupId: String,
         inviteCodeId: String
     ): Result<DeleteInviteCodeResponse, NetworkError>
+
+    suspend fun joinGroup(inviteCodeKey: String): Result<JoinGroupResponse, NetworkError>
 }

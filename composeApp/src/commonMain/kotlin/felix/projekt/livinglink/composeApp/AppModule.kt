@@ -15,6 +15,7 @@ import felix.projekt.livinglink.composeApp.groups.application.DeleteInviteCodeDe
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
+import felix.projekt.livinglink.composeApp.groups.application.JoinGroupWithInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
 import felix.projekt.livinglink.shared.json
 import io.ktor.client.HttpClient
@@ -132,6 +133,12 @@ object AppModule {
 
     val deleteInviteCodeUseCase by lazy {
         DeleteInviteCodeDefaultUseCase(
+            groupsRepository = groupsRepository
+        )
+    }
+
+    val joinGroupWithInviteCodeUseCase by lazy {
+        JoinGroupWithInviteCodeDefaultUseCase(
             groupsRepository = groupsRepository
         )
     }

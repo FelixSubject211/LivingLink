@@ -37,4 +37,11 @@ data class Group(
     fun removeInviteCode(inviteCodeId: String) = copy(
         inviteCodeIdToInviteCode = inviteCodeIdToInviteCode - inviteCodeId
     )
+
+    fun incrementInviteCodeUsage(inviteCodeId: String): Group {
+        val inviteCode = inviteCodeIdToInviteCode[inviteCodeId]!!
+        val updatedInviteCode = inviteCode.copy(usages = inviteCode.usages + 1)
+        val updatedInviteCodeIdToInviteCode = inviteCodeIdToInviteCode + (inviteCodeId to updatedInviteCode)
+        return copy(inviteCodeIdToInviteCode = updatedInviteCodeIdToInviteCode)
+    }
 }

@@ -8,5 +8,9 @@ sealed class ListGroupsAction {
     data class AddGroupNameChanged(val value: String) : ListGroupsAction()
     data object AddGroupConfirmed : ListGroupsAction()
     data object AddGroupCanceled : ListGroupsAction()
+    data object JoinGroupSubmitted : ListGroupsAction()
+    data class JoinGroupInviteCodeChanged(val value: String) : ListGroupsAction()
+    data object JoinGroupConfirmed : ListGroupsAction()
+    data object JoinGroupCanceled : ListGroupsAction()
     data class NavigateToGroup(val groupId: String) : ListGroupsAction()
 }

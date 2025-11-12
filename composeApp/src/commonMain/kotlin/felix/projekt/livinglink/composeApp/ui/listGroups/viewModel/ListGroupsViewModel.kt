@@ -2,6 +2,7 @@ package felix.projekt.livinglink.composeApp.ui.listGroups.viewModel
 
 import felix.projekt.livinglink.composeApp.groups.interfaces.CreateGroupUseCase
 import felix.projekt.livinglink.composeApp.groups.interfaces.GetGroupsUseCase
+import felix.projekt.livinglink.composeApp.groups.interfaces.JoinGroupWithInviteCodeUseCase
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ExecutionScope
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.MutableStateFlowWithReducer
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.Reducer
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 class ListGroupsViewModel(
     private val getGroupsUseCase: GetGroupsUseCase,
     private val createGroupUseCase: CreateGroupUseCase,
+    private val joinGroupWithInviteCodeUseCase: JoinGroupWithInviteCodeUseCase,
     private val executionScope: ExecutionScope,
     private val reducer: Reducer<ListGroupsState, ListGroupsResult> = ListGroupsReducer(),
 ) : ViewModel<ListGroupsState, ListGroupsAction, ListGroupsSideEffect> {
@@ -57,6 +59,24 @@ class ListGroupsViewModel(
 
         is ListGroupsAction.AddGroupCanceled -> {
             _state.update(CloseAddGroupDialog)
+        }
+
+        is ListGroupsAction.JoinGroupSubmitted -> {
+            _state.update(ListGroupsResult.ShowJoinGroupDialog)
+        }
+
+        is ListGroupsAction.JoinGroupInviteCodeChanged -> {
+            _state.update(ListGroupsResult.JoinGroupInviteCodeChanged(action.value))
+        }
+
+        is ListGroupsAction.JoinGroupConfirmed -> {
+            executionScope.launchJob {
+                joinGroup(_state.value)
+            }
+        }
+
+        is ListGroupsAction.JoinGroupCanceled -> {
+            _state.update(ListGroupsResult.CloseJoinGroupDialog)
         }
 
         is ListGroupsAction.NavigateToGroup -> {
@@ -102,5 +122,30 @@ class ListGroupsViewModel(
             }
         }
         _state.update(ListGroupsResult.AddGroupFinished)
+    }
+
+    private suspend fun joinGroup(state: ListGroupsState) {
+        _state.update(ListGroupsResult.ConfirmJoinGroup)
+        when (joinGroupWithInviteCodeUseCase(state.joinGroupInviteCode)) {
+            is JoinGroupWithInviteCodeUseCase.Response.Success -> {
+                _state.update(ListGroupsResult.JoinGroupFinished)
+                return
+            }
+
+            is JoinGroupWithInviteCodeUseCase.Response.InvalidInviteCode -> {
+                _state.update(ListGroupsResult.JoinGroupFinished)
+                _sideEffect.emit(ListGroupsSideEffect.ShowSnackbar.JoinGroupInvalidInviteCode)
+            }
+
+            is JoinGroupWithInviteCodeUseCase.Response.AlreadyMember -> {
+                _state.update(ListGroupsResult.JoinGroupFinished)
+                _sideEffect.emit(ListGroupsSideEffect.ShowSnackbar.JoinGroupAlreadyMember)
+            }
+
+            is JoinGroupWithInviteCodeUseCase.Response.NetworkError -> {
+                _state.update(ListGroupsResult.JoinGroupFinished)
+                _sideEffect.emit(ListGroupsSideEffect.ShowSnackbar.JoinGroupNetworkError)
+            }
+        }
     }
 }

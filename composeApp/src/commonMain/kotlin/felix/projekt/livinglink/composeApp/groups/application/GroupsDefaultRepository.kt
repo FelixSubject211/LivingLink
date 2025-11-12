@@ -11,6 +11,7 @@ import felix.projekt.livinglink.composeApp.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.composeApp.groups.domain.Group
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsNetworkDataSource
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsRepository
+import felix.projekt.livinglink.composeApp.groups.domain.JoinGroupResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
@@ -106,6 +107,14 @@ class GroupsDefaultRepository(
             inviteCodeId = inviteCodeId
         ).also {
             manualUpdateChannel.send(ManualUpdateItem.Update)
+        }
+    }
+
+    override suspend fun joinGroup(inviteCodeKey: String): Result<JoinGroupResponse, NetworkError> {
+        return groupsNetworkDataSource.joinGroup(inviteCodeKey).also { result ->
+            if (result is Result.Success && result.data is JoinGroupResponse.Success) {
+                manualUpdateChannel.send(ManualUpdateItem.AddGroup(result.data.group))
+            }
         }
     }
 

@@ -58,5 +58,10 @@ fun ListGroupsFabMenu(
             text = { Text(ListGroupsLocalizables.AddGroupButtonTitle()) },
             icon = {}
         )
+        FloatingActionButtonMenuItem(
+            onClick = { dispatch(ListGroupsAction.JoinGroupSubmitted) },
+            text = { Text(ListGroupsLocalizables.JoinGroupButtonTitle()) },
+            icon = {}
+        )
     }
 }

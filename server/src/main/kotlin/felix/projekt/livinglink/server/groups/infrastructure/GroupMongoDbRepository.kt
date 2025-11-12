@@ -21,6 +21,7 @@ class GroupMongoDbRepository(
     private val database: MongoDatabase = mongoClient.getDatabase(groupsConfig.mongoDatabase)
     private val collection: MongoCollection<Document> = database.getCollection("groups").also {
         it.createIndex(Document("memberIdToMember.$**", 1))
+        it.createIndex(Document("inviteCodes.key", 1))
     }
 
     override fun getGroupsForMember(userId: String): Map<String, Group> {
@@ -31,6 +32,22 @@ class GroupMongoDbRepository(
     override fun getGroupById(groupId: String): Group? {
         val doc = collection.find(Filters.eq("_id", groupId)).firstOrNull()
         return doc?.toGroup()
+    }
+
+    override fun getGroupByInviteCodeKey(inviteCodeKey: String): Group? {
+        val filter = Document("inviteCodes", Document("\$elemMatch", Document("key", inviteCodeKey)))
+        val doc = collection.find(filter).firstOrNull()
+        return doc?.toGroup()
+    }
+
+    override fun getInviteCodeIdByKey(inviteCodeKey: String): String? {
+        val filter = Document("inviteCodes", Document("\$elemMatch", Document("key", inviteCodeKey)))
+        val projection = Document("inviteCodes.$", 1)
+        val doc = collection.find(filter).projection(projection).firstOrNull() ?: return null
+
+        @Suppress("UNCHECKED_CAST")
+        val inviteCodes = doc.get("inviteCodes") as? List<Document> ?: return null
+        return inviteCodes.firstOrNull()?.getString("id")
     }
 
     override fun createGroup(groupName: String): Group {
@@ -106,15 +123,18 @@ class GroupMongoDbRepository(
                 "username" to member.username
             )
         })
-        put("inviteCodeIdToInviteCode", inviteCodeIdToInviteCode.mapValues { (_, code) ->
-            mapOf(
-                "id" to code.id,
-                "key" to code.key,
-                "name" to code.name,
-                "creatorId" to code.creatorId,
-                "usages" to code.usages
-            )
-        })
+        put(
+            "inviteCodes",
+            inviteCodeIdToInviteCode.values.map { code ->
+                mapOf(
+                    "id" to code.id,
+                    "key" to code.key,
+                    "name" to code.name,
+                    "creatorId" to code.creatorId,
+                    "usages" to code.usages
+                )
+            }
+        )
         put("version", version)
     }
 
@@ -127,16 +147,16 @@ class GroupMongoDbRepository(
             )
         } ?: emptyMap()
 
-        val inviteCodes =
-            (this["inviteCodeIdToInviteCode"] as? Map<String, Map<String, Any>>)?.mapValues { (_, v) ->
-                Group.InviteCode(
-                    id = v["id"] as String,
-                    key = v["key"] as String,
-                    name = v["name"] as String,
-                    creatorId = v["creatorId"] as String,
-                    usages = (v["usages"] as Number).toInt()
-                )
-            } ?: emptyMap()
+        val inviteCodes = (this["inviteCodes"] as List<Map<String, Any>>).associate { inviteCodeMap ->
+            val id = inviteCodeMap["id"] as String
+            id to Group.InviteCode(
+                id = id,
+                key = inviteCodeMap["key"] as String,
+                name = inviteCodeMap["name"] as String,
+                creatorId = inviteCodeMap["creatorId"] as String,
+                usages = (inviteCodeMap["usages"] as Number).toInt()
+            )
+        }
 
         return Group(
             id = this["_id"] as String,

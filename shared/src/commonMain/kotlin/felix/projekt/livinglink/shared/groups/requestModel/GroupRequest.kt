@@ -21,4 +21,9 @@ sealed class GroupRequest {
         val groupId: String,
         val inviteCodeId: String
     ) : GroupRequest()
+
+    @Serializable
+    data class JoinGroup(
+        val inviteCodeKey: String
+    ) : GroupRequest()
 }

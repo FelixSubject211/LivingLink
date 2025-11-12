@@ -11,6 +11,7 @@ import felix.projekt.livinglink.composeApp.groups.domain.DeleteInviteCodeRespons
 import felix.projekt.livinglink.composeApp.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.composeApp.groups.domain.Group
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsNetworkDataSource
+import felix.projekt.livinglink.composeApp.groups.domain.JoinGroupResponse
 import felix.projekt.livinglink.shared.groups.requestModel.GroupRequest
 import felix.projekt.livinglink.shared.groups.requestModel.GroupResponse
 import io.ktor.client.HttpClient
@@ -88,6 +89,27 @@ class GroupsNetworkDefaultDataSource(
             when (response) {
                 is GroupResponse.DeleteInviteCode.Success -> {
                     DeleteInviteCodeResponse.Success
+                }
+            }
+        }
+    }
+
+    override suspend fun joinGroup(inviteCodeKey: String): Result<JoinGroupResponse, NetworkError> {
+        return httpClient.post<GroupRequest.JoinGroup, GroupResponse.JoinGroup>(
+            urlString = "groups/inviteCode/join",
+            request = GroupRequest.JoinGroup(inviteCodeKey = inviteCodeKey)
+        ).map { response ->
+            when (response) {
+                is GroupResponse.JoinGroup.Success -> {
+                    JoinGroupResponse.Success(response.group.toDomain())
+                }
+
+                is GroupResponse.JoinGroup.InviteCodeNotFound -> {
+                    JoinGroupResponse.InviteCodeNotFound
+                }
+
+                is GroupResponse.JoinGroup.AlreadyMember -> {
+                    JoinGroupResponse.AlreadyMember
                 }
             }
         }

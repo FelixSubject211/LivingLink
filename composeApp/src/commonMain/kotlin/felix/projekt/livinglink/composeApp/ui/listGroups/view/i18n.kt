@@ -7,4 +7,16 @@ fun ListGroupsSideEffect.ShowSnackbar.localized() = when (this) {
     ListGroupsSideEffect.ShowSnackbar.CreateGroupNetworkError -> {
         ListGroupsLocalizables.CreateGroupNetworkError()
     }
+
+    ListGroupsSideEffect.ShowSnackbar.JoinGroupNetworkError -> {
+        ListGroupsLocalizables.JoinGroupNetworkError()
+    }
+
+    ListGroupsSideEffect.ShowSnackbar.JoinGroupInvalidInviteCode -> {
+        ListGroupsLocalizables.JoinGroupInvalidInviteCodeError()
+    }
+
+    ListGroupsSideEffect.ShowSnackbar.JoinGroupAlreadyMember -> {
+        ListGroupsLocalizables.JoinGroupAlreadyMemberError()
+    }
 }

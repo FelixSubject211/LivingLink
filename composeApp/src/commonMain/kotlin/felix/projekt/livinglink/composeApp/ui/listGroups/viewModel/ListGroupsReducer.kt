@@ -7,7 +7,7 @@ class ListGroupsReducer : Reducer<ListGroupsState, ListGroupsResult> {
         state: ListGroupsState,
         result: ListGroupsResult
     ) = when (result) {
-        ListGroupsResult.GroupsChangedToLoading -> {
+        is ListGroupsResult.GroupsChangedToLoading -> {
             state.copy(groupsLoading = true)
         }
 
@@ -44,17 +44,48 @@ class ListGroupsReducer : Reducer<ListGroupsState, ListGroupsResult> {
             )
         }
 
-        ListGroupsResult.CloseAddGroupDialog -> {
+        is ListGroupsResult.CloseAddGroupDialog -> {
             state.copy(
                 showAddGroup = false,
                 addGroupName = ""
             )
         }
 
-        ListGroupsResult.AddGroupFinished -> {
+        is ListGroupsResult.AddGroupFinished -> {
             state.copy(
                 showAddGroup = false,
                 addGroupIsLoading = false
+            )
+        }
+
+        is ListGroupsResult.ShowJoinGroupDialog -> {
+            state.copy(
+                menuExpanded = false,
+                showJoinGroup = true
+            )
+        }
+
+        is ListGroupsResult.JoinGroupInviteCodeChanged -> {
+            state.copy(joinGroupInviteCode = result.value)
+        }
+
+        is ListGroupsResult.CloseJoinGroupDialog -> {
+            state.copy(
+                showJoinGroup = false,
+                joinGroupInviteCode = "",
+                joinGroupIsLoading = false
+            )
+        }
+
+        is ListGroupsResult.ConfirmJoinGroup -> {
+            state.copy(joinGroupIsLoading = true)
+        }
+
+        is ListGroupsResult.JoinGroupFinished -> {
+            state.copy(
+                showJoinGroup = false,
+                joinGroupInviteCode = "",
+                joinGroupIsLoading = false
             )
         }
     }

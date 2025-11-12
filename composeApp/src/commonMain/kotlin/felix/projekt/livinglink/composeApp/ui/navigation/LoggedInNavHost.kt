@@ -21,6 +21,7 @@ fun LoggedInNavHost(navController: NavHostController) {
                 ListGroupsViewModel(
                     getGroupsUseCase = AppModule.getGroupsUseCase,
                     createGroupUseCase = AppModule.createGroupUseCase,
+                    joinGroupWithInviteCodeUseCase = AppModule.joinGroupWithInviteCodeUseCase,
                     executionScope = it
                 )
             }

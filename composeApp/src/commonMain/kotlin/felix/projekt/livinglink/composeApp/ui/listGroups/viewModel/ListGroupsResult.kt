@@ -11,4 +11,9 @@ sealed class ListGroupsResult {
     data object CloseAddGroupDialog : ListGroupsResult()
     data object ConfirmAddGroup : ListGroupsResult()
     data object AddGroupFinished : ListGroupsResult()
+    data object ShowJoinGroupDialog : ListGroupsResult()
+    data class JoinGroupInviteCodeChanged(val value: String) : ListGroupsResult()
+    data object CloseJoinGroupDialog : ListGroupsResult()
+    data object ConfirmJoinGroup : ListGroupsResult()
+    data object JoinGroupFinished : ListGroupsResult()
 }

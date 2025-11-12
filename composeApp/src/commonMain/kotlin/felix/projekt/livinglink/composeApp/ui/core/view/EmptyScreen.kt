@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +19,9 @@ fun EmptyScreen(
     text: String,
     buttonTitle: String,
     onButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    secondButtonTitle: String? = null,
+    onSecondButtonClick: (() -> Unit)? = null
 ) {
     Box(
         modifier = modifier,
@@ -34,13 +37,21 @@ fun EmptyScreen(
                 textAlign = TextAlign.Center
             )
             Spacer(modifier = Modifier.height(32.dp))
-            Button(
-                onClick = onButtonClick
-            ) {
+            Button(onClick = onButtonClick) {
                 Text(
                     text = buttonTitle,
                     style = MaterialTheme.typography.bodyLarge
                 )
+            }
+
+            if (secondButtonTitle != null && onSecondButtonClick != null) {
+                Spacer(modifier = Modifier.height(4.dp))
+                TextButton(onClick = onSecondButtonClick) {
+                    Text(
+                        text = secondButtonTitle,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
             }
         }
     }

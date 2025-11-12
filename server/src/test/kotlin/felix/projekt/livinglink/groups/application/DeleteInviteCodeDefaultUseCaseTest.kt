@@ -9,6 +9,7 @@ import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode.Companion.exhaustiveOrder
 import dev.mokkery.verifyNoMoreCalls
 import dev.mokkery.verifySuspend
+import felix.projekt.common.lambdaCapture
 import felix.projekt.livinglink.server.groups.application.DeleteInviteCodeDefaultUseCase
 import felix.projekt.livinglink.server.groups.domain.DeleteInviteCodeResponse
 import felix.projekt.livinglink.server.groups.domain.Group

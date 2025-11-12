@@ -15,6 +15,7 @@ import felix.projekt.livinglink.server.groups.application.CreateGroupDefaultUseC
 import felix.projekt.livinglink.server.groups.application.CreateInviteCodeDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.DeleteInviteCodeDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.GetUserGroupsDefaultUseCase
+import felix.projekt.livinglink.server.groups.application.JoinGroupWithInviteCodeDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.RemoveUserFromGroupsDefaultService
 import felix.projekt.livinglink.server.groups.config.GroupsConfig
 import felix.projekt.livinglink.server.groups.config.groupsDefaultConfig
@@ -157,6 +158,10 @@ fun Application.module(
                     uuidProvider = uuidProvider
                 ),
                 deleteInviteCodeUseCase = DeleteInviteCodeDefaultUseCase(
+                    groupRepository = groupMongoDbRepository,
+                    groupVersionCache = groupVersionCache
+                ),
+                joinGroupWithInviteCodeUseCase = JoinGroupWithInviteCodeDefaultUseCase(
                     groupRepository = groupMongoDbRepository,
                     groupVersionCache = groupVersionCache
                 )

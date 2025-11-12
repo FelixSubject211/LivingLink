@@ -7,10 +7,12 @@ import felix.projekt.livinglink.server.groups.domain.CreateInviteCodeResponse
 import felix.projekt.livinglink.server.groups.domain.DeleteInviteCodeResponse
 import felix.projekt.livinglink.server.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.server.groups.domain.Group
+import felix.projekt.livinglink.server.groups.domain.JoinGroupResponse
 import felix.projekt.livinglink.server.groups.interfaces.CreateGroupUseCase
 import felix.projekt.livinglink.server.groups.interfaces.CreateInviteCodeUseCase
 import felix.projekt.livinglink.server.groups.interfaces.DeleteInviteCodeUseCase
 import felix.projekt.livinglink.server.groups.interfaces.GetUserGroupsUseCase
+import felix.projekt.livinglink.server.groups.interfaces.JoinGroupWithInviteCodeUseCase
 import felix.projekt.livinglink.shared.groups.requestModel.GroupRequest
 import felix.projekt.livinglink.shared.groups.requestModel.GroupResponse
 import io.ktor.server.request.receive
@@ -24,7 +26,8 @@ fun Route.groupRoutes(
     getUserGroupsUseCase: GetUserGroupsUseCase,
     createGroupUseCase: CreateGroupUseCase,
     createInviteCodeUseCase: CreateInviteCodeUseCase,
-    deleteInviteCodeUseCase: DeleteInviteCodeUseCase
+    deleteInviteCodeUseCase: DeleteInviteCodeUseCase,
+    joinGroupWithInviteCodeUseCase: JoinGroupWithInviteCodeUseCase
 ) {
     fun Group.toResponse() = GroupResponse.Group(
         id = this.id,
@@ -116,6 +119,31 @@ fun Route.groupRoutes(
                     call.respond<GroupResponse.DeleteInviteCode>(
                         GroupResponse.DeleteInviteCode.Success
                     )
+                }
+            }
+        }
+
+        post("/inviteCode/join") {
+            val request: GroupRequest.JoinGroup = call.receive()
+            val response = joinGroupWithInviteCodeUseCase(
+                userId = call.userId,
+                username = call.username,
+                inviteCodeKey = request.inviteCodeKey
+            )
+
+            when (response) {
+                is JoinGroupResponse.Success -> {
+                    call.respond<GroupResponse.JoinGroup>(
+                        GroupResponse.JoinGroup.Success(group = response.group.toResponse())
+                    )
+                }
+
+                is JoinGroupResponse.InviteCodeNotFound -> {
+                    call.respond<GroupResponse.JoinGroup>(GroupResponse.JoinGroup.InviteCodeNotFound)
+                }
+
+                is JoinGroupResponse.AlreadyMember -> {
+                    call.respond<GroupResponse.JoinGroup>(GroupResponse.JoinGroup.AlreadyMember)
                 }
             }
         }

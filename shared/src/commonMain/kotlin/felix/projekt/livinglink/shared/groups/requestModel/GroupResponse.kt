@@ -37,6 +37,18 @@ sealed class GroupResponse {
     }
 
     @Serializable
+    sealed class JoinGroup {
+        @Serializable
+        data class Success(val group: Group) : JoinGroup()
+
+        @Serializable
+        data object InviteCodeNotFound : JoinGroup()
+
+        @Serializable
+        data object AlreadyMember : JoinGroup()
+    }
+
+    @Serializable
     data class Group(
         val id: String,
         val name: String,

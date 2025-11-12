@@ -6,10 +6,17 @@ data class ListGroupsState(
     val menuExpanded: Boolean = false,
     val showAddGroup: Boolean = false,
     val addGroupName: String = "",
-    val addGroupIsLoading: Boolean = false
+    val addGroupIsLoading: Boolean = false,
+    val showJoinGroup: Boolean = false,
+    val joinGroupInviteCode: String = "",
+    val joinGroupIsLoading: Boolean = false
 ) {
     fun addGroupConfirmButtonIsEnabled(): Boolean {
         return !addGroupName.isBlank() && !addGroupIsLoading
+    }
+
+    fun joinGroupConfirmButtonIsEnabled(): Boolean {
+        return joinGroupInviteCode.isNotBlank() && !joinGroupIsLoading
     }
 
     data class Group(
