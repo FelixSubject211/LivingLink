@@ -12,10 +12,13 @@ services:
       - GROUPS_MONGO_HOST=groups-mongodb
       - GROUPS_MONGO_PORT=27017
       - GROUPS_REDIS_URI=redis://groups-redis:6379
+      - EVENT_SOURCING_POSTGRES_HOST=eventSourcing-postgres
+      - EVENT_SOURCING_POSTGRES_PORT=5432
     depends_on:
       - keycloak
       - groups-mongodb
       - groups-redis
+      - eventSourcing-postgres
     networks:
       - livinglink_net
 
@@ -74,9 +77,25 @@ services:
     networks:
       - livinglink_net
 
+  eventSourcing-postgres:
+    image: postgres:15
+    container_name: events-postgres
+    environment:
+      - POSTGRES_DB=${EVENT_SOURCING_POSTGRES_DATABASE}
+      - POSTGRES_USER=${EVENT_SOURCING_POSTGRES_USERNAME}
+      - POSTGRES_PASSWORD=${EVENT_SOURCING_POSTGRES_PASSWORD}
+    ports:
+      - "${EVENT_SOURCING_POSTGRES_PORT}:5432"
+    volumes:
+      - eventSourcing-postgres_data:/var/lib/postgresql/data
+    networks:
+      - livinglink_net
+
+
 networks:
   livinglink_net:
     driver: bridge
 
 volumes:
   mongodb_data:
+  eventSourcing-postgres_data:

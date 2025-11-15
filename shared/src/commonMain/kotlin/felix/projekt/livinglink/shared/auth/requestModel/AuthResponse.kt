@@ -2,8 +2,7 @@ package felix.projekt.livinglink.shared.auth.requestModel
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-sealed class AuthResponse {
+sealed interface AuthResponse {
     @Serializable
     sealed class Login {
         @Serializable

@@ -11,6 +11,13 @@ import felix.projekt.livinglink.server.auth.config.authDefaultConfig
 import felix.projekt.livinglink.server.auth.infrastructure.KeycloakClient
 import felix.projekt.livinglink.server.auth.routes.authRoutes
 import felix.projekt.livinglink.server.config.appDefaultConfig
+import felix.projekt.livinglink.server.eventSourcing.application.AppendEventDefaultUseCase
+import felix.projekt.livinglink.server.eventSourcing.application.PollEventsDefaultUseCase
+import felix.projekt.livinglink.server.eventSourcing.config.EventSourcingConfig
+import felix.projekt.livinglink.server.eventSourcing.config.eventSourcingDefaultConfig
+import felix.projekt.livinglink.server.eventSourcing.infrastructure.EventSourcingPostgresRepository
+import felix.projekt.livinglink.server.eventSourcing.routes.eventSourcingRoutes
+import felix.projekt.livinglink.server.groups.application.CheckGroupMembershipDefaultService
 import felix.projekt.livinglink.server.groups.application.CreateGroupDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.CreateInviteCodeDefaultUseCase
 import felix.projekt.livinglink.server.groups.application.DeleteInviteCodeDefaultUseCase
@@ -54,7 +61,8 @@ fun main() {
 
 fun Application.module(
     authConfig: AuthConfig = authDefaultConfig(),
-    groupsConfig: GroupsConfig = groupsDefaultConfig()
+    groupsConfig: GroupsConfig = groupsDefaultConfig(),
+    eventSourcingConfig: EventSourcingConfig = eventSourcingDefaultConfig()
 ) {
     install(ContentNegotiation) {
         json(json)
@@ -107,15 +115,16 @@ fun Application.module(
             uuidProvider = uuidProvider
         )
 
-        monitor.subscribe(ApplicationStopped) {
-            groupMongoDbRepository.close()
-        }
-
         val groupVersionCache = GroupVersionRedisCache(
             groupsConfig = groupsConfig
         )
 
         val removeUserFromGroupsService = RemoveUserFromGroupsDefaultService(
+            groupRepository = groupMongoDbRepository,
+            groupVersionCache = groupVersionCache
+        )
+
+        val checkGroupMembershipService = CheckGroupMembershipDefaultService(
             groupRepository = groupMongoDbRepository,
             groupVersionCache = groupVersionCache
         )
@@ -140,6 +149,20 @@ fun Application.module(
             )
         )
 
+        val eventSourcingRepository = EventSourcingPostgresRepository(
+            config = eventSourcingConfig
+        )
+
+        val appendEventUseCase = AppendEventDefaultUseCase(
+            repository = eventSourcingRepository,
+            checkGroupMembershipService = checkGroupMembershipService
+        )
+
+        val pollEventsUseCase = PollEventsDefaultUseCase(
+            repository = eventSourcingRepository,
+            checkGroupMembershipService = checkGroupMembershipService,
+            pollPageSize = eventSourcingConfig.pollPageSize
+        )
 
         authenticate(authConfig.authJwtName) {
             groupRoutes(
@@ -166,6 +189,17 @@ fun Application.module(
                     groupVersionCache = groupVersionCache
                 )
             )
+
+            eventSourcingRoutes(
+                config = eventSourcingConfig,
+                appendEventUseCase = appendEventUseCase,
+                pollEventsUseCase = pollEventsUseCase
+            )
+        }
+
+        monitor.subscribe(ApplicationStopped) {
+            groupMongoDbRepository.close()
+            eventSourcingRepository.close()
         }
     }
 }

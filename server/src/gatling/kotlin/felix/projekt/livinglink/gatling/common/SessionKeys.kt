@@ -7,4 +7,6 @@ object SessionKeys {
     const val username2 = "username2"
     const val groupId = "groupId"
     const val inviteCode = "inviteCode"
+    const val lastEventId = "lastEventId"
+    const val fetchedEventIds = "fetchedEventIds"
 }

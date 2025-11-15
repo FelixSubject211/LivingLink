@@ -70,6 +70,8 @@ dependencies {
     implementation(libs.mongodb.driver.core)
     implementation(libs.mongodb.driver.sync)
     implementation(libs.lettuce)
+    implementation(libs.postgresql)
+    implementation(libs.hikaricp)
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)

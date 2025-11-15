@@ -2,8 +2,7 @@ package felix.projekt.livinglink.shared.auth.requestModel
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-sealed class AuthRequest {
+sealed interface AuthRequest {
     @Serializable
     data class Login(val username: String, val password: String)
 

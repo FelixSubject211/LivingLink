@@ -2,8 +2,7 @@ package felix.projekt.livinglink.shared.groups.requestModel
 
 import kotlinx.serialization.Serializable
 
-@Serializable
-sealed class GroupResponse {
+sealed interface GroupResponse {
     @Serializable
     sealed class GetGroups() {
         @Serializable
