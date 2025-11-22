@@ -3,6 +3,7 @@ package felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.CheckShoppingListItemUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.CreateShoppingListItemUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.GetShoppingListStateUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.interfaces.UncheckShoppingListItemUseCase
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ExecutionScope
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.MutableStateFlowWithReducer
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.Reducer
@@ -20,6 +21,7 @@ class ShoppingListViewModel(
     private val getShoppingListStateUseCase: GetShoppingListStateUseCase,
     private val createShoppingListItemUseCase: CreateShoppingListItemUseCase,
     private val checkShoppingListItemUseCase: CheckShoppingListItemUseCase,
+    private val uncheckShoppingListItemUseCase: UncheckShoppingListItemUseCase,
     private val executionScope: ExecutionScope,
     private val reducer: Reducer<ShoppingListState, ShoppingListResult> = ShoppingListReducer()
 ) : ViewModel<ShoppingListState, ShoppingListAction, ShoppingListSideEffect> {
@@ -48,6 +50,10 @@ class ShoppingListViewModel(
 
         is ShoppingListAction.ItemChecked -> {
             executionScope.launchJob { itemChecked(action.itemId) }
+        }
+
+        is ShoppingListAction.ItemUnchecked -> {
+            executionScope.launchJob { itemUnchecked(action.itemId) }
         }
     }
 
@@ -115,5 +121,28 @@ class ShoppingListViewModel(
             }
         }
         _state.update(ShoppingListResult.ItemCheckedFinished(itemId = itemId))
+    }
+
+    private suspend fun itemUnchecked(itemId: String) {
+        _state.update(ShoppingListResult.ItemUncheckedSubmitting(itemId = itemId))
+        val response = uncheckShoppingListItemUseCase(
+            groupId = groupId,
+            itemId = itemId
+        )
+        when (response) {
+            UncheckShoppingListItemUseCase.Response.Success -> {}
+            UncheckShoppingListItemUseCase.Response.AlreadyUnchecked -> {
+                _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemUncheckedAlreadyUnchecked)
+            }
+
+            UncheckShoppingListItemUseCase.Response.ItemNotFound -> {
+                _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemUncheckedNotFound)
+            }
+
+            UncheckShoppingListItemUseCase.Response.NetworkError -> {
+                _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemUncheckedNetworkError)
+            }
+        }
+        _state.update(ShoppingListResult.ItemUncheckedFinished(itemId = itemId))
     }
 }

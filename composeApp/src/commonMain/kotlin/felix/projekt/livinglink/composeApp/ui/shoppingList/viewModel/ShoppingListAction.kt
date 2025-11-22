@@ -5,4 +5,5 @@ sealed class ShoppingListAction {
     data class NewItemNameChanged(val name: String) : ShoppingListAction()
     object SubmitNewItem : ShoppingListAction()
     data class ItemChecked(val itemId: String) : ShoppingListAction()
+    data class ItemUnchecked(val itemId: String) : ShoppingListAction()
 }

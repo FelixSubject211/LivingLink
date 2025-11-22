@@ -34,5 +34,13 @@ class ShoppingListReducer : Reducer<ShoppingListState, ShoppingListResult> {
         is ShoppingListResult.ItemCheckedFinished -> {
             state
         }
+
+        is ShoppingListResult.ItemUncheckedSubmitting -> {
+            state
+        }
+
+        is ShoppingListResult.ItemUncheckedFinished -> {
+            state
+        }
     }
 }

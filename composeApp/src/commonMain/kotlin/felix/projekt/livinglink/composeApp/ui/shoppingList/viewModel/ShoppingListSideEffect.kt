@@ -8,5 +8,8 @@ sealed class ShoppingListSideEffect {
         data object ItemCheckedAlreadyChecked : ShowSnackbar()
         data object ItemCheckedNotFound : ShowSnackbar()
         data object ItemCheckedNetworkError : ShowSnackbar()
+        data object ItemUncheckedAlreadyUnchecked : ShowSnackbar()
+        data object ItemUncheckedNotFound : ShowSnackbar()
+        data object ItemUncheckedNetworkError : ShowSnackbar()
     }
 }

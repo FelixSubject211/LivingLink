@@ -18,4 +18,10 @@ sealed interface ShoppingListEvent {
     data class ItemChecked(
         val id: String
     ) : ShoppingListEvent
+
+    @Serializable
+    @SerialName("ItemUnchecked")
+    data class ItemUnchecked(
+        val id: String
+    ) : ShoppingListEvent
 }

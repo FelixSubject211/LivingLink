@@ -55,6 +55,7 @@ fun GroupWithTabs(
                         getShoppingListStateUseCase = AppModule.getShoppingListStateUseCase,
                         createShoppingListItemUseCase = AppModule.createShoppingListItemUseCase,
                         checkShoppingListItemUseCase = AppModule.checkShoppingListItemUseCase,
+                        uncheckShoppingListItemUseCase = AppModule.uncheckShoppingListItemUseCase,
                         executionScope = it
                     )
                 }

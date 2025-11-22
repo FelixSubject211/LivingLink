@@ -20,5 +20,17 @@ fun ShoppingListSideEffect.ShowSnackbar.localized(): String {
         is ShoppingListSideEffect.ShowSnackbar.ItemCheckedNetworkError -> {
             ShoppingListLocalizables.ItemCheckedNetworkError()
         }
+
+        is ShoppingListSideEffect.ShowSnackbar.ItemUncheckedAlreadyUnchecked -> {
+            ShoppingListLocalizables.ItemUncheckedAlreadyUnchecked()
+        }
+
+        is ShoppingListSideEffect.ShowSnackbar.ItemUncheckedNotFound -> {
+            ShoppingListLocalizables.ItemUncheckedNotFound()
+        }
+
+        is ShoppingListSideEffect.ShowSnackbar.ItemUncheckedNetworkError -> {
+            ShoppingListLocalizables.ItemUncheckedNetworkError()
+        }
     }
 }

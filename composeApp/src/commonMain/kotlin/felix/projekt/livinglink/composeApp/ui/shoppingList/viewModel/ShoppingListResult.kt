@@ -10,4 +10,6 @@ sealed class ShoppingListResult {
     data object AddItemFinished : ShoppingListResult()
     data class ItemCheckedSubmitting(val itemId: String) : ShoppingListResult()
     data class ItemCheckedFinished(val itemId: String) : ShoppingListResult()
+    data class ItemUncheckedSubmitting(val itemId: String) : ShoppingListResult()
+    data class ItemUncheckedFinished(val itemId: String) : ShoppingListResult()
 }

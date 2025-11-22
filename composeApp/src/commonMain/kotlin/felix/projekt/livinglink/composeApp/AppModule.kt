@@ -26,6 +26,7 @@ import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDe
 import felix.projekt.livinglink.composeApp.shoppingList.application.CheckShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.CreateShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.GetShoppingListStateDefaultUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.application.UncheckShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.shared.json
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -201,6 +202,12 @@ object AppModule {
 
     val checkShoppingListItemUseCase by lazy {
         CheckShoppingListItemDefaultUseCase(
+            appendEventService = appendEventService
+        )
+    }
+
+    val uncheckShoppingListItemUseCase by lazy {
+        UncheckShoppingListItemDefaultUseCase(
             appendEventService = appendEventService
         )
     }

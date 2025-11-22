@@ -42,6 +42,11 @@ fun shoppingListAggregator(groupId: String): Aggregator<ShoppingListTopic, Shopp
                         val existing = map[shoppingEvent.id] ?: continue
                         map[shoppingEvent.id] = existing.copy(isChecked = true)
                     }
+
+                    is ShoppingListEvent.ItemUnchecked -> {
+                        val existing = map[shoppingEvent.id] ?: continue
+                        map[shoppingEvent.id] = existing.copy(isChecked = false)
+                    }
                 }
             }
 

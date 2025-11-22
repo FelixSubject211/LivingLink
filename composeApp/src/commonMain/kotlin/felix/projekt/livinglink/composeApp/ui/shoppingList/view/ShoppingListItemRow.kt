@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListAction
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListState
@@ -36,7 +37,10 @@ fun ShoppingListItemRow(
         ) {
             Text(
                 text = item.name,
-                style = MaterialTheme.typography.bodyLarge
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
             Box(
@@ -45,8 +49,12 @@ fun ShoppingListItemRow(
             ) {
                 Checkbox(
                     checked = item.isChecked,
-                    onCheckedChange = {
-                        dispatch(ShoppingListAction.ItemChecked(item.id))
+                    onCheckedChange = { checked ->
+                        if (checked) {
+                            dispatch(ShoppingListAction.ItemChecked(item.id))
+                        } else {
+                            dispatch(ShoppingListAction.ItemUnchecked(item.id))
+                        }
                     }
                 )
             }
