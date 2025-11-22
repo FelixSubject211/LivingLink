@@ -90,7 +90,7 @@ class EventSourcingPostgresRepository(
     override suspend fun fetchEvents(
         groupId: String,
         topic: String,
-        lastKnownEventId: Long?,
+        lastKnownEventId: Long,
         limit: Int
     ): List<EventSourcingEvent> = withConnection { connection ->
         val sql = buildString {
@@ -101,19 +101,15 @@ class EventSourcingPostgresRepository(
                 WHERE group_id = ? AND topic = ?
                 """.trimIndent()
             )
-            if (lastKnownEventId != null) {
-                append(" AND event_id > ?")
-            }
+            append(" AND event_id > ?")
             append(" ORDER BY event_id ASC LIMIT ?")
         }
         connection.prepareStatement(sql).use { statement ->
             statement.setString(1, groupId)
             statement.setString(2, topic)
             var parameterIndex = 3
-            if (lastKnownEventId != null) {
-                statement.setLong(parameterIndex, lastKnownEventId)
-                parameterIndex += 1
-            }
+            statement.setLong(parameterIndex, lastKnownEventId)
+            parameterIndex += 1
             statement.setInt(parameterIndex, limit)
             statement.executeQuery().use { rs ->
                 val events = mutableListOf<EventSourcingEvent>()

@@ -9,6 +9,12 @@ import felix.projekt.livinglink.composeApp.auth.application.RegisterUserDefaultU
 import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthNetworkDefaultDataSource
 import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthTokenDefaultManager
 import felix.projekt.livinglink.composeApp.auth.infrastructure.getTokenPlatformStorage
+import felix.projekt.livinglink.composeApp.eventSourcing.application.AppendEventDefaultService
+import felix.projekt.livinglink.composeApp.eventSourcing.application.EventSourcingDefaultRepository
+import felix.projekt.livinglink.composeApp.eventSourcing.application.EventSynchronizer
+import felix.projekt.livinglink.composeApp.eventSourcing.application.GetAggregateDefaultService
+import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventSourcingNetworkDefaultDataSource
+import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.InMemoryEventStore
 import felix.projekt.livinglink.composeApp.groups.application.CreateGroupDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.CreateInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.DeleteInviteCodeDefaultUseCase
@@ -17,6 +23,9 @@ import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUs
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
 import felix.projekt.livinglink.composeApp.groups.application.JoinGroupWithInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
+import felix.projekt.livinglink.composeApp.shoppingList.application.CheckShoppingListItemDefaultUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.application.CreateShoppingListItemDefaultUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.application.GetShoppingListStateDefaultUseCase
 import felix.projekt.livinglink.shared.json
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -140,6 +149,59 @@ object AppModule {
     val joinGroupWithInviteCodeUseCase by lazy {
         JoinGroupWithInviteCodeDefaultUseCase(
             groupsRepository = groupsRepository
+        )
+    }
+
+    val eventSourcingNetworkDataSource by lazy {
+        EventSourcingNetworkDefaultDataSource(
+            httpClient = authTokenManager.client
+        )
+    }
+
+    val eventStore by lazy {
+        InMemoryEventStore()
+    }
+
+    val eventSourcingRepository by lazy {
+        EventSourcingDefaultRepository(
+            eventSynchronizer = EventSynchronizer(
+                eventStore = eventStore,
+                eventSourcingNetworkDataSource = eventSourcingNetworkDataSource,
+                scope = scope
+            ),
+            eventStore = eventStore,
+            getAuthStateService = getAuthStateService,
+            scope = scope
+        )
+    }
+
+    val getAggregateService by lazy {
+        GetAggregateDefaultService(
+            repository = eventSourcingRepository
+        )
+    }
+
+    val appendEventService by lazy {
+        AppendEventDefaultService(
+            eventSourcingRepository = eventSourcingRepository
+        )
+    }
+
+    val getShoppingListStateUseCase by lazy {
+        GetShoppingListStateDefaultUseCase(
+            getAggregateService = getAggregateService
+        )
+    }
+
+    val createShoppingListItemUseCase by lazy {
+        CreateShoppingListItemDefaultUseCase(
+            appendEventService = appendEventService
+        )
+    }
+
+    val checkShoppingListItemUseCase by lazy {
+        CheckShoppingListItemDefaultUseCase(
+            appendEventService = appendEventService
         )
     }
 }

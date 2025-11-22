@@ -97,7 +97,7 @@ fun GroupInviteCodesSection(
         is GroupState.InviteCodeCreationState.Input -> {
             AlertDialog(
                 onDismissRequest = { dispatch(GroupAction.InviteCodeCreationCancelled) },
-                title = { Text(GroupLocalizables.CreateInviteCodeButtonTitle()) },
+                title = { Text(GroupLocalizables.CreatedInviteCodeDialogTitle()) },
                 text = {
                     Column {
                         OutlinedTextField(

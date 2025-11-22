@@ -15,7 +15,7 @@ class PollEventsDefaultUseCase(
         userId: String,
         groupId: String,
         topic: String,
-        lastKnownEventId: Long?
+        lastKnownEventId: Long
     ): PollEventsResult {
         if (!checkGroupMembershipService(userId = userId, groupId = groupId)) {
             return PollEventsResult.NotAuthorized

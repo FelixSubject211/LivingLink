@@ -15,7 +15,7 @@ class AppendEventDefaultUseCase(
         groupId: String,
         topic: String,
         payload: JsonElement,
-        expectedLastEventId: Long?
+        expectedLastEventId: Long
     ): AppendEventResult {
         if (!checkGroupMembershipService(userId = userId, groupId = groupId)) {
             return AppendEventResult.NotAuthorized
@@ -26,7 +26,7 @@ class AppendEventDefaultUseCase(
             topic = topic,
             createdBy = userId,
             payload = payload,
-            expectedLastEventId = expectedLastEventId ?: 0L
+            expectedLastEventId = expectedLastEventId
         ) ?: return AppendEventResult.VersionMismatch
 
         return AppendEventResult.Success(event = event)

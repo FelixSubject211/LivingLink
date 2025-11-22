@@ -7,6 +7,6 @@ fun interface PollEventsUseCase {
         userId: String,
         groupId: String,
         topic: String,
-        lastKnownEventId: Long?
+        lastKnownEventId: Long
     ): PollEventsResult
 }

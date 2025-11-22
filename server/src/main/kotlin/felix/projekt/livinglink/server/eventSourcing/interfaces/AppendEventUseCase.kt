@@ -9,6 +9,6 @@ fun interface AppendEventUseCase {
         groupId: String,
         topic: String,
         payload: JsonElement,
-        expectedLastEventId: Long?
+        expectedLastEventId: Long
     ): AppendEventResult
 }

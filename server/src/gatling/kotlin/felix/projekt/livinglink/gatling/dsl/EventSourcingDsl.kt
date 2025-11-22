@@ -8,6 +8,7 @@ import io.gatling.javaapi.core.CoreDsl.StringBody
 import io.gatling.javaapi.core.CoreDsl.jsonPath
 import io.gatling.javaapi.http.HttpDsl.http
 import io.gatling.javaapi.http.HttpDsl.status
+import okhttp3.internal.toLongOrDefault
 
 fun appendEvent(groupIdKey: String, topic: String, payloadJsonString: String) =
     http("Append Event")
@@ -21,7 +22,7 @@ fun appendEvent(groupIdKey: String, topic: String, payloadJsonString: String) =
                     groupId = session.getString(groupIdKey)!!,
                     topic = topic,
                     payload = json.parseToJsonElement(payloadJsonString),
-                    expectedLastEventId = session.getString(SessionKeys.lastEventId)?.toLongOrNull()
+                    expectedLastEventId = session.getString(SessionKeys.lastEventId)?.toLongOrDefault(0) ?: 0
                 )
             )
         })
@@ -39,7 +40,7 @@ fun pollEvents(groupIdKey: String, topic: String) =
                 EventSourcingRequest.Poll(
                     groupId = session.getString(groupIdKey)!!,
                     topic = topic,
-                    lastKnownEventId = session.getString(SessionKeys.lastEventId)?.toLongOrNull()
+                    lastKnownEventId = session.getString(SessionKeys.lastEventId)?.toLongOrDefault(0) ?: 0
                 )
             )
         })

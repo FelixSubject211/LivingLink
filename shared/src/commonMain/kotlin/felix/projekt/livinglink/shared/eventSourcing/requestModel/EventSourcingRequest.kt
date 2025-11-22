@@ -10,13 +10,13 @@ sealed interface EventSourcingRequest {
         val groupId: String,
         val topic: String,
         val payload: JsonElement,
-        val expectedLastEventId: Long?
+        val expectedLastEventId: Long
     )
 
     @Serializable
     data class Poll(
         val groupId: String,
         val topic: String,
-        val lastKnownEventId: Long?
+        val lastKnownEventId: Long
     )
 }

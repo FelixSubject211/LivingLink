@@ -84,11 +84,18 @@ fun Route.eventSourcingRoutes(
                             payload = event.payload
                         )
                     }
+
+                    val nextPollAfterMillis = if (result.totalEvents > result.events.size) {
+                        0L
+                    } else {
+                        config.defaultPollAfterMillis
+                    }
+
                     call.respond<PollEvents>(
                         PollEvents.Success(
                             events = events,
                             totalEvents = result.totalEvents,
-                            nextPollAfterMillis = config.defaultPollAfterMillis
+                            nextPollAfterMillis = nextPollAfterMillis
                         )
                     )
                 }

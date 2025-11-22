@@ -6,8 +6,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import felix.projekt.livinglink.composeApp.AppModule
-import felix.projekt.livinglink.composeApp.ui.group.view.GroupScreen
-import felix.projekt.livinglink.composeApp.ui.group.viewModel.GroupViewModel
 import felix.projekt.livinglink.composeApp.ui.listGroups.view.ListGroupsScreen
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsViewModel
 import felix.projekt.livinglink.composeApp.ui.settings.view.SettingsScreen
@@ -51,19 +49,10 @@ fun LoggedInNavHost(navController: NavHostController) {
 
         composable<Route.GroupRoute> { backStackEntry ->
             val groupId = backStackEntry.toRoute<Route.GroupRoute>().groupId
-            val viewModel = rememberViewModel {
-                GroupViewModel(
-                    groupId = groupId,
-                    getGroupUseCase = AppModule.getGroupUseCase,
-                    createInviteCodeUseCase = AppModule.createInviteCodeUseCase,
-                    deleteInviteCodeUseCase = AppModule.deleteInviteCodeUseCase,
-                    executionScope = it
-                )
-            }
 
-            GroupScreen(
-                viewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+            GroupWithTabs(
+                navController = navController,
+                groupId = groupId
             )
         }
     }

@@ -14,7 +14,7 @@ interface EventSourcingRepository {
     suspend fun fetchEvents(
         groupId: String,
         topic: String,
-        lastKnownEventId: Long?,
+        lastKnownEventId: Long,
         limit: Int
     ): List<EventSourcingEvent>
 

@@ -15,18 +15,8 @@ This is a Kotlin Multiplatform project targeting Android, iOS, Web, and Server.
 * [/shared](./shared/src) contains shared code for all targets. The main folder is **commonMain** (
   `./shared/src/commonMain/kotlin`). Platform-specific code can also live here if needed.
 
-### Docker Setup
-
-The project is configured to run via Docker Compose with the following services:
-
-* **server** – Ktor server
-* **web** – Web/Compose app
-* **keycloak** – Keycloak authentication server
+### Setup
 
 Environment variables for development are stored in `Developer.env`. **You should rename this file to `.env`** to
 use it with Docker Compose.
 > Don't commit your personal `.env` with secrets to version control.
-
-Make sure the Compose app uses these variables to connect to the server and Keycloak.
-
-**Note:** The server depends on Keycloak; it will not start correctly without it.
