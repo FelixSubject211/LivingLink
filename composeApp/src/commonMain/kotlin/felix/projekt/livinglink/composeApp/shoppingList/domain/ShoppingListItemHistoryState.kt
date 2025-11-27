@@ -19,6 +19,7 @@ data class ShoppingListItemHistoryState(
     enum class ShoppingListItemHistoryActionType {
         Created,
         Checked,
-        Unchecked
+        Unchecked,
+        Deleted
     }
 }

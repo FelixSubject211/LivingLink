@@ -65,6 +65,7 @@ fun LoggedInNavHost(navController: NavHostController) {
                     groupId = route.groupId,
                     itemId = route.itemId,
                     getShoppingListItemHistoryUseCase = AppModule.getShoppingListItemHistoryUseCase,
+                    deleteShoppingListItemUseCase = AppModule.deleteShoppingListItemUseCase,
                     executionScope = it
                 )
             }

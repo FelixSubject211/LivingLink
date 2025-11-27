@@ -18,6 +18,7 @@ import felix.projekt.livinglink.composeApp.ui.shoppingListItemDetail.viewModel.S
 import livinglink.composeapp.generated.resources.Res
 import livinglink.composeapp.generated.resources.add_box_36px
 import livinglink.composeapp.generated.resources.check_box_36px
+import livinglink.composeapp.generated.resources.delete_36px
 import livinglink.composeapp.generated.resources.indeterminate_check_box_36px
 import org.jetbrains.compose.resources.painterResource
 import kotlin.time.ExperimentalTime
@@ -37,6 +38,10 @@ fun ShoppingListItemDetailEventItem(action: ShoppingListItemDetailState.Action) 
         ShoppingListItemDetailState.ActionType.Unchecked -> {
             ShoppingListItemDetailLocalizables.UncheckedAction()
         }
+
+        ShoppingListItemDetailState.ActionType.Deleted -> {
+            ShoppingListItemDetailLocalizables.DeletedAction()
+        }
     }
 
     val icon = when (action.actionType) {
@@ -50,6 +55,10 @@ fun ShoppingListItemDetailEventItem(action: ShoppingListItemDetailState.Action) 
 
         ShoppingListItemDetailState.ActionType.Unchecked -> {
             Res.drawable.indeterminate_check_box_36px
+        }
+
+        ShoppingListItemDetailState.ActionType.Deleted -> {
+            Res.drawable.delete_36px
         }
     }
 

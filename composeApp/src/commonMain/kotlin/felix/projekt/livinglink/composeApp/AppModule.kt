@@ -26,6 +26,7 @@ import felix.projekt.livinglink.composeApp.groups.application.JoinGroupWithInvit
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
 import felix.projekt.livinglink.composeApp.shoppingList.application.CheckShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.CreateShoppingListItemDefaultUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.application.DeleteShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.GetShoppingListItemHistoryDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.GetShoppingListStateDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.UncheckShoppingListItemDefaultUseCase
@@ -223,6 +224,12 @@ object AppModule {
 
     val uncheckShoppingListItemUseCase by lazy {
         UncheckShoppingListItemDefaultUseCase(
+            appendEventService = appendEventService
+        )
+    }
+
+    val deleteShoppingListItemUseCase by lazy {
+        DeleteShoppingListItemDefaultUseCase(
             appendEventService = appendEventService
         )
     }

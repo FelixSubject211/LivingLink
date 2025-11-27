@@ -23,7 +23,9 @@ fun SettingsAuthSection(
     dispatch: (SettingsAction) -> Unit,
     state: SettingsState
 ) {
-    if (state.username == null) return
+    if (state.username == null) {
+        return
+    }
 
     Text(
         text = SettingsLocalizables.AccountSectionTitle(),

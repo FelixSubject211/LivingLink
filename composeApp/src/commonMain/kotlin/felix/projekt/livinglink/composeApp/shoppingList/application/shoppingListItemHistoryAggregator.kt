@@ -57,6 +57,10 @@ fun shoppingListItemHistoryAggregator(
                     is ShoppingListEvent.ItemUnchecked -> {
                         ShoppingListItemHistoryState.ShoppingListItemHistoryActionType.Unchecked
                     }
+
+                    is ShoppingListEvent.ItemDeleted -> {
+                        ShoppingListItemHistoryState.ShoppingListItemHistoryActionType.Deleted
+                    }
                 }
 
                 actions.add(

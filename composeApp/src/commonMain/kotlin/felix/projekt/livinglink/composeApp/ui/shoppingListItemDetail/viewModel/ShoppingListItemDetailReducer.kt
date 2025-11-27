@@ -21,5 +21,31 @@ class ShoppingListItemDetailReducer : Reducer<ShoppingListItemDetailState, Shopp
                 actions = result.actions
             )
         }
+
+        is ShoppingListItemDetailResult.ShowDeleteConfirmation -> {
+            state.copy(
+                showDeleteConfirmationDialog = true
+            )
+        }
+
+        is ShoppingListItemDetailResult.HideDeleteConfirmation -> {
+            state.copy(
+                showDeleteConfirmationDialog = false,
+                isDeleting = false
+            )
+        }
+
+        is ShoppingListItemDetailResult.Deleting -> {
+            state.copy(
+                isDeleting = true
+            )
+        }
+
+        is ShoppingListItemDetailResult.DeleteFinished -> {
+            state.copy(
+                isDeleting = false,
+                showDeleteConfirmationDialog = false
+            )
+        }
     }
 }

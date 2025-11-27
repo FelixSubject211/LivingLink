@@ -7,7 +7,9 @@ data class ShoppingListItemDetailState(
     val itemName: String? = null,
     val isLoading: Boolean = false,
     val loadingProgress: Float = 0f,
-    val actions: List<Action> = emptyList()
+    val actions: List<Action> = emptyList(),
+    val showDeleteConfirmationDialog: Boolean = false,
+    val isDeleting: Boolean = false
 ) {
     @OptIn(ExperimentalTime::class)
     data class Action(
@@ -20,6 +22,7 @@ data class ShoppingListItemDetailState(
     enum class ActionType {
         Created,
         Checked,
-        Unchecked
+        Unchecked,
+        Deleted
     }
 }

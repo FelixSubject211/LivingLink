@@ -2,18 +2,18 @@ package felix.projekt.livinglink.composeApp.shoppingList.application
 
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService
 import felix.projekt.livinglink.composeApp.shoppingList.domain.ShoppingListEvent
-import felix.projekt.livinglink.composeApp.shoppingList.interfaces.UncheckShoppingListItemUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.interfaces.DeleteShoppingListItemUseCase
 import felix.projekt.livinglink.shared.json
 import kotlinx.serialization.json.encodeToJsonElement
 
-class UncheckShoppingListItemDefaultUseCase(
+class DeleteShoppingListItemDefaultUseCase(
     private val appendEventService: AppendEventService
-) : UncheckShoppingListItemUseCase {
+) : DeleteShoppingListItemUseCase {
 
     override suspend fun invoke(
         groupId: String,
         itemId: String
-    ): UncheckShoppingListItemUseCase.Response {
+    ): DeleteShoppingListItemUseCase.Response {
         val aggregator = shoppingListAggregator(groupId)
 
         val result = appendEventService(
@@ -21,22 +21,16 @@ class UncheckShoppingListItemDefaultUseCase(
             buildEvent = { currentState ->
                 val item = currentState.itemIdToItem[itemId]
                     ?: return@appendEventService AppendEventService.OperationResult.NoOperation(
-                        UncheckShoppingListItemUseCase.Response.ItemNotFound
+                        DeleteShoppingListItemUseCase.Response.ItemNotFound
                     )
-
-                if (!item.isChecked) {
-                    return@appendEventService AppendEventService.OperationResult.NoOperation(
-                        UncheckShoppingListItemUseCase.Response.AlreadyUnchecked
-                    )
-                }
 
                 val payload = json.encodeToJsonElement<ShoppingListEvent>(
-                    ShoppingListEvent.ItemUnchecked(id = itemId)
+                    ShoppingListEvent.ItemDeleted(id = item.id)
                 )
 
                 AppendEventService.OperationResult.EmitEvent(
                     payload = payload,
-                    response = UncheckShoppingListItemUseCase.Response.Success
+                    response = DeleteShoppingListItemUseCase.Response.Success
                 )
             }
         )
@@ -51,7 +45,7 @@ class UncheckShoppingListItemDefaultUseCase(
             }
 
             else -> {
-                UncheckShoppingListItemUseCase.Response.NetworkError
+                DeleteShoppingListItemUseCase.Response.NetworkError
             }
         }
     }

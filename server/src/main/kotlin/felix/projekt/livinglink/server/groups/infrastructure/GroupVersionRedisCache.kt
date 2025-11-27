@@ -48,11 +48,16 @@ class GroupVersionRedisCache(
 
     override suspend fun getGroupVersions(userId: String): GroupVersionCache.GroupVersions? {
         val exists = connection.exists(userId).await() > 0
-        if (!exists) return null
+        if (!exists) {
+            return null
+        }
 
         val entries = connection.hgetall(userId).await()
-        val map = if (entries.containsKey(emptyPlaceholder)) emptyMap()
-        else entries.mapValues { it.value.toLong() }
+        val map = if (entries.containsKey(emptyPlaceholder)) {
+            emptyMap()
+        } else {
+            entries.mapValues { it.value.toLong() }
+        }
 
         return GroupVersionCache.GroupVersions(map)
     }

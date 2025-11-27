@@ -23,4 +23,10 @@ sealed interface ShoppingListEvent {
     data class ItemUnchecked(
         val id: String
     ) : ShoppingListEvent
+
+    @Serializable
+    @SerialName("ItemDeleted")
+    data class ItemDeleted(
+        val id: String
+    ) : ShoppingListEvent
 }

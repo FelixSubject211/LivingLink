@@ -24,10 +24,11 @@ class CheckShoppingListItemDefaultUseCase(
                         CheckShoppingListItemUseCase.Response.ItemNotFound
                     )
 
-                if (item.isChecked)
+                if (item.isChecked) {
                     return@appendEventService AppendEventService.OperationResult.NoOperation(
                         CheckShoppingListItemUseCase.Response.AlreadyChecked
                     )
+                }
 
                 val payload = json.encodeToJsonElement<ShoppingListEvent>(
                     ShoppingListEvent.ItemChecked(id = itemId)

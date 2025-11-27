@@ -47,6 +47,10 @@ fun shoppingListAggregator(groupId: String): Aggregator<ShoppingListTopic, Shopp
                         val existing = map[shoppingEvent.id] ?: continue
                         map[shoppingEvent.id] = existing.copy(isChecked = false)
                     }
+
+                    is ShoppingListEvent.ItemDeleted -> {
+                        map.remove(shoppingEvent.id)
+                    }
                 }
             }
 

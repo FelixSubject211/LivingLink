@@ -26,7 +26,11 @@ fun App() {
 
     key(i18n4kConfig) {
         val isDarkTheme = isSystemInDarkTheme()
-        val colorScheme = if (isDarkTheme) customDarkScheme else lightColorScheme()
+        val colorScheme = if (isDarkTheme) {
+            customDarkScheme
+        } else {
+            lightColorScheme()
+        }
 
         MaterialExpressiveTheme(colorScheme) {
             NavigationHost(navController = navHostController)
