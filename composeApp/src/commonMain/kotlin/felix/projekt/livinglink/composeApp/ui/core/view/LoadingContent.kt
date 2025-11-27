@@ -1,6 +1,5 @@
-package felix.projekt.livinglink.composeApp.ui.shoppingList.view
+package felix.projekt.livinglink.composeApp.ui.core.view
 
-import ShoppingListLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,20 +14,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListState
 
 @Composable
-fun ShoppingListLoadingContent(
-    state: ShoppingListState
+fun LoadingContent(
+    text: String? = null,
+    loadingProgress: Float
 ) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(ShoppingListLocalizables.LoadingShoppingList())
+        text?.let {
+            Text(text)
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+        }
 
         Box(
             modifier = Modifier
@@ -36,11 +37,11 @@ fun ShoppingListLoadingContent(
                 .height(48.dp),
             contentAlignment = Alignment.Center
         ) {
-            if (state.loadingProgress == 0f) {
+            if (loadingProgress == 0f) {
                 CircularProgressIndicator()
             } else {
                 LinearProgressIndicator(
-                    progress = { state.loadingProgress },
+                    progress = { loadingProgress },
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(18.dp)

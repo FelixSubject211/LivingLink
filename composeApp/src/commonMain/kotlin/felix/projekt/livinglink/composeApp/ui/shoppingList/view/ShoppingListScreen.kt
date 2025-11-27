@@ -1,10 +1,10 @@
 package felix.projekt.livinglink.composeApp.ui.shoppingList.view
 
 import ShoppingListLocalizables
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import felix.projekt.livinglink.composeApp.ui.core.view.BackNavigationIcon
+import felix.projekt.livinglink.composeApp.ui.core.view.LoadingContent
 import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ViewModel
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListAction
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListSideEffect
@@ -34,7 +35,8 @@ import livinglink.composeapp.generated.resources.arrow_back_36px
 @Composable
 fun ShoppingListScreen(
     viewModel: ViewModel<ShoppingListState, ShoppingListAction, ShoppingListSideEffect>,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToItemDetail: (itemId: String, itemName: String) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -48,6 +50,13 @@ fun ShoppingListScreen(
 
                 is ShoppingListSideEffect.NavigateBack -> {
                     onNavigateBack()
+                }
+
+                is ShoppingListSideEffect.NavigateToItemDetail -> {
+                    onNavigateToItemDetail(
+                        sideEffect.itemId,
+                        sideEffect.itemName
+                    )
                 }
             }
         }
@@ -66,9 +75,13 @@ fun ShoppingListScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.imePadding()
+            )
+        }
     ) { innerPadding ->
-
         Column(
             modifier = Modifier
                 .padding(top = innerPadding.calculateTopPadding())
@@ -85,16 +98,25 @@ fun ShoppingListScreen(
                     }
 
                     items(state.items, key = { it.id }) { item ->
-                        ShoppingListItemRow(
+                        ShoppingListItem(
                             item = item,
-                            dispatch = viewModel::dispatch
+                            dispatch = viewModel::dispatch,
+                            onItemClick = { selectedItem ->
+                                viewModel.dispatch(
+                                    ShoppingListAction.OpenItemDetail(
+                                        itemId = selectedItem.id,
+                                        itemName = selectedItem.name
+                                    )
+                                )
+                            }
                         )
                     }
                 }
-            }
-
-            AnimatedVisibility(visible = state.isLoading) {
-                ShoppingListLoadingContent(state = state)
+            } else {
+                LoadingContent(
+                    text = ShoppingListLocalizables.LoadingShoppingList(),
+                    loadingProgress = state.loadingProgress
+                )
             }
         }
     }

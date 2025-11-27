@@ -30,4 +30,9 @@ sealed interface Route {
     data class ShoppingListTabRoute(val groupId: String) : Route {
         override val routeId = "shoppingListTab"
     }
+
+    @Serializable
+    data class ShoppingListItemDetailRoute(val groupId: String, val itemId: String) : Route {
+        override val routeId = "shoppingListItemDetail"
+    }
 }

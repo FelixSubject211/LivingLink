@@ -45,6 +45,8 @@ class AggregateManager<TTopic : EventTopic, TState>(
                     lastEventId = lastAppliedEventId
                 )
             )
+        } else {
+            EventAggregateState.Loading(progress = 0.0F)
         }
 
         updates.collect { update ->

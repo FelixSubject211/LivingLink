@@ -1,0 +1,25 @@
+package felix.projekt.livinglink.composeApp.ui.shoppingListItemDetail.viewModel
+
+import felix.projekt.livinglink.composeApp.ui.core.viewmodel.Reducer
+
+class ShoppingListItemDetailReducer : Reducer<ShoppingListItemDetailState, ShoppingListItemDetailResult> {
+    override fun invoke(
+        state: ShoppingListItemDetailState,
+        result: ShoppingListItemDetailResult
+    ): ShoppingListItemDetailState = when (result) {
+        is ShoppingListItemDetailResult.Loading -> {
+            state.copy(
+                isLoading = true,
+                loadingProgress = result.progress
+            )
+        }
+
+        is ShoppingListItemDetailResult.DetailLoaded -> {
+            state.copy(
+                itemName = result.itemName,
+                isLoading = false,
+                actions = result.actions
+            )
+        }
+    }
+}

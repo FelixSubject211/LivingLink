@@ -22,12 +22,11 @@ fun App() {
 
     val i18n4kConfig = mutableStateOf(I18n4kConfigImmutable())
     i18n4kInitCldrPluralRules()
+    val navHostController = rememberNavController()
 
     key(i18n4kConfig) {
         val isDarkTheme = isSystemInDarkTheme()
         val colorScheme = if (isDarkTheme) customDarkScheme else lightColorScheme()
-
-        val navHostController = rememberNavController()
 
         MaterialExpressiveTheme(colorScheme) {
             NavigationHost(navController = navHostController)

@@ -10,6 +10,8 @@ import felix.projekt.livinglink.composeApp.ui.listGroups.view.ListGroupsScreen
 import felix.projekt.livinglink.composeApp.ui.listGroups.viewModel.ListGroupsViewModel
 import felix.projekt.livinglink.composeApp.ui.settings.view.SettingsScreen
 import felix.projekt.livinglink.composeApp.ui.settings.viewModel.SettingsViewModel
+import felix.projekt.livinglink.composeApp.ui.shoppingListItemDetail.view.ShoppingListItemDetailScreen
+import felix.projekt.livinglink.composeApp.ui.shoppingListItemDetail.viewModel.ShoppingListItemDetailViewModel
 
 @Composable
 fun LoggedInNavHost(navController: NavHostController) {
@@ -53,6 +55,25 @@ fun LoggedInNavHost(navController: NavHostController) {
             GroupWithTabs(
                 navController = navController,
                 groupId = groupId
+            )
+        }
+
+        composable<Route.ShoppingListItemDetailRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<Route.ShoppingListItemDetailRoute>()
+            val viewModel = rememberViewModel {
+                ShoppingListItemDetailViewModel(
+                    groupId = route.groupId,
+                    itemId = route.itemId,
+                    getShoppingListItemHistoryUseCase = AppModule.getShoppingListItemHistoryUseCase,
+                    executionScope = it
+                )
+            }
+
+            ShoppingListItemDetailScreen(
+                viewModel = viewModel,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
             )
         }
     }

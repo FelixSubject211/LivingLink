@@ -55,6 +55,17 @@ class ShoppingListViewModel(
         is ShoppingListAction.ItemUnchecked -> {
             executionScope.launchJob { itemUnchecked(action.itemId) }
         }
+
+        is ShoppingListAction.OpenItemDetail -> {
+            executionScope.launchJob {
+                _sideEffect.emit(
+                    ShoppingListSideEffect.NavigateToItemDetail(
+                        itemId = action.itemId,
+                        itemName = action.itemName
+                    )
+                )
+            }
+        }
     }
 
     override fun start() {

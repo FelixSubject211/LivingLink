@@ -19,14 +19,18 @@ import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingLis
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListState
 
 @Composable
-fun ShoppingListItemRow(
+fun ShoppingListItem(
     item: ShoppingListState.Item,
-    dispatch: (ShoppingListAction) -> Unit
+    dispatch: (ShoppingListAction) -> Unit,
+    onItemClick: (ShoppingListState.Item) -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp)
+            .padding(bottom = 8.dp),
+        onClick = {
+            onItemClick(item)
+        }
     ) {
         Row(
             modifier = Modifier

@@ -2,6 +2,7 @@ package felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel
 
 sealed class ShoppingListSideEffect {
     object NavigateBack : ShoppingListSideEffect()
+    data class NavigateToItemDetail(val itemId: String, val itemName: String) : ShoppingListSideEffect()
 
     sealed class ShowSnackbar : ShoppingListSideEffect() {
         data object CreateItemNetworkError : ShowSnackbar()

@@ -19,12 +19,14 @@ import felix.projekt.livinglink.composeApp.groups.application.CreateGroupDefault
 import felix.projekt.livinglink.composeApp.groups.application.CreateInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.DeleteInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupDefaultUseCase
+import felix.projekt.livinglink.composeApp.groups.application.GetGroupMemberIdToMemberNameDefaultService
 import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
 import felix.projekt.livinglink.composeApp.groups.application.JoinGroupWithInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
 import felix.projekt.livinglink.composeApp.shoppingList.application.CheckShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.CreateShoppingListItemDefaultUseCase
+import felix.projekt.livinglink.composeApp.shoppingList.application.GetShoppingListItemHistoryDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.GetShoppingListStateDefaultUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.application.UncheckShoppingListItemDefaultUseCase
 import felix.projekt.livinglink.shared.json
@@ -117,6 +119,12 @@ object AppModule {
         )
     }
 
+    val getGroupMemberIdToMemberNameService by lazy {
+        GetGroupMemberIdToMemberNameDefaultService(
+            groupsRepository = groupsRepository
+        )
+    }
+
     val getGroupsUseCase by lazy {
         GetGroupsDefaultUseCase(
             groupsRepository = groupsRepository
@@ -191,6 +199,13 @@ object AppModule {
     val getShoppingListStateUseCase by lazy {
         GetShoppingListStateDefaultUseCase(
             getAggregateService = getAggregateService
+        )
+    }
+
+    val getShoppingListItemHistoryUseCase by lazy {
+        GetShoppingListItemHistoryDefaultUseCase(
+            getAggregateService = getAggregateService,
+            getGroupMemberIdToMemberNameService = getGroupMemberIdToMemberNameService
         )
     }
 

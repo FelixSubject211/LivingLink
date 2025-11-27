@@ -46,5 +46,5 @@ fun pollEvents(groupIdKey: String, topic: String) =
         })
         .check(status().`is`(200))
         .check(
-            jsonPath("$.events[*].eventId").findAll().saveAs(SessionKeys.fetchedEventIds)
+            jsonPath("$.events[*].eventId").findAll().optional().saveAs(SessionKeys.fetchedEventIds)
         )

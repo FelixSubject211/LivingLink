@@ -1,5 +1,10 @@
 {
   "realm": "${KEYCLOAK_REALM}",
+  "ssoSessionIdleTimeout": 2592000,
+  "ssoSessionMaxLifespan": 2592000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespan": 2592000,
+  "offlineSessionMaxLifespanEnabled": true,
   "sslRequired": "NONE",
   "enabled": true,
   "roles": {

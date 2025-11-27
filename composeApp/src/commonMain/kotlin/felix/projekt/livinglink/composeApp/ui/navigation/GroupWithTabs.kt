@@ -62,7 +62,15 @@ fun GroupWithTabs(
 
                 ShoppingListScreen(
                     viewModel = viewModel,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToItemDetail = { itemId, itemName ->
+                        navController.navigate(
+                            Route.ShoppingListItemDetailRoute(
+                                groupId = groupId,
+                                itemId = itemId
+                            )
+                        )
+                    }
                 )
             }
 

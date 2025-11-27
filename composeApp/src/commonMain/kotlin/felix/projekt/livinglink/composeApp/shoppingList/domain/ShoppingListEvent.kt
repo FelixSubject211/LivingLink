@@ -5,7 +5,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface ShoppingListEvent {
-
     @Serializable
     @SerialName("ItemCreated")
     data class ItemCreated(

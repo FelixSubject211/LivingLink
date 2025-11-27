@@ -3,6 +3,7 @@ package felix.projekt.livinglink.composeApp.ui.group.view
 import GroupLocalizables
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -74,7 +75,12 @@ fun GroupScreen(
                 }
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.imePadding()
+            )
+        }
     ) { innerPadding ->
         Column(
             modifier = Modifier
