@@ -33,8 +33,6 @@ class AggregateManager<TTopic : EventTopic, TState>(
     }
 
     val state: StateFlow<EventAggregateState<TState>> = flow {
-        Napier.d { "init AggregateManager from ${aggregator.id} ${aggregator.subscription}" }
-
         val initialMissing = eventStore.eventsSince(aggregator.subscription, lastAppliedEventId)
         if (initialMissing.isNotEmpty()) {
             applyEvents(initialMissing)
@@ -45,8 +43,6 @@ class AggregateManager<TTopic : EventTopic, TState>(
                     lastEventId = lastAppliedEventId
                 )
             )
-        } else {
-            EventAggregateState.Loading(progress = 0.0F)
         }
 
         updates.collect { update ->

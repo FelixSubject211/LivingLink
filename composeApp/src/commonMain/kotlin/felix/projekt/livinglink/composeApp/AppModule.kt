@@ -8,13 +8,16 @@ import felix.projekt.livinglink.composeApp.auth.application.LogoutUserDefaultUse
 import felix.projekt.livinglink.composeApp.auth.application.RegisterUserDefaultUseCase
 import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthNetworkDefaultDataSource
 import felix.projekt.livinglink.composeApp.auth.infrastructure.AuthTokenDefaultManager
-import felix.projekt.livinglink.composeApp.auth.infrastructure.getTokenPlatformStorage
+import felix.projekt.livinglink.composeApp.auth.infrastructure.getTokenPlatformStore
 import felix.projekt.livinglink.composeApp.eventSourcing.application.AppendEventDefaultService
 import felix.projekt.livinglink.composeApp.eventSourcing.application.EventSourcingDefaultRepository
 import felix.projekt.livinglink.composeApp.eventSourcing.application.EventSynchronizer
 import felix.projekt.livinglink.composeApp.eventSourcing.application.GetAggregateDefaultService
+import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventDatabaseDriverFactory
+import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventDatabaseFactory
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventSourcingNetworkDefaultDataSource
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.InMemoryEventStore
+import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.SqlDelightEventStore
 import felix.projekt.livinglink.composeApp.groups.application.CreateGroupDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.CreateInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.application.DeleteInviteCodeDefaultUseCase
@@ -35,6 +38,7 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.PlatformUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 
@@ -61,7 +65,7 @@ object AppModule {
     val authTokenManager by lazy {
         AuthTokenDefaultManager(
             scope = scope,
-            tokenStorage = getTokenPlatformStorage(),
+            tokenStore = getTokenPlatformStore(),
             authNetworkDataSource = authNetworkDataSource
         )
     }
@@ -169,7 +173,15 @@ object AppModule {
     }
 
     val eventStore by lazy {
-        InMemoryEventStore()
+        if (PlatformUtils.IS_BROWSER) {
+            InMemoryEventStore()
+        } else {
+            SqlDelightEventStore(
+                database = EventDatabaseFactory(
+                    driverFactory = EventDatabaseDriverFactory()
+                ).createDatabase()
+            )
+        }
     }
 
     val eventSourcingRepository by lazy {

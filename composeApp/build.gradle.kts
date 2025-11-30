@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.kotlinPluginSerialization)
     alias(libs.plugins.i18n4k)
     alias(libs.plugins.mokkery)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -29,7 +30,8 @@ kotlin {
     ).forEach { iosTarget ->
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
-            isStatic = true
+            isStatic = false
+            linkerOpts("-lsqlite3")
         }
     }
 
@@ -40,16 +42,6 @@ kotlin {
     }
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-            implementation(libs.ktor.client.okhttp)
-            implementation(libs.kvault)
-        }
-        iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
-            implementation(libs.kvault)
-        }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
@@ -70,11 +62,36 @@ kotlin {
             implementation(libs.napier)
             implementation(libs.material3.expressive)
             implementation(projects.shared)
+            implementation(libs.sqldelight.runtime)
+            implementation(libs.sqldelight.coroutines)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.coroutines.test)
             implementation(libs.turbine)
+        }
+        androidMain.dependencies {
+            implementation(compose.preview)
+            implementation(libs.androidx.activity.compose)
+            implementation(libs.ktor.client.okhttp)
+            implementation(libs.kvault)
+            implementation(libs.sqldelight.android.driver)
+        }
+        iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
+            implementation(libs.kvault)
+            implementation(libs.sqldelight.native.driver)
+        }
+        wasmJsMain.dependencies {
+            implementation(libs.sqldelight.web.worker.driver)
+        }
+    }
+}
+
+sqldelight {
+    databases {
+        create("EventDatabase") {
+            packageName.set("felix.projekt.livinglink.composeApp.database")
         }
     }
 }

@@ -1,6 +1,6 @@
 package felix.projekt.livinglink.composeApp.auth.domain
 
-interface TokenStorage {
+interface TokenStore {
     fun saveAccessToken(token: String)
     fun saveRefreshToken(token: String)
     fun getAccessToken(): String?

@@ -1,8 +1,8 @@
 package felix.projekt.livinglink.composeApp.auth.infrastructure
 
-import felix.projekt.livinglink.composeApp.auth.domain.TokenStorage
+import felix.projekt.livinglink.composeApp.auth.domain.TokenStore
 
-actual fun getTokenPlatformStorage() = object : TokenStorage {
+actual fun getTokenPlatformStore() = object : TokenStore {
     private var accessToken: String? = null
     private var refreshToken: String? = null
 

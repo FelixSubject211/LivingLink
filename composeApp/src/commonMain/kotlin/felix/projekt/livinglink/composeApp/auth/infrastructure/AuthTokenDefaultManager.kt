@@ -5,7 +5,7 @@ import felix.projekt.livinglink.composeApp.auth.domain.AuthNetworkDataSource
 import felix.projekt.livinglink.composeApp.auth.domain.AuthSession
 import felix.projekt.livinglink.composeApp.auth.domain.AuthTokenManager
 import felix.projekt.livinglink.composeApp.auth.domain.RefreshResponse
-import felix.projekt.livinglink.composeApp.auth.domain.TokenStorage
+import felix.projekt.livinglink.composeApp.auth.domain.TokenStore
 import felix.projekt.livinglink.composeApp.core.domain.Result
 import felix.projekt.livinglink.shared.json
 import io.github.aakira.napier.Napier
@@ -34,13 +34,13 @@ import kotlinx.serialization.json.jsonPrimitive
 
 class AuthTokenDefaultManager(
     private val authNetworkDataSource: AuthNetworkDataSource,
-    private val tokenStorage: TokenStorage,
+    private val tokenStore: TokenStore,
     private val scope: CoroutineScope
 ) : AuthTokenManager {
     private val _bearerTokens: MutableStateFlow<BearerTokens?> = MutableStateFlow(
         run {
-            val accessToken = tokenStorage.getAccessToken()
-            val refreshToken = tokenStorage.getRefreshToken()
+            val accessToken = tokenStore.getAccessToken()
+            val refreshToken = tokenStore.getRefreshToken()
             if (accessToken != null && refreshToken != null) {
                 BearerTokens(accessToken, refreshToken)
             } else {
@@ -88,14 +88,14 @@ class AuthTokenDefaultManager(
 
     override fun setTokens(accessToken: String, refreshToken: String) {
         _bearerTokens.value = BearerTokens(accessToken, refreshToken)
-        tokenStorage.saveAccessToken(accessToken)
-        tokenStorage.saveRefreshToken(refreshToken)
+        tokenStore.saveAccessToken(accessToken)
+        tokenStore.saveRefreshToken(refreshToken)
     }
 
     override fun clearTokens() {
         client.authProvider<BearerAuthProvider>()?.clearToken()
         _bearerTokens.value = null
-        tokenStorage.clearTokens()
+        tokenStore.clearTokens()
     }
 
     private suspend fun refresh(): BearerTokens? {

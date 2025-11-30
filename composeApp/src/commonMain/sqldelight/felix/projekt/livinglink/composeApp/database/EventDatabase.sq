@@ -1,0 +1,27 @@
+CREATE TABLE events (
+    groupId TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    eventId INTEGER NOT NULL,
+    createdBy TEXT NOT NULL,
+    createdAtEpochMillis INTEGER NOT NULL,
+    payload TEXT NOT NULL,
+    PRIMARY KEY(groupId, topic, eventId)
+);
+
+lastEventId:
+SELECT coalesce(MAX(eventId), 0)
+FROM events
+WHERE groupId = ? AND topic = ?;
+
+eventsSince:
+SELECT *
+FROM events
+WHERE groupId = ? AND topic = ? AND eventId > ?
+ORDER BY eventId;
+
+insertEvent:
+INSERT INTO events(groupId, topic, eventId, createdBy, createdAtEpochMillis, payload)
+VALUES (?, ?, ?, ?, ?, ?);
+
+deleteAll:
+DELETE FROM events;
