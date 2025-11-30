@@ -6,7 +6,6 @@ import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Aggregator
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventAggregateState
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventTopic
-import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow

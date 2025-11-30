@@ -8,6 +8,7 @@ sealed class ShoppingListItemDetailResult {
         val itemName: String?,
         val actions: List<Action>
     ) : ShoppingListItemDetailResult()
+
     data object ShowDeleteConfirmation : ShoppingListItemDetailResult()
     data object HideDeleteConfirmation : ShoppingListItemDetailResult()
     data object Deleting : ShoppingListItemDetailResult()

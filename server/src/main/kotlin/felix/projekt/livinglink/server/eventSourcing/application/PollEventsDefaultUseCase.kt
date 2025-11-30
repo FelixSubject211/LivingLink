@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.server.eventSourcing.application
 
+import felix.projekt.livinglink.server.eventSourcing.config.EventSourcingConfig
 import felix.projekt.livinglink.server.eventSourcing.domain.EventSourcingRepository
 import felix.projekt.livinglink.server.eventSourcing.domain.PollEventsResult
 import felix.projekt.livinglink.server.eventSourcing.interfaces.PollEventsUseCase
@@ -8,7 +9,7 @@ import felix.projekt.livinglink.server.groups.interfaces.CheckGroupMembershipSer
 class PollEventsDefaultUseCase(
     private val repository: EventSourcingRepository,
     private val checkGroupMembershipService: CheckGroupMembershipService,
-    private val pollPageSize: Int
+    private val eventSourcingConfig: EventSourcingConfig
 ) : PollEventsUseCase {
 
     override suspend fun invoke(
@@ -25,7 +26,7 @@ class PollEventsDefaultUseCase(
             groupId = groupId,
             topic = topic,
             lastKnownEventId = lastKnownEventId,
-            limit = pollPageSize
+            limit = eventSourcingConfig.pollPageSize
         )
 
         if (events.isEmpty()) {

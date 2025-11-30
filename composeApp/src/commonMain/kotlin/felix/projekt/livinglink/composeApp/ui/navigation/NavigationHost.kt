@@ -8,12 +8,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
-import felix.projekt.livinglink.composeApp.AppModule
 import felix.projekt.livinglink.composeApp.auth.domain.AuthSession
+import felix.projekt.livinglink.composeApp.auth.domain.AuthTokenManager
+import org.koin.compose.koinInject
 
 @Composable
 fun NavigationHost(navController: NavHostController) {
-    val session by AppModule.authTokenManager.session.collectAsState()
+    val authTokenManager: AuthTokenManager = koinInject()
+    val session by authTokenManager.session.collectAsState()
     var previous by remember { mutableStateOf<AuthSession?>(null) }
 
     LaunchedEffect(session) {

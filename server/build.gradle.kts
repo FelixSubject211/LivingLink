@@ -72,6 +72,8 @@ dependencies {
     implementation(libs.lettuce)
     implementation(libs.postgresql)
     implementation(libs.hikaricp)
+    implementation(libs.koin.ktor)
+    implementation(libs.koin.logger.slf4j)
 
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)

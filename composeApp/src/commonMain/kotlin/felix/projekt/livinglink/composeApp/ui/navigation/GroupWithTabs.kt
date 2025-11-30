@@ -16,7 +16,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import felix.projekt.livinglink.composeApp.AppModule
 import felix.projekt.livinglink.composeApp.ui.group.view.GroupScreen
 import felix.projekt.livinglink.composeApp.ui.group.viewModel.GroupViewModel
 import felix.projekt.livinglink.composeApp.ui.shoppingList.view.ShoppingListScreen
@@ -25,6 +24,7 @@ import livinglink.composeapp.generated.resources.Res
 import livinglink.composeapp.generated.resources.groups_3_36px
 import livinglink.composeapp.generated.resources.shopping_cart_36px
 import org.jetbrains.compose.resources.painterResource
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun GroupWithTabs(
@@ -48,17 +48,12 @@ fun GroupWithTabs(
                 .weight(1f)
                 .fillMaxSize()
         ) {
-            composable<Route.ShoppingListTabRoute> {
-                val viewModel = rememberViewModel {
-                    ShoppingListViewModel(
-                        groupId = groupId,
-                        getShoppingListStateUseCase = AppModule.getShoppingListStateUseCase,
-                        createShoppingListItemUseCase = AppModule.createShoppingListItemUseCase,
-                        checkShoppingListItemUseCase = AppModule.checkShoppingListItemUseCase,
-                        uncheckShoppingListItemUseCase = AppModule.uncheckShoppingListItemUseCase,
-                        executionScope = it
-                    )
-                }
+            composable<Route.ShoppingListTabRoute> { backStackEntry ->
+                val executionScope = rememberExecutionScope(backStackEntry)
+                val viewModel = koinViewModel<ShoppingListViewModel>(
+                    viewModelStoreOwner = backStackEntry,
+                    parameters = { parametersOf(groupId, executionScope) }
+                )
 
                 ShoppingListScreen(
                     viewModel = viewModel,
@@ -74,16 +69,12 @@ fun GroupWithTabs(
                 )
             }
 
-            composable<Route.GroupTabRoute> {
-                val viewModel = rememberViewModel {
-                    GroupViewModel(
-                        groupId = groupId,
-                        getGroupUseCase = AppModule.getGroupUseCase,
-                        createInviteCodeUseCase = AppModule.createInviteCodeUseCase,
-                        deleteInviteCodeUseCase = AppModule.deleteInviteCodeUseCase,
-                        executionScope = it
-                    )
-                }
+            composable<Route.GroupTabRoute> { backStackEntry ->
+                val executionScope = rememberExecutionScope(backStackEntry)
+                val viewModel = koinViewModel<GroupViewModel>(
+                    viewModelStoreOwner = backStackEntry,
+                    parameters = { parametersOf(groupId, executionScope) }
+                )
 
                 GroupScreen(
                     viewModel = viewModel,

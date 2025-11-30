@@ -1,19 +1,19 @@
 package felix.projekt.livinglink.composeApp.ui.navigation
 
 import androidx.compose.runtime.Composable
-import felix.projekt.livinglink.composeApp.AppModule
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import felix.projekt.livinglink.composeApp.ui.loginRegistration.view.LoginRegistrationScreen
 import felix.projekt.livinglink.composeApp.ui.loginRegistration.viewmodel.LoginRegistrationViewModel
+import org.koin.core.parameter.parametersOf
 
 @Composable
 fun LoggedOutScreen() {
-    val viewModel = rememberViewModel {
-        LoginRegistrationViewModel(
-            loginUserUseCase = AppModule.loginUseCase,
-            registerUserUseCase = AppModule.registerUseCase,
-            executionScope = it
-        )
-    }
+    val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current)
+    val executionScope = rememberExecutionScope(viewModelStoreOwner)
+    val viewModel = koinViewModel<LoginRegistrationViewModel>(
+        viewModelStoreOwner = viewModelStoreOwner,
+        parameters = { parametersOf(executionScope) }
+    )
 
     LoginRegistrationScreen(viewModel)
 }
