@@ -35,12 +35,6 @@ kotlin {
         }
     }
 
-    @OptIn(ExperimentalWasmDsl::class)
-    wasmJs {
-        browser()
-        binaries.executable()
-    }
-
     sourceSets {
         commonMain.dependencies {
             implementation(compose.runtime)
@@ -85,16 +79,13 @@ kotlin {
             implementation(libs.kvault)
             implementation(libs.sqldelight.native.driver)
         }
-        wasmJsMain.dependencies {
-            implementation(libs.sqldelight.web.worker.driver)
-        }
     }
 }
 
 sqldelight {
     databases {
         create("EventDatabase") {
-            packageName.set("felix.projekt.livinglink.composeApp.database")
+            packageName.set("felix.projekt.livinglink.composeApp.eventDatabase")
         }
     }
 }

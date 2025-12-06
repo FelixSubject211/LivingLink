@@ -3,6 +3,7 @@ package felix.projekt.livinglink.composeApp.eventSourcing.application
 import felix.projekt.livinglink.composeApp.auth.interfaces.GetAuthStateService
 import felix.projekt.livinglink.composeApp.core.domain.NetworkError
 import felix.projekt.livinglink.composeApp.core.domain.Result
+import felix.projekt.livinglink.composeApp.core.domain.withLockNonSuspend
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.AppendEventResponse
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSourcingRepository
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
@@ -15,6 +16,9 @@ import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 
 class EventSourcingDefaultRepository(
@@ -23,6 +27,7 @@ class EventSourcingDefaultRepository(
     private val getAuthStateService: GetAuthStateService,
     private val scope: CoroutineScope
 ) : EventSourcingRepository {
+    private val mutex = Mutex()
     private val aggregateManagers = HashMap<AggregateManagerKey, AggregateManager<*, *>>()
 
     init {
@@ -32,12 +37,14 @@ class EventSourcingDefaultRepository(
                 .collect { authState ->
                     when (authState) {
                         GetAuthStateService.AuthState.LoggedOut -> {
-                            eventSynchronizer.clear()
-                            aggregateManagers.values.forEach { manager ->
-                                manager.stop()
+                            mutex.withLock {
+                                eventSynchronizer.clear()
+                                aggregateManagers.values.forEach { manager ->
+                                    manager.stop()
+                                }
+                                aggregateManagers.clear()
+                                eventStore.clearAll()
                             }
-                            aggregateManagers.clear()
-                            eventStore.clearAll()
                         }
 
                         GetAuthStateService.AuthState.LoggedIn -> {}
@@ -55,17 +62,19 @@ class EventSourcingDefaultRepository(
             subscription = aggregator.subscription
         )
 
-        @Suppress("UNCHECKED_CAST")
-        return aggregateManagers.getOrPut(key) {
-            AggregateManager(
-                aggregator = aggregator,
-                updates = eventSynchronizer.subscribe(
-                    subscription = aggregator.subscription
-                ),
-                eventStore = eventStore,
-                parentScope = scope
-            )
-        }.state as StateFlow<EventAggregateState<TState>>
+        return mutex.withLockNonSuspend {
+            @Suppress("UNCHECKED_CAST")
+            aggregateManagers.getOrPut(key) {
+                AggregateManager(
+                    aggregator = aggregator,
+                    updates = eventSynchronizer.subscribe(
+                        subscription = aggregator.subscription
+                    ),
+                    eventStore = eventStore,
+                    parentScope = scope
+                )
+            }.state as StateFlow<EventAggregateState<TState>>
+        }
     }
 
     override suspend fun appendEvent(
@@ -73,11 +82,13 @@ class EventSourcingDefaultRepository(
         payload: JsonElement,
         expectedLastEventId: Long
     ): Result<AppendEventResponse, NetworkError> {
-        return eventSynchronizer.appendEvent(
-            subscription = subscription,
-            payload = payload,
-            expectedLastEventId = expectedLastEventId
-        )
+        return mutex.withLock {
+            eventSynchronizer.appendEvent(
+                subscription = subscription,
+                payload = payload,
+                expectedLastEventId = expectedLastEventId
+            )
+        }
     }
 
     data class AggregateManagerKey(

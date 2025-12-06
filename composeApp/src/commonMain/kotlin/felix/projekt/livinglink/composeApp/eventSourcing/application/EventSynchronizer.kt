@@ -3,6 +3,7 @@ package felix.projekt.livinglink.composeApp.eventSourcing.application
 import felix.projekt.livinglink.composeApp.AppConfig
 import felix.projekt.livinglink.composeApp.core.domain.NetworkError
 import felix.projekt.livinglink.composeApp.core.domain.Result
+import felix.projekt.livinglink.composeApp.core.domain.withLockNonSuspend
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.AppendEventResponse
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventBatch
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSourcingNetworkDataSource
@@ -30,19 +31,21 @@ class EventSynchronizer(
     private val eventSourcingNetworkDataSource: EventSourcingNetworkDataSource,
     private val scope: CoroutineScope
 ) {
+    private val mutex = Mutex()
     private val sharedFlows = HashMap<TopicSubscription<*>, SharedFlow<EventBatch>>()
     private val manualAppendChannels = HashMap<TopicSubscription<*>, Channel<EventSourcingEvent?>>()
-    private val pollMutex = Mutex()
 
     fun subscribe(subscription: TopicSubscription<*>): SharedFlow<EventBatch> {
-        return sharedFlows.getOrPut(subscription) {
-            pollEvents(subscription)
-                .shareIn(
-                    scope = scope,
-                    started = SharingStarted.WhileSubscribed(
-                        stopTimeoutMillis = 5_000
+        return mutex.withLockNonSuspend {
+            sharedFlows.getOrPut(subscription) {
+                pollEvents(subscription)
+                    .shareIn(
+                        scope = scope,
+                        started = SharingStarted.WhileSubscribed(
+                            stopTimeoutMillis = 5_000
+                        )
                     )
-                )
+            }
         }
     }
 
@@ -51,7 +54,7 @@ class EventSynchronizer(
         payload: JsonElement,
         expectedLastEventId: Long
     ): Result<AppendEventResponse, NetworkError> {
-        pollMutex.withLock {
+        mutex.withLock {
             val result = eventSourcingNetworkDataSource.appendEvent(
                 groupId = subscription.groupId,
                 topic = subscription.topic.value,
@@ -73,7 +76,9 @@ class EventSynchronizer(
     }
 
     suspend fun clear() {
-        eventStore.clearAll()
+        mutex.withLock {
+            eventStore.clearAll()
+        }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -91,7 +96,7 @@ class EventSynchronizer(
                 onTimeout(nextDelay) {}
 
                 manualChannel.onReceive { event ->
-                    val shouldSkip = pollMutex.withLock {
+                    val shouldSkip = mutex.withLock {
                         val lastEventId = eventStore.lastEventId(subscription)
                         if (event != null && lastEventId + 1 == event.eventId) {
                             eventStore.append(subscription, listOf(event))
@@ -118,7 +123,7 @@ class EventSynchronizer(
                 lastKnownEventId = eventStore.lastEventId(subscription)
             )
 
-            nextDelay = pollMutex.withLock {
+            nextDelay = mutex.withLock {
                 when (result) {
                     is Result.Success<*> -> {
                         when (val data = result.data) {

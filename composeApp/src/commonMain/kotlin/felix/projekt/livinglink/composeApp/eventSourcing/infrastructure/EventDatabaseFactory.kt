@@ -1,7 +1,7 @@
 package felix.projekt.livinglink.composeApp.eventSourcing.infrastructure
 
 import app.cash.sqldelight.db.SqlDriver
-import felix.projekt.livinglink.composeApp.database.EventDatabase
+import felix.projekt.livinglink.composeApp.eventDatabase.EventDatabase
 
 expect class EventDatabaseDriverFactory() {
     fun createDriver(): SqlDriver

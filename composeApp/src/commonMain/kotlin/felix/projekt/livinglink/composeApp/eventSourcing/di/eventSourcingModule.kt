@@ -11,11 +11,9 @@ import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventDatabaseDriverFactory
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventDatabaseFactory
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventSourcingNetworkDefaultDataSource
-import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.InMemoryEventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.SqlDelightEventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.GetAggregateService
-import io.ktor.util.PlatformUtils
 import org.koin.core.module.dsl.factoryOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -28,15 +26,11 @@ val eventSourcingModule = module {
     }
 
     single<EventStore> {
-        if (PlatformUtils.IS_BROWSER) {
-            InMemoryEventStore()
-        } else {
-            SqlDelightEventStore(
-                database = EventDatabaseFactory(
-                    driverFactory = EventDatabaseDriverFactory()
-                ).createDatabase()
-            )
-        }
+        SqlDelightEventStore(
+            database = EventDatabaseFactory(
+                driverFactory = EventDatabaseDriverFactory()
+            ).createDatabase()
+        )
     }
 
     single<EventSourcingRepository> {

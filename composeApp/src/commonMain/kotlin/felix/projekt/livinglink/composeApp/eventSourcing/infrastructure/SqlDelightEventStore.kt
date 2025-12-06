@@ -1,6 +1,6 @@
 package felix.projekt.livinglink.composeApp.eventSourcing.infrastructure
 
-import felix.projekt.livinglink.composeApp.database.EventDatabase
+import felix.projekt.livinglink.composeApp.eventDatabase.EventDatabase
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.TopicSubscription
