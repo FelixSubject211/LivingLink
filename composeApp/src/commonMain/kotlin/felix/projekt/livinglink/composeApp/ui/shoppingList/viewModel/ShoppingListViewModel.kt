@@ -32,38 +32,46 @@ class ShoppingListViewModel(
     private val _sideEffect: MutableSharedFlow<ShoppingListSideEffect> = MutableSharedFlow()
     override val sideEffect: MutableSharedFlow<ShoppingListSideEffect> = _sideEffect
 
-    override fun dispatch(action: ShoppingListAction) = when (action) {
-        is ShoppingListAction.NavigateBack -> {
-            executionScope.launchJob {
-                _sideEffect.emit(ShoppingListSideEffect.NavigateBack)
+    override fun dispatch(action: ShoppingListAction) {
+        when (action) {
+            is ShoppingListAction.NavigateBack -> {
+                executionScope.launchJob {
+                    _sideEffect.emit(ShoppingListSideEffect.NavigateBack)
+                }
             }
-        }
 
-        is ShoppingListAction.NewItemNameChanged -> {
-            _state.update(NewItemNameUpdated(action.name))
-        }
+            is ShoppingListAction.NewItemNameChanged -> {
+                _state.update(NewItemNameUpdated(action.name))
+            }
 
-        is ShoppingListAction.SubmitNewItem -> {
-            val name = _state.value.newItemName.trim()
-            executionScope.launchJob { createItem(name) }
-        }
+            is ShoppingListAction.SubmitNewItem -> {
+                val name = _state.value.newItemName.trim()
+                executionScope.launchJob {
+                    createItem(name)
+                }
+            }
 
-        is ShoppingListAction.ItemChecked -> {
-            executionScope.launchJob { itemChecked(action.itemId) }
-        }
+            is ShoppingListAction.ItemChecked -> {
+                executionScope.launchJob {
+                    itemChecked(action.itemId)
+                }
+            }
 
-        is ShoppingListAction.ItemUnchecked -> {
-            executionScope.launchJob { itemUnchecked(action.itemId) }
-        }
+            is ShoppingListAction.ItemUnchecked -> {
+                executionScope.launchJob {
+                    itemUnchecked(action.itemId)
+                }
+            }
 
-        is ShoppingListAction.OpenItemDetail -> {
-            executionScope.launchJob {
-                _sideEffect.emit(
-                    ShoppingListSideEffect.NavigateToItemDetail(
-                        itemId = action.itemId,
-                        itemName = action.itemName
+            is ShoppingListAction.OpenItemDetail -> {
+                executionScope.launchJob {
+                    _sideEffect.emit(
+                        ShoppingListSideEffect.NavigateToItemDetail(
+                            itemId = action.itemId,
+                            itemName = action.itemName
+                        )
                     )
-                )
+                }
             }
         }
     }
@@ -101,11 +109,11 @@ class ShoppingListViewModel(
             name = name
         )
         when (response) {
-            CreateShoppingListItemUseCase.Response.Success -> {
+            is CreateShoppingListItemUseCase.Response.Success -> {
                 _state.update(AddItemFinished)
             }
 
-            CreateShoppingListItemUseCase.Response.NetworkError -> {
+            is CreateShoppingListItemUseCase.Response.NetworkError -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.CreateItemNetworkError)
             }
         }
@@ -118,16 +126,17 @@ class ShoppingListViewModel(
             itemId = itemId
         )
         when (response) {
-            CheckShoppingListItemUseCase.Response.Success -> {}
-            CheckShoppingListItemUseCase.Response.AlreadyChecked -> {
+            is CheckShoppingListItemUseCase.Response.Success -> {}
+
+            is CheckShoppingListItemUseCase.Response.AlreadyChecked -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemCheckedAlreadyChecked)
             }
 
-            CheckShoppingListItemUseCase.Response.ItemNotFound -> {
+            is CheckShoppingListItemUseCase.Response.ItemNotFound -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemCheckedNotFound)
             }
 
-            CheckShoppingListItemUseCase.Response.NetworkError -> {
+            is CheckShoppingListItemUseCase.Response.NetworkError -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemCheckedNetworkError)
             }
         }
@@ -141,16 +150,17 @@ class ShoppingListViewModel(
             itemId = itemId
         )
         when (response) {
-            UncheckShoppingListItemUseCase.Response.Success -> {}
-            UncheckShoppingListItemUseCase.Response.AlreadyUnchecked -> {
+            is UncheckShoppingListItemUseCase.Response.Success -> {}
+
+            is UncheckShoppingListItemUseCase.Response.AlreadyUnchecked -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemUncheckedAlreadyUnchecked)
             }
 
-            UncheckShoppingListItemUseCase.Response.ItemNotFound -> {
+            is UncheckShoppingListItemUseCase.Response.ItemNotFound -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemUncheckedNotFound)
             }
 
-            UncheckShoppingListItemUseCase.Response.NetworkError -> {
+            is UncheckShoppingListItemUseCase.Response.NetworkError -> {
                 _sideEffect.emit(ShoppingListSideEffect.ShowSnackbar.ItemUncheckedNetworkError)
             }
         }

@@ -100,6 +100,7 @@ fun ShoppingListScreen(
                     items(state.items, key = { it.id }) { item ->
                         ShoppingListItem(
                             item = item,
+                            state = state,
                             dispatch = viewModel::dispatch,
                             onItemClick = { selectedItem ->
                                 viewModel.dispatch(

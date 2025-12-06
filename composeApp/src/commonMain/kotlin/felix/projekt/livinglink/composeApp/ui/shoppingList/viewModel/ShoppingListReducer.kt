@@ -6,41 +6,64 @@ class ShoppingListReducer : Reducer<ShoppingListState, ShoppingListResult> {
     override fun invoke(
         state: ShoppingListState,
         result: ShoppingListResult
-    ): ShoppingListState = when (result) {
-        is ShoppingListResult.ShoppingListLoading -> {
-            state.copy(isLoading = true, loadingProgress = result.progress)
-        }
+    ): ShoppingListState {
+        return when (result) {
+            is ShoppingListResult.ShoppingListLoading -> {
+                state.copy(
+                    isLoading = true,
+                    loadingProgress = result.progress
+                )
+            }
 
-        is ShoppingListResult.ShoppingListChanged -> {
-            state.copy(isLoading = false, loadingProgress = 0f, items = result.items.reversed())
-        }
+            is ShoppingListResult.ShoppingListChanged -> {
+                state.copy(
+                    isLoading = false,
+                    loadingProgress = 0f,
+                    items = result.items.map { item ->
+                        ShoppingListState.Item(
+                            id = item.id,
+                            name = item.name,
+                            isChecked = item.isChecked
+                        )
+                    }
+                )
+            }
 
-        is ShoppingListResult.NewItemNameUpdated -> {
-            state.copy(newItemName = result.name)
-        }
+            is ShoppingListResult.NewItemNameUpdated -> {
+                state.copy(newItemName = result.name)
+            }
 
-        is ShoppingListResult.AddItemSubmitting -> {
-            state
-        }
+            is ShoppingListResult.AddItemSubmitting -> {
+                state
+            }
 
-        is ShoppingListResult.AddItemFinished -> {
-            state.copy(newItemName = "")
-        }
+            is ShoppingListResult.AddItemFinished -> {
+                state.copy(newItemName = "")
+            }
 
-        is ShoppingListResult.ItemCheckedSubmitting -> {
-            state
-        }
+            is ShoppingListResult.ItemCheckedSubmitting -> {
+                state.copy(
+                    submittingItemIds = state.submittingItemIds + result.itemId
+                )
+            }
 
-        is ShoppingListResult.ItemCheckedFinished -> {
-            state
-        }
+            is ShoppingListResult.ItemCheckedFinished -> {
+                state.copy(
+                    submittingItemIds = state.submittingItemIds - result.itemId
+                )
+            }
 
-        is ShoppingListResult.ItemUncheckedSubmitting -> {
-            state
-        }
+            is ShoppingListResult.ItemUncheckedSubmitting -> {
+                state.copy(
+                    submittingItemIds = state.submittingItemIds + result.itemId
+                )
+            }
 
-        is ShoppingListResult.ItemUncheckedFinished -> {
-            state
+            is ShoppingListResult.ItemUncheckedFinished -> {
+                state.copy(
+                    submittingItemIds = state.submittingItemIds - result.itemId
+                )
+            }
         }
     }
 }
