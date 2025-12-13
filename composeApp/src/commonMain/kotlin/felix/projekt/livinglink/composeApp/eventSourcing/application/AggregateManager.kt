@@ -19,23 +19,21 @@ class AggregateManager<TTopic : EventTopic, TState>(
     private val aggregator: Aggregator<TTopic, TState>,
     private val updates: Flow<EventBatch>,
     private val eventStore: EventStore,
-    private val parentScope: CoroutineScope
+    parentScope: CoroutineScope
 ) {
     private val job = SupervisorJob(parentScope.coroutineContext.job)
     private val scope = CoroutineScope(parentScope.coroutineContext + job)
-    private var currentState = aggregator.initialState
-    private var lastAppliedEventId: Long = 0
-    private var appliedEventCount = 0
 
     fun stop() {
         job.cancel()
     }
 
     val state: StateFlow<EventAggregateState<TState>> = flow {
-        val initialMissing = eventStore.eventsSince(aggregator.subscription, lastAppliedEventId)
-        if (initialMissing.isNotEmpty()) {
-            applyEvents(initialMissing)
+        var currentState = aggregator.initialState
+        var lastAppliedEventId = 0L
+        var appliedEventCount = 0
 
+        suspend fun emitData() {
             emit(
                 EventAggregateState.Data(
                     state = currentState,
@@ -44,53 +42,65 @@ class AggregateManager<TTopic : EventTopic, TState>(
             )
         }
 
+        fun applyEvents(events: List<EventSourcingEvent>) {
+            if (events.isEmpty()) {
+                return
+            }
+
+            currentState = aggregator.apply(currentState, events)
+            lastAppliedEventId = events.last().eventId
+            appliedEventCount += events.size
+        }
+
+        val initialMissing = eventStore.eventsSince(
+            subscription = aggregator.subscription,
+            eventId = lastAppliedEventId
+        )
+
+        if (initialMissing.isNotEmpty()) {
+            applyEvents(initialMissing)
+            emitData()
+        }
+
         updates.collect { update ->
             when (update) {
                 EventBatch.NoChange -> {
-                    emit(
-                        EventAggregateState.Data(
-                            state = currentState,
-                            lastEventId = lastAppliedEventId
-                        )
-                    )
+                    emitData()
                 }
 
                 is EventBatch.Local -> {
-                    val e = update.newEvent
-
-                    if (e.eventId != lastAppliedEventId + 1) {
-                        val missing = eventStore.eventsSince(aggregator.subscription, lastAppliedEventId)
+                    if (update.newEvent.eventId != lastAppliedEventId + 1L) {
+                        val missing = eventStore.eventsSince(
+                            subscription = aggregator.subscription,
+                            eventId = lastAppliedEventId
+                        )
                         applyEvents(missing)
                     }
 
                     applyEvents(listOf(update.newEvent))
-
-                    emit(
-                        EventAggregateState.Data(
-                            state = currentState,
-                            lastEventId = lastAppliedEventId
-                        )
-                    )
+                    emitData()
                 }
 
                 is EventBatch.Remote -> {
-                    val first = update.newEvents.first().eventId
+                    val firstIncomingId = update.newEvents.first().eventId
 
-                    if (first != lastAppliedEventId + 1) {
-                        val missing = eventStore.eventsSince(aggregator.subscription, lastAppliedEventId)
+                    if (firstIncomingId != lastAppliedEventId + 1L) {
+                        val missing = eventStore.eventsSince(
+                            subscription = aggregator.subscription,
+                            eventId = lastAppliedEventId
+                        )
                         applyEvents(missing)
                     }
+
                     applyEvents(update.newEvents)
+
                     if (update.totalEvents > appliedEventCount) {
                         val ratio = appliedEventCount.toFloat() / update.totalEvents.toFloat()
-                        emit(EventAggregateState.Loading(progress = ratio.coerceIn(0f, 1f)))
-                    } else {
                         emit(
-                            EventAggregateState.Data(
-                                state = currentState,
-                                lastEventId = lastAppliedEventId
-                            )
+                            EventAggregateState.Loading(progress = ratio.coerceIn(0f, 1f))
                         )
+                    } else {
+                        emitData()
                     }
                 }
             }
@@ -100,15 +110,4 @@ class AggregateManager<TTopic : EventTopic, TState>(
         started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
         initialValue = EventAggregateState.Loading(progress = 0f)
     )
-
-    private fun applyEvents(events: List<EventSourcingEvent>): TState {
-        if (events.isEmpty()) {
-            return currentState
-        }
-
-        currentState = aggregator.apply(currentState, events)
-        lastAppliedEventId = events.last().eventId
-        appliedEventCount += events.size
-        return currentState
-    }
 }

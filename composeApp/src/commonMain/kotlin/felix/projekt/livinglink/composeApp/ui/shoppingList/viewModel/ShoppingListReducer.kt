@@ -25,7 +25,7 @@ class ShoppingListReducer : Reducer<ShoppingListState, ShoppingListResult> {
                             name = item.name,
                             isChecked = item.isChecked
                         )
-                    }
+                    }.reversed()
                 )
             }
 

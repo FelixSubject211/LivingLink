@@ -27,6 +27,10 @@ class CreateInviteCodeDefaultUseCase(
         )
 
         val result = groupRepository.updateWithOptimisticLocking(groupId) { group ->
+            require(group.memberIdToMember.containsKey(userId)) {
+                "User $userId is not a member of group $groupId"
+            }
+
             GroupRepository.UpdateOperationResult.Updated(
                 newEntity = group.addInviteCode(inviteCode),
                 response = CreateInviteCodeResponse.Success(inviteCode.key)

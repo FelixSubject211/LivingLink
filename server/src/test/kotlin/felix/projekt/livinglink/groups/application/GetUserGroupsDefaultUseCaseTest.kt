@@ -127,4 +127,32 @@ class GetUserGroupsDefaultUseCaseTest {
 
         verifyNoMoreCalls(mockGroupRepository, mockGroupVersionCache)
     }
+
+    @Test
+    fun `fetches groups when current versions include unknown entries`() = runTest {
+        // Arrange
+        val userId = "user-1"
+        val currentVersions = mapOf("group-1" to 5L, "stale-group" to 1L)
+        val cachedVersions = GroupVersionCache.GroupVersions(mapOf("group-1" to 5L))
+        val groups = mapOf(group1.id to group1)
+        val newVersions = GroupVersionCache.GroupVersions(mapOf("group-1" to 5L))
+
+        everySuspend { mockGroupVersionCache.getGroupVersions(userId) } returns cachedVersions
+        everySuspend { mockGroupRepository.getGroupsForMember(userId) } returns groups
+
+        // Act
+        val result = sut.invoke(userId, currentVersions)
+
+        // Assert
+        assertIs<GetGroupsResponse.Success>(result)
+        assertEquals(groups, result.groups)
+
+        verifySuspend(exhaustiveOrder) {
+            mockGroupVersionCache.getGroupVersions(userId)
+            mockGroupRepository.getGroupsForMember(userId)
+            mockGroupVersionCache.setGroupVersions(userId, newVersions)
+        }
+
+        verifyNoMoreCalls(mockGroupRepository, mockGroupVersionCache)
+    }
 }

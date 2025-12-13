@@ -2,7 +2,7 @@ package felix.projekt.livinglink.composeApp.groups.interfaces
 
 import kotlinx.coroutines.flow.Flow
 
-fun interface GetGroupsUseCase {
+interface GetGroupsUseCase {
     operator fun invoke(): Flow<Response>
 
     sealed class Response {

@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -84,8 +83,8 @@ kotlin {
 
 sqldelight {
     databases {
-        create("EventDatabase") {
-            packageName.set("felix.projekt.livinglink.composeApp.eventDatabase")
+        create("Database") {
+            packageName.set("felix.projekt.livinglink.composeApp.core")
         }
     }
 }

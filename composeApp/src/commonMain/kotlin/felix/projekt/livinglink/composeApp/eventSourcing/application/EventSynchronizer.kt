@@ -35,17 +35,15 @@ class EventSynchronizer(
     private val sharedFlows = HashMap<TopicSubscription<*>, SharedFlow<EventBatch>>()
     private val manualAppendChannels = HashMap<TopicSubscription<*>, Channel<EventSourcingEvent?>>()
 
-    fun subscribe(subscription: TopicSubscription<*>): SharedFlow<EventBatch> {
-        return mutex.withLockNonSuspend {
-            sharedFlows.getOrPut(subscription) {
-                pollEvents(subscription)
-                    .shareIn(
-                        scope = scope,
-                        started = SharingStarted.WhileSubscribed(
-                            stopTimeoutMillis = 5_000
-                        )
+    fun subscribe(subscription: TopicSubscription<*>): SharedFlow<EventBatch> = mutex.withLockNonSuspend {
+        sharedFlows.getOrPut(subscription) {
+            pollEvents(subscription)
+                .shareIn(
+                    scope = scope,
+                    started = SharingStarted.WhileSubscribed(
+                        stopTimeoutMillis = 5_000
                     )
-            }
+                )
         }
     }
 
@@ -53,26 +51,22 @@ class EventSynchronizer(
         subscription: TopicSubscription<*>,
         payload: JsonElement,
         expectedLastEventId: Long
-    ): Result<AppendEventResponse, NetworkError> {
-        mutex.withLock {
-            val result = eventSourcingNetworkDataSource.appendEvent(
-                groupId = subscription.groupId,
-                topic = subscription.topic.value,
-                payload = payload,
-                expectedLastEventId = expectedLastEventId
-            )
+    ): Result<AppendEventResponse, NetworkError> = mutex.withLock {
+        val result = eventSourcingNetworkDataSource.appendEvent(
+            groupId = subscription.groupId,
+            topic = subscription.topic.value,
+            payload = payload,
+            expectedLastEventId = expectedLastEventId
+        )
 
-            val channel = manualAppendChannels.getOrPut(subscription) {
-                Channel(Channel.UNLIMITED)
-            }
-            if (result is Result.Success && result.data is AppendEventResponse.Success) {
-                channel.send(result.data.event)
-            } else {
-                channel.send(null)
-            }
-
-            return result
-        }
+        val channel = getOrCreateManualChannel(subscription)
+        channel.send(
+            (result as? Result.Success)
+                ?.data
+                ?.let { it as? AppendEventResponse.Success }
+                ?.event
+        )
+        result
     }
 
     suspend fun clear() {
@@ -83,10 +77,7 @@ class EventSynchronizer(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun pollEvents(subscription: TopicSubscription<*>): Flow<EventBatch> = flow {
-        val manualChannel = manualAppendChannels.getOrPut(subscription) {
-            Channel(Channel.UNLIMITED)
-        }
-
+        val manualChannel = getOrCreateManualChannel(subscription)
         var nextDelay = 0L
 
         while (scope.isActive) {
@@ -96,68 +87,93 @@ class EventSynchronizer(
                 onTimeout(nextDelay) {}
 
                 manualChannel.onReceive { event ->
-                    val shouldSkip = mutex.withLock {
-                        val lastEventId = eventStore.lastEventId(subscription)
-                        if (event != null && lastEventId + 1 == event.eventId) {
-                            eventStore.append(subscription, listOf(event))
-                            emit(EventBatch.Local(event))
-                            true
-                        } else {
-                            false
-                        }
-                    }
-
-                    if (shouldSkip) {
+                    val batch = handleManualAppend(subscription, event)
+                    if (batch != null) {
+                        emit(batch)
                         skipPolling = true
                     }
                 }
             }
 
-            if (skipPolling) {
-                continue
+            if (skipPolling) continue
+
+            val result = pollFromNetwork(subscription)
+            val (batch, delay) = handlePollResult(subscription, result)
+
+            nextDelay = delay
+            if (batch != null) {
+                emit(batch)
+            }
+        }
+    }
+
+    private fun getOrCreateManualChannel(
+        subscription: TopicSubscription<*>
+    ): Channel<EventSourcingEvent?> {
+        return manualAppendChannels.getOrPut(subscription) {
+            Channel(Channel.UNLIMITED)
+        }
+    }
+
+
+    private suspend fun handleManualAppend(
+        subscription: TopicSubscription<*>,
+        event: EventSourcingEvent?
+    ): EventBatch? = mutex.withLock {
+        val lastEventId = eventStore.lastEventId(subscription)
+
+        if (event != null && lastEventId + 1L == event.eventId) {
+            eventStore.append(subscription, listOf(event))
+            EventBatch.Local(event)
+        } else {
+            null
+        }
+    }
+
+    private suspend fun pollFromNetwork(
+        subscription: TopicSubscription<*>
+    ): Result<PollEventsResponse, NetworkError> {
+        return eventSourcingNetworkDataSource.pollEvents(
+            groupId = subscription.groupId,
+            topic = subscription.topic.value,
+            lastKnownEventId = eventStore.lastEventId(subscription)
+        )
+    }
+
+
+    private suspend fun handlePollResult(
+        subscription: TopicSubscription<*>,
+        result: Result<PollEventsResponse, NetworkError>
+    ): Pair<EventBatch?, Long> = mutex.withLock {
+        when (result) {
+            is Result.Success -> when (val data = result.data) {
+                is PollEventsResponse.Success -> {
+                    val lastEventId = eventStore.lastEventId(subscription)
+                    val firstIncoming = data.events.firstOrNull()?.eventId
+
+                    val batch = if (firstIncoming != null && lastEventId + 1L == firstIncoming) {
+                        eventStore.append(subscription, data.events)
+                        EventBatch.Remote(
+                            newEvents = data.events,
+                            totalEvents = data.totalEvents
+                        )
+                    } else {
+                        null
+                    }
+                    batch to data.nextPollAfterMillis
+                }
+
+                is PollEventsResponse.NotModified -> {
+                    EventBatch.NoChange to data.nextPollAfterMillis
+                }
+
+                else -> {
+                    null to AppConfig.eventSourcingPollFallbackMills
+                }
             }
 
-            val result = eventSourcingNetworkDataSource.pollEvents(
-                groupId = subscription.groupId,
-                topic = subscription.topic.value,
-                lastKnownEventId = eventStore.lastEventId(subscription)
-            )
-
-            nextDelay = mutex.withLock {
-                when (result) {
-                    is Result.Success<*> -> {
-                        when (val data = result.data) {
-                            is PollEventsResponse.Success -> {
-                                val lastEventId = eventStore.lastEventId(subscription)
-
-                                if (lastEventId + 1 == data.events.firstOrNull()?.eventId) {
-                                    eventStore.append(subscription, data.events)
-                                    emit(
-                                        EventBatch.Remote(
-                                            newEvents = data.events,
-                                            totalEvents = data.totalEvents
-                                        )
-                                    )
-                                }
-
-                                data.nextPollAfterMillis
-                            }
-
-                            is PollEventsResponse.NotModified -> {
-                                emit(EventBatch.NoChange)
-                                data.nextPollAfterMillis
-                            }
-
-                            else -> {
-                                AppConfig.eventSourcingPollFallbackMills
-                            }
-                        }
-                    }
-
-                    is Result.Error -> {
-                        AppConfig.eventSourcingPollFallbackMills
-                    }
-                }
+            is Result.Error -> {
+                null to AppConfig.eventSourcingPollFallbackMills
             }
         }
     }

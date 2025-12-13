@@ -8,8 +8,6 @@ import felix.projekt.livinglink.composeApp.eventSourcing.application.GetAggregat
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSourcingNetworkDataSource
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSourcingRepository
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
-import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventDatabaseDriverFactory
-import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventDatabaseFactory
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.EventSourcingNetworkDefaultDataSource
 import felix.projekt.livinglink.composeApp.eventSourcing.infrastructure.SqlDelightEventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService
@@ -27,9 +25,7 @@ val eventSourcingModule = module {
 
     single<EventStore> {
         SqlDelightEventStore(
-            database = EventDatabaseFactory(
-                driverFactory = EventDatabaseDriverFactory()
-            ).createDatabase()
+            database = get()
         )
     }
 

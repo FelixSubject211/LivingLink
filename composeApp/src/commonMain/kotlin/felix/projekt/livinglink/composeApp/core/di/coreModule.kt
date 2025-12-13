@@ -1,6 +1,8 @@
 package felix.projekt.livinglink.composeApp.core.di
 
 import felix.projekt.livinglink.composeApp.AppConfig
+import felix.projekt.livinglink.composeApp.core.Database
+import felix.projekt.livinglink.composeApp.core.infrastructure.createSqlDriver
 import felix.projekt.livinglink.shared.json
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -11,6 +13,10 @@ import kotlinx.coroutines.Dispatchers
 import org.koin.dsl.module
 
 val coreModule = module {
+    single {
+        Database(driver = createSqlDriver())
+    }
+
     single { CoroutineScope(Dispatchers.Default) }
 
     single {

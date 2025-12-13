@@ -1,6 +1,6 @@
 package felix.projekt.livinglink.composeApp.eventSourcing.infrastructure
 
-import felix.projekt.livinglink.composeApp.eventDatabase.EventDatabase
+import felix.projekt.livinglink.composeApp.core.Database
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.TopicSubscription
@@ -10,7 +10,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 
 class SqlDelightEventStore(
-    private val database: EventDatabase,
+    private val database: Database,
 ) : EventStore {
 
     private val mutex = Mutex()

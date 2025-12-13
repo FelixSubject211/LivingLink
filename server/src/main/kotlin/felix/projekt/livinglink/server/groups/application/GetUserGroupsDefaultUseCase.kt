@@ -34,6 +34,10 @@ class GetUserGroupsDefaultUseCase(
     }
 
     private fun GroupVersionCache.GroupVersions.matches(current: Map<String, Long>): Boolean {
+        if (groupIdsToGroupVersion.size != current.size) {
+            return false
+        }
+
         return groupIdsToGroupVersion.all { (id, version) -> current[id] == version }
     }
 }
