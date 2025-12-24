@@ -3,11 +3,23 @@ package felix.projekt.livinglink.composeApp.eventSourcing.interfaces
 import kotlinx.serialization.json.JsonElement
 
 interface AppendEventService {
-
     suspend operator fun <TTopic : EventTopic, TState, R> invoke(
         aggregator: Aggregator<TTopic, TState>,
         maxRetries: Int = 30,
         buildEvent: (TState) -> OperationResult<R>
+    ): FinalResult<R>
+
+    suspend operator fun <TState, TTopic : EventTopic, R> invoke(
+        projector: Projector<TState, TTopic>,
+        itemId: String,
+        maxRetries: Int = 30,
+        buildEvent: (TState?) -> OperationResult<R>
+    ): FinalResult<R>
+
+    suspend operator fun <TState, TTopic : EventTopic, R> invoke(
+        projector: Projector<TState, TTopic>,
+        maxRetries: Int = 30,
+        buildEvent: () -> OperationResult<R>
     ): FinalResult<R>
 
     sealed class OperationResult<out R> {

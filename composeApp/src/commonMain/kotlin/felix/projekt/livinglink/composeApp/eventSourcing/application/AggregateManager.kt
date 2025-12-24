@@ -1,11 +1,12 @@
 package felix.projekt.livinglink.composeApp.eventSourcing.application
 
+import felix.projekt.livinglink.composeApp.AppConfig
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventBatch
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Aggregator
-import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventAggregateState
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventTopic
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.GetAggregateService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -28,14 +29,14 @@ class AggregateManager<TTopic : EventTopic, TState>(
         job.cancel()
     }
 
-    val state: StateFlow<EventAggregateState<TState>> = flow {
+    val state: StateFlow<GetAggregateService.State<TState>> = flow {
         var currentState = aggregator.initialState
         var lastAppliedEventId = 0L
         var appliedEventCount = 0
 
         suspend fun emitData() {
             emit(
-                EventAggregateState.Data(
+                GetAggregateService.State.Data(
                     state = currentState,
                     lastEventId = lastAppliedEventId
                 )
@@ -52,15 +53,24 @@ class AggregateManager<TTopic : EventTopic, TState>(
             appliedEventCount += events.size
         }
 
-        val initialMissing = eventStore.eventsSince(
-            subscription = aggregator.subscription,
-            eventId = lastAppliedEventId
-        )
+        suspend fun replayMissingEvents() {
+            while (true) {
+                val missing = eventStore.eventsSince(
+                    subscription = aggregator.subscription,
+                    eventId = lastAppliedEventId,
+                    limit = AppConfig.eventSourcingEventBatchSize
+                )
 
-        if (initialMissing.isNotEmpty()) {
-            applyEvents(initialMissing)
+                if (missing.isEmpty()) {
+                    break
+                }
+                applyEvents(missing)
+            }
+
             emitData()
         }
+
+        replayMissingEvents()
 
         updates.collect { update ->
             when (update) {
@@ -70,11 +80,7 @@ class AggregateManager<TTopic : EventTopic, TState>(
 
                 is EventBatch.Local -> {
                     if (update.newEvent.eventId != lastAppliedEventId + 1L) {
-                        val missing = eventStore.eventsSince(
-                            subscription = aggregator.subscription,
-                            eventId = lastAppliedEventId
-                        )
-                        applyEvents(missing)
+                        replayMissingEvents()
                     }
 
                     applyEvents(listOf(update.newEvent))
@@ -85,11 +91,7 @@ class AggregateManager<TTopic : EventTopic, TState>(
                     val firstIncomingId = update.newEvents.first().eventId
 
                     if (firstIncomingId != lastAppliedEventId + 1L) {
-                        val missing = eventStore.eventsSince(
-                            subscription = aggregator.subscription,
-                            eventId = lastAppliedEventId
-                        )
-                        applyEvents(missing)
+                        replayMissingEvents()
                     }
 
                     applyEvents(update.newEvents)
@@ -97,7 +99,7 @@ class AggregateManager<TTopic : EventTopic, TState>(
                     if (update.totalEvents > appliedEventCount) {
                         val ratio = appliedEventCount.toFloat() / update.totalEvents.toFloat()
                         emit(
-                            EventAggregateState.Loading(progress = ratio.coerceIn(0f, 1f))
+                            GetAggregateService.State.Loading(progress = ratio.coerceIn(0f, 1f))
                         )
                     } else {
                         emitData()
@@ -108,6 +110,6 @@ class AggregateManager<TTopic : EventTopic, TState>(
     }.stateIn(
         scope = scope,
         started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
-        initialValue = EventAggregateState.Loading(progress = 0f)
+        initialValue = GetAggregateService.State.Loading(progress = 0f)
     )
 }

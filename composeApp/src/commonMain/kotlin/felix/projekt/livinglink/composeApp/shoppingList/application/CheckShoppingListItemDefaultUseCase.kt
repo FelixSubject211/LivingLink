@@ -9,22 +9,22 @@ import kotlinx.serialization.json.encodeToJsonElement
 class CheckShoppingListItemDefaultUseCase(
     private val appendEventService: AppendEventService
 ) : CheckShoppingListItemUseCase {
-
     override suspend fun invoke(
         groupId: String,
         itemId: String
     ): CheckShoppingListItemUseCase.Response {
-        val aggregator = shoppingListAggregator(groupId)
-
+        val projector = shoppingListProjector(groupId)
         val result = appendEventService(
-            aggregator = aggregator,
+            projector = projector,
+            itemId = itemId,
             buildEvent = { currentState ->
-                val item = currentState.itemIdToItem[itemId]
-                    ?: return@appendEventService AppendEventService.OperationResult.NoOperation(
+                if (currentState == null) {
+                    return@appendEventService AppendEventService.OperationResult.NoOperation(
                         CheckShoppingListItemUseCase.Response.ItemNotFound
                     )
+                }
 
-                if (item.isChecked) {
+                if (currentState.isChecked) {
                     return@appendEventService AppendEventService.OperationResult.NoOperation(
                         CheckShoppingListItemUseCase.Response.AlreadyChecked
                     )

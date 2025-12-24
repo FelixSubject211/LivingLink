@@ -11,18 +11,16 @@ import kotlin.uuid.Uuid
 class CreateShoppingListItemDefaultUseCase(
     private val appendEventService: AppendEventService
 ) : CreateShoppingListItemUseCase {
-
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun invoke(
         groupId: String,
         name: String
     ): CreateShoppingListItemUseCase.Response {
-
-        val aggregator = shoppingListAggregator(groupId)
+        val projector = shoppingListProjector(groupId)
 
         val result = appendEventService(
-            aggregator = aggregator,
-            buildEvent = { currentState ->
+            projector = projector,
+            buildEvent = {
                 val event = ShoppingListEvent.ItemCreated(
                     id = Uuid.random().toString(),
                     name = name

@@ -14,18 +14,20 @@ class DeleteShoppingListItemDefaultUseCase(
         groupId: String,
         itemId: String
     ): DeleteShoppingListItemUseCase.Response {
-        val aggregator = shoppingListAggregator(groupId)
+        val projector = shoppingListProjector(groupId)
 
         val result = appendEventService(
-            aggregator = aggregator,
+            projector = projector,
+            itemId = itemId,
             buildEvent = { currentState ->
-                val item = currentState.itemIdToItem[itemId]
-                    ?: return@appendEventService AppendEventService.OperationResult.NoOperation(
+                if (currentState == null) {
+                    return@appendEventService AppendEventService.OperationResult.NoOperation(
                         DeleteShoppingListItemUseCase.Response.ItemNotFound
                     )
+                }
 
                 val payload = json.encodeToJsonElement<ShoppingListEvent>(
-                    ShoppingListEvent.ItemDeleted(id = item.id)
+                    ShoppingListEvent.ItemDeleted(id = currentState.id)
                 )
 
                 AppendEventService.OperationResult.EmitEvent(

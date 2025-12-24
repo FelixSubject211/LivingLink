@@ -27,8 +27,6 @@ import felix.projekt.livinglink.server.groups.interfaces.GetUserGroupsUseCase
 import felix.projekt.livinglink.server.groups.interfaces.JoinGroupWithInviteCodeUseCase
 import felix.projekt.livinglink.server.groups.routes.groupRoutes
 import felix.projekt.livinglink.shared.json
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpMethod
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.server.application.Application
 import io.ktor.server.application.ApplicationStopped
@@ -40,7 +38,6 @@ import io.ktor.server.auth.jwt.jwt
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.server.plugins.cors.routing.CORS
 import io.ktor.server.routing.routing
 import org.koin.ktor.ext.get
 import org.koin.ktor.plugin.Koin
@@ -76,18 +73,6 @@ fun Application.module() {
 
     install(ContentNegotiation) {
         json(json)
-    }
-
-    install(CORS) {
-        anyHost()
-        allowHeader(HttpHeaders.ContentType)
-        allowHeader(HttpHeaders.Authorization)
-        allowHeader(HttpHeaders.Upgrade)
-        allowMethod(HttpMethod.Get)
-        allowMethod(HttpMethod.Post)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Options)
     }
 
     val issuer = "http://${authConfig.keycloakHost}:${authConfig.keycloakPort}/realms/${authConfig.keycloakRealm}"

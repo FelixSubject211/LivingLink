@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -48,7 +47,6 @@ class GroupsDefaultRepository(
     init {
         scope.launch {
             getAuthStateService()
-                .drop(1)
                 .collect { authState ->
                     when (authState) {
                         GetAuthStateService.AuthState.LoggedOut -> {

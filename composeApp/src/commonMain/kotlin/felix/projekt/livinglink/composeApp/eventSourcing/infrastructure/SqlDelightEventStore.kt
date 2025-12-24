@@ -70,12 +70,14 @@ class SqlDelightEventStore(
 
     override suspend fun eventsSince(
         subscription: TopicSubscription<*>,
-        eventId: Long
+        eventId: Long,
+        limit: Long
     ): List<EventSourcingEvent> = mutex.withLock {
         database.eventDatabaseQueries.eventsSince(
             groupId = subscription.groupId,
             topic = subscription.topic.value,
-            eventId = eventId
+            eventId = eventId,
+            limit = limit.toLong()
         ).executeAsList().map { row ->
             EventSourcingEvent(
                 eventId = row.eventId,
@@ -89,7 +91,9 @@ class SqlDelightEventStore(
     }
 
     override suspend fun clearAll() = mutex.withLock {
-        database.eventDatabaseQueries.deleteAll()
+        database.eventDatabaseQueries.deleteAllEvents()
+        database.eventDatabaseQueries.deleteAllProjectionMeta()
+        database.eventDatabaseQueries.deleteAllProjectionItems()
         Unit
     }
 

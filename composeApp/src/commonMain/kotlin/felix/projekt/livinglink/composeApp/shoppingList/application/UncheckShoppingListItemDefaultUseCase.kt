@@ -14,17 +14,19 @@ class UncheckShoppingListItemDefaultUseCase(
         groupId: String,
         itemId: String
     ): UncheckShoppingListItemUseCase.Response {
-        val aggregator = shoppingListAggregator(groupId)
+        val projector = shoppingListProjector(groupId)
 
         val result = appendEventService(
-            aggregator = aggregator,
+            projector = projector,
+            itemId = itemId,
             buildEvent = { currentState ->
-                val item = currentState.itemIdToItem[itemId]
-                    ?: return@appendEventService AppendEventService.OperationResult.NoOperation(
+                if (currentState == null) {
+                    return@appendEventService AppendEventService.OperationResult.NoOperation(
                         UncheckShoppingListItemUseCase.Response.ItemNotFound
                     )
+                }
 
-                if (!item.isChecked) {
+                if (!currentState.isChecked) {
                     return@appendEventService AppendEventService.OperationResult.NoOperation(
                         UncheckShoppingListItemUseCase.Response.AlreadyUnchecked
                     )

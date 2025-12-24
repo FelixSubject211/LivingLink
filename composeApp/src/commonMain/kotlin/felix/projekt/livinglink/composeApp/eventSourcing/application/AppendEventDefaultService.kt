@@ -5,68 +5,153 @@ import felix.projekt.livinglink.composeApp.eventSourcing.domain.AppendEventRespo
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSourcingRepository
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Aggregator
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService
-import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventAggregateState
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService.FinalResult
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService.OperationResult
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventTopic
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.GetAggregateService
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.GetProjectionService
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Projection
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Projector
+import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.TopicSubscription
 import kotlinx.coroutines.flow.first
 
 class AppendEventDefaultService(
-    private val eventSourcingRepository: EventSourcingRepository
+    private val eventSourcingRepository: EventSourcingRepository,
+    private val getProjectionService: GetProjectionService
 ) : AppendEventService {
 
-    override suspend operator fun <TTopic : EventTopic, TState, R> invoke(
-        aggregator: Aggregator<TTopic, TState>,
-        maxRetries: Int,
-        buildEvent: (TState) -> AppendEventService.OperationResult<R>
-    ): AppendEventService.FinalResult<R> {
-        val aggregateFlow = eventSourcingRepository.getAggregate(aggregator)
+    private data class AppendContext<TState>(
+        val state: TState?,
+        val lastEventId: Long
+    )
 
-        var currentState = aggregateFlow.first {
-            it is EventAggregateState.Data<*>
-        } as EventAggregateState.Data<TState>
+    private suspend fun <TState, R> retryAppend(
+        maxRetries: Int,
+        loadContext: suspend () -> AppendContext<TState>,
+        subscription: TopicSubscription<*>,
+        buildEvent: (TState?) -> OperationResult<R>
+    ): FinalResult<R> {
+        var context = loadContext()
 
         repeat(maxRetries) {
-            val operation = buildEvent(currentState.state)
+            val operation = buildEvent(context.state)
 
             when (operation) {
-                is AppendEventService.OperationResult.NoOperation -> {
-                    return AppendEventService.FinalResult.NoOperation(operation.response)
+                is OperationResult.NoOperation -> {
+                    return FinalResult.NoOperation(operation.response)
                 }
 
-                is AppendEventService.OperationResult.EmitEvent -> {
+                is OperationResult.EmitEvent -> {
                     val result = eventSourcingRepository.appendEvent(
-                        subscription = aggregator.subscription,
+                        subscription = subscription,
                         payload = operation.payload,
-                        expectedLastEventId = currentState.lastEventId
+                        expectedLastEventId = context.lastEventId
                     )
 
                     when (result) {
                         is Result.Success -> {
                             when (result.data) {
                                 is AppendEventResponse.Success -> {
-                                    return AppendEventService.FinalResult.Success(operation.response)
+                                    return FinalResult.Success(operation.response)
                                 }
 
                                 is AppendEventResponse.NotAuthorized -> {
-                                    return AppendEventService.FinalResult.NotAuthorized(operation.response)
+                                    return FinalResult.NotAuthorized(operation.response)
                                 }
 
                                 is AppendEventResponse.VersionMismatch -> {
-                                    currentState = aggregateFlow.first { state ->
-                                        state is EventAggregateState.Data<*> &&
-                                                state.lastEventId != currentState.lastEventId
-                                    } as EventAggregateState.Data<TState>
+                                    context = loadContext()
                                 }
                             }
                         }
 
                         is Result.Error -> {
-                            return AppendEventService.FinalResult.NetworkError(operation.response)
+                            return FinalResult.NetworkError(operation.response)
                         }
                     }
                 }
             }
         }
 
-        return AppendEventService.FinalResult.VersionMismatch()
+        return FinalResult.VersionMismatch()
+    }
+
+
+    override suspend operator fun <TTopic : EventTopic, TState, R> invoke(
+        aggregator: Aggregator<TTopic, TState>,
+        maxRetries: Int,
+        buildEvent: (TState) -> OperationResult<R>
+    ): FinalResult<R> {
+        val aggregateFlow = eventSourcingRepository.getAggregate(aggregator)
+
+        return retryAppend(
+            maxRetries = maxRetries,
+            subscription = aggregator.subscription,
+            loadContext = {
+                val data = aggregateFlow.first {
+                    it is GetAggregateService.State.Data<*>
+                } as GetAggregateService.State.Data<TState>
+
+                AppendContext(
+                    state = data.state,
+                    lastEventId = data.lastEventId
+                )
+            },
+            buildEvent = { state ->
+                buildEvent(state!!)
+            }
+        )
+    }
+
+
+    override suspend operator fun <TState, TTopic : EventTopic, R> invoke(
+        projector: Projector<TState, TTopic>,
+        itemId: String,
+        maxRetries: Int,
+        buildEvent: (TState?) -> OperationResult<R>
+    ): FinalResult<R> {
+        val projection = getProjectionService(projector)
+
+        return retryAppend(
+            maxRetries = maxRetries,
+            subscription = projector.subscription,
+            loadContext = {
+                val data = projection.item(itemId).first {
+                    it is Projection.State.Data
+                } as Projection.State.Data
+
+                AppendContext(
+                    state = data.state,
+                    lastEventId = data.lastEventId
+                )
+            },
+            buildEvent = buildEvent
+        )
+    }
+
+    override suspend fun <TState, TTopic : EventTopic, R> invoke(
+        projector: Projector<TState, TTopic>,
+        maxRetries: Int,
+        buildEvent: () -> OperationResult<R>
+    ): FinalResult<R> {
+        val projection = getProjectionService(projector)
+
+        return retryAppend(
+            maxRetries = maxRetries,
+            subscription = projector.subscription,
+            loadContext = {
+                val data = projection.status().first {
+                    it is Projection.State.Data
+                } as Projection.State.Data
+
+                AppendContext(
+                    state = data.state,
+                    lastEventId = data.lastEventId
+                )
+            },
+            buildEvent = {
+                buildEvent()
+            }
+        )
     }
 }

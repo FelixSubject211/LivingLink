@@ -23,7 +23,7 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val groupsModule = module {
-    single<GroupsRepository> {
+    single<GroupsRepository>(createdAtStart = true) {
         GroupsDefaultRepository(
             groupsNetworkDataSource = GroupsNetworkDefaultDataSource(
                 httpClient = get<AuthTokenManager>().client

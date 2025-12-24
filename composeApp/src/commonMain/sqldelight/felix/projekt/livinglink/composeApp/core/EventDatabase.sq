@@ -9,7 +9,7 @@ CREATE TABLE events (
 );
 
 lastEventId:
-SELECT coalesce(MAX(eventId), 0)
+SELECT COALESCE(MAX(eventId), 0)
 FROM events
 WHERE groupId = ? AND topic = ?;
 
@@ -17,11 +17,95 @@ eventsSince:
 SELECT *
 FROM events
 WHERE groupId = ? AND topic = ? AND eventId > ?
-ORDER BY eventId;
+ORDER BY eventId
+LIMIT :limit;
 
 insertEvent:
-INSERT INTO events(groupId, topic, eventId, createdBy, createdAtEpochMillis, payload)
+INSERT INTO events(
+    groupId,
+    topic,
+    eventId,
+    createdBy,
+    createdAtEpochMillis,
+    payload
+)
 VALUES (?, ?, ?, ?, ?, ?);
 
-deleteAll:
+deleteAllEvents:
 DELETE FROM events;
+
+CREATE TABLE projection_meta (
+    projectionId TEXT NOT NULL,
+    groupId TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    lastEventId INTEGER NOT NULL,
+    appliedEventCount INTEGER NOT NULL,
+    PRIMARY KEY (projectionId, groupId, topic)
+);
+
+selectLastEventId:
+SELECT lastEventId
+FROM projection_meta
+WHERE projectionId = ? AND groupId = ? AND topic = ?;
+
+selectAppliedEventCount:
+SELECT lastEventId
+FROM projection_meta
+WHERE projectionId = ? AND groupId = ? AND topic = ?;
+
+upsertProjectionMeta:
+INSERT OR REPLACE INTO projection_meta(
+    projectionId,
+    groupId,
+    topic,
+    lastEventId,
+    appliedEventCount
+)
+VALUES (?, ?, ?, ?, ?);
+
+deleteAllProjectionMeta:
+DELETE FROM projection_meta;
+
+CREATE TABLE projection_items (
+    sortKey INTEGER PRIMARY KEY AUTOINCREMENT,
+    projectionId TEXT NOT NULL,
+    groupId TEXT NOT NULL,
+    topic TEXT NOT NULL,
+    itemId TEXT NOT NULL,
+    state TEXT NOT NULL,
+    UNIQUE (projectionId, groupId, topic, itemId)
+);
+
+CREATE INDEX projection_items_by_projection
+ON projection_items(projectionId, groupId, topic);
+
+selectProjectionItem:
+SELECT state
+FROM projection_items
+WHERE projectionId = ? AND groupId = ? AND topic = ? AND itemId = ?;
+
+selectProjectionPage:
+SELECT itemId, state
+FROM projection_items
+WHERE projectionId = ? AND groupId = ? AND topic = ?
+ORDER BY sortKey
+LIMIT :limit
+OFFSET :offset;
+
+insertProjectionItemIfAbsent:
+INSERT OR IGNORE INTO projection_items(
+    projectionId, groupId, topic, itemId, state
+)
+VALUES (?, ?, ?, ?, ?);
+
+updateProjectionItemState:
+UPDATE projection_items
+SET state = ?
+WHERE projectionId = ? AND groupId = ? AND topic = ? AND itemId = ?;
+
+deleteProjectionItem:
+DELETE FROM projection_items
+WHERE projectionId = ? AND groupId = ? AND topic = ? AND itemId = ?;
+
+deleteAllProjectionItems:
+DELETE FROM projection_items;

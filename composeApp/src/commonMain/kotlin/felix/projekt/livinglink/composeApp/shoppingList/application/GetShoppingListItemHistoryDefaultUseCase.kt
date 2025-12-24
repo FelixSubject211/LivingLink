@@ -1,6 +1,5 @@
 package felix.projekt.livinglink.composeApp.shoppingList.application
 
-import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventAggregateState
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.GetAggregateService
 import felix.projekt.livinglink.composeApp.groups.interfaces.GetGroupMemberIdToMemberNameService
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.GetShoppingListItemHistoryUseCase
@@ -23,13 +22,13 @@ class GetShoppingListItemHistoryDefaultUseCase(
 
         return combine(aggregateFlow, memberIdToMemberNameFlow) { aggregateState, memberIdToMemberName ->
             when (aggregateState) {
-                is EventAggregateState.Loading -> {
+                is GetAggregateService.State.Loading -> {
                     GetShoppingListItemHistoryUseCase.State.Loading(
                         progress = aggregateState.progress
                     )
                 }
 
-                is EventAggregateState.Data -> {
+                is GetAggregateService.State.Data -> {
                     val state = aggregateState.state
                     GetShoppingListItemHistoryUseCase.State.Data(
                         itemName = state.itemName,

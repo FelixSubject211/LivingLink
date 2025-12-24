@@ -8,6 +8,7 @@ import felix.projekt.livinglink.composeApp.eventSourcing.domain.AppendEventRespo
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventBatch
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSourcingNetworkDataSource
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
+import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventSynchronizer
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.PollEventsResponse
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.TopicSubscription
@@ -26,16 +27,16 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 
-class EventSynchronizer(
+class OnlineEventSynchronizer(
     private val eventStore: EventStore,
     private val eventSourcingNetworkDataSource: EventSourcingNetworkDataSource,
     private val scope: CoroutineScope
-) {
+) : EventSynchronizer {
     private val mutex = Mutex()
     private val sharedFlows = HashMap<TopicSubscription<*>, SharedFlow<EventBatch>>()
     private val manualAppendChannels = HashMap<TopicSubscription<*>, Channel<EventSourcingEvent?>>()
 
-    fun subscribe(subscription: TopicSubscription<*>): SharedFlow<EventBatch> = mutex.withLockNonSuspend {
+    override fun subscribe(subscription: TopicSubscription<*>): SharedFlow<EventBatch> = mutex.withLockNonSuspend {
         sharedFlows.getOrPut(subscription) {
             pollEvents(subscription)
                 .shareIn(
@@ -47,7 +48,7 @@ class EventSynchronizer(
         }
     }
 
-    suspend fun appendEvent(
+    override suspend fun appendEvent(
         subscription: TopicSubscription<*>,
         payload: JsonElement,
         expectedLastEventId: Long
@@ -69,7 +70,7 @@ class EventSynchronizer(
         result
     }
 
-    suspend fun clear() {
+    override suspend fun clear() {
         mutex.withLock {
             eventStore.clearAll()
         }
