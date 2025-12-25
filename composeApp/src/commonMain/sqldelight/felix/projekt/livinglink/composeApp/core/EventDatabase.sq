@@ -88,7 +88,7 @@ selectProjectionPage:
 SELECT itemId, state
 FROM projection_items
 WHERE projectionId = ? AND groupId = ? AND topic = ?
-ORDER BY sortKey
+ORDER BY sortKey DESC
 LIMIT :limit
 OFFSET :offset;
 

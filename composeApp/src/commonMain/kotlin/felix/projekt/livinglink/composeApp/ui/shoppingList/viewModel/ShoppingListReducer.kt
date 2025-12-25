@@ -8,25 +8,8 @@ class ShoppingListReducer : Reducer<ShoppingListState, ShoppingListResult> {
         result: ShoppingListResult
     ): ShoppingListState {
         return when (result) {
-            is ShoppingListResult.ShoppingListLoading -> {
-                state.copy(
-                    isLoading = true,
-                    loadingProgress = result.progress
-                )
-            }
-
-            is ShoppingListResult.ShoppingListChanged -> {
-                state.copy(
-                    isLoading = false,
-                    loadingProgress = 0f,
-                    items = result.items.map { item ->
-                        ShoppingListState.Item(
-                            id = item.id,
-                            name = item.name,
-                            isChecked = item.isChecked
-                        )
-                    }.reversed()
-                )
+            is ShoppingListResult.Init -> {
+                state.copy(pagingModel = result.pagingModel)
             }
 
             is ShoppingListResult.NewItemNameUpdated -> {

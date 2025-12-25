@@ -1,11 +1,12 @@
 package felix.projekt.livinglink.composeApp.eventSourcing.interfaces
 
+import felix.projekt.livinglink.composeApp.core.domain.PagingModel
 import kotlinx.coroutines.flow.Flow
 
 interface Projection<TState> {
     fun status(): Flow<State<Unit>>
     fun item(id: String): Flow<State<TState?>>
-    fun page(offset: Int, limit: Int): Flow<State<Page<TState>>>
+    fun page(): PagingModel<TState>
 
     sealed class State<out STATE> {
         data class Loading(val progress: Float) : State<Nothing>()

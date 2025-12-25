@@ -119,10 +119,7 @@ class SqlDelightProjectionStore<TState>(
         }
     }
 
-    override fun page(
-        offset: Int,
-        limit: Int
-    ): Flow<Projection.State<Projection.Page<TState>>> {
+    override fun page(offset: Int, limit: Int): Flow<Projection.State<Projection.Page<TState>>> {
         val pageFlow = queries
             .selectProjectionPage(
                 projectionId = projectionId,

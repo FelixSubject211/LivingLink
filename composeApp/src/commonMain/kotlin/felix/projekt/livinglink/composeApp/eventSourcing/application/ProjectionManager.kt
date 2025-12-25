@@ -1,6 +1,7 @@
 package felix.projekt.livinglink.composeApp.eventSourcing.application
 
 import felix.projekt.livinglink.composeApp.AppConfig
+import felix.projekt.livinglink.composeApp.core.domain.PagingModel
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventBatch
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.EventStore
 import felix.projekt.livinglink.composeApp.eventSourcing.domain.ProjectionStore
@@ -139,9 +140,12 @@ class ProjectionManager<TState, TTopic : EventTopic>(
         return replayAwareState(projectionStore.item(id))
     }
 
-
-    override fun page(offset: Int, limit: Int): Flow<Projection.State<Projection.Page<TState>>> {
-        return replayAwareState(projectionStore.page(offset = offset, limit = limit))
+    override fun page(): PagingModel<TState> {
+        return ProjectionPagingModel(
+            store = projectionStore,
+            runner = runner,
+            scope = scope
+        )
     }
 
     private fun <T> replayAwareState(

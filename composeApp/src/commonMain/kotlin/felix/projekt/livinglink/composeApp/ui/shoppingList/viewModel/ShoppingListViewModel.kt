@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel
 
+import felix.projekt.livinglink.composeApp.core.domain.mapItems
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.CheckShoppingListItemUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.CreateShoppingListItemUseCase
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.GetShoppingListStateUseCase
@@ -11,8 +12,7 @@ import felix.projekt.livinglink.composeApp.ui.core.viewmodel.ViewModel
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListResult.AddItemFinished
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListResult.AddItemSubmitting
 import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListResult.NewItemNameUpdated
-import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListResult.ShoppingListChanged
-import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListResult.ShoppingListLoading
+import felix.projekt.livinglink.composeApp.ui.shoppingList.viewModel.ShoppingListState.Item
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -77,29 +77,16 @@ class ShoppingListViewModel(
     }
 
     override fun start() {
-        executionScope.launchCollector(getShoppingListStateUseCase(groupId)) { response ->
-            when (response) {
-                is GetShoppingListStateUseCase.State.Loading -> {
-                    _state.update(
-                        ShoppingListLoading(progress = response.progress)
+        _state.update(
+            ShoppingListResult.Init(
+                getShoppingListStateUseCase(groupId).mapItems { item ->
+                    Item(
+                        id = item.id,
+                        name = item.name,
+                        isChecked = item.isChecked
                     )
                 }
-
-                is GetShoppingListStateUseCase.State.Data -> {
-                    _state.update(
-                        ShoppingListChanged(
-                            items = response.items.map { item ->
-                                ShoppingListState.Item(
-                                    id = item.id,
-                                    name = item.name,
-                                    isChecked = item.isChecked
-                                )
-                            }
-                        )
-                    )
-                }
-            }
-        }
+            ))
     }
 
     private suspend fun createItem(name: String) {
