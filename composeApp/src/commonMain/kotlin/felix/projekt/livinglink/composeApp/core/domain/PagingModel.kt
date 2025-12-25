@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.map
 interface PagingModel<T> {
     val state: Flow<State<T>>
     fun loadNextItems()
+    fun restoreFromIndex(firstIndex: Int)
 
     sealed class State<T> {
         data class Loading<T>(
@@ -39,6 +40,10 @@ fun <A, B> PagingModel<A>.mapItems(
 
         override fun loadNextItems() {
             source.loadNextItems()
+        }
+
+        override fun restoreFromIndex(firstIndex: Int) {
+            source.restoreFromIndex(firstIndex)
         }
     }
 }

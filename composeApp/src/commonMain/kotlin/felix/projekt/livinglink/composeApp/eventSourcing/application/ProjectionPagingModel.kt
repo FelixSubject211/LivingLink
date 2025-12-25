@@ -38,6 +38,7 @@ class ProjectionPagingModel<T>(
             initialValue = PagingModel.State.Loading(0.0f)
         )
 
+    private var restoredIndex: Int? = null
     private var offset: Int = 0
     private var pageJob: Job? = null
 
@@ -69,5 +70,15 @@ class ProjectionPagingModel<T>(
                 }
             }
         }
+    }
+
+    override fun restoreFromIndex(firstIndex: Int) {
+        if (restoredIndex != null) {
+            return
+        }
+
+        restoredIndex = firstIndex
+        offset = firstIndex
+        loadNextItems()
     }
 }

@@ -4,12 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import felix.projekt.livinglink.composeApp.core.domain.PagingModel
 import kotlinx.coroutines.flow.distinctUntilChanged
 
+@Suppress("FrequentlyChangingValue")
 @Composable
 fun <T> PagingLazyColumn(
     pagingModel: PagingModel<T>?,
@@ -37,7 +39,16 @@ fun <T> PagingLazyColumn(
         return
     }
 
-    val listState = rememberLazyListState()
+    val listState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
+
+    LaunchedEffect(listState, pagingModel) {
+        pagingModel.restoreFromIndex(
+            listState.firstVisibleItemIndex
+        )
+    }
+
     val pagingState by pagingModel.state.collectAsState(
         initial = PagingModel.State.Loading(0.0F)
     )

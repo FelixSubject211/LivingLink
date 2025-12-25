@@ -1,6 +1,8 @@
 package felix.projekt.livinglink.composeApp.ui.navigation
 
 import NavigationLocalizables
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Icon
@@ -11,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -46,7 +49,11 @@ fun GroupWithTabs(
             startDestination = Route.ShoppingListTabRoute(groupId),
             modifier = Modifier
                 .weight(1f)
-                .fillMaxSize()
+                .fillMaxSize(),
+            enterTransition = { EnterTransition.None },
+            exitTransition = { ExitTransition.None },
+            popEnterTransition = { EnterTransition.None },
+            popExitTransition = { ExitTransition.None }
         ) {
             composable<Route.ShoppingListTabRoute> { backStackEntry ->
                 val executionScope = rememberExecutionScope(backStackEntry)
@@ -88,7 +95,11 @@ fun GroupWithTabs(
                 selected = isSelected(Route.ShoppingListTabRoute(groupId)),
                 onClick = {
                     tabNavController.navigate(Route.ShoppingListTabRoute(groupId)) {
+                        popUpTo(tabNavController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 },
                 label = { Text(NavigationLocalizables.NavigationShoppingListTab()) },
@@ -105,7 +116,11 @@ fun GroupWithTabs(
                 selected = isSelected(Route.GroupTabRoute(groupId)),
                 onClick = {
                     tabNavController.navigate(Route.GroupTabRoute(groupId)) {
+                        popUpTo(tabNavController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
                         launchSingleTop = true
+                        restoreState = true
                     }
                 },
                 label = { Text(NavigationLocalizables.NavigationGroupTab()) },
