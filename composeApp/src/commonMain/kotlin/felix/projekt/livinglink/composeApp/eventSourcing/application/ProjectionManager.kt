@@ -46,8 +46,6 @@ class ProjectionManager<TState, TTopic : EventTopic>(
             appliedEventCount = projectionStore.appliedEventCount()
 
             replayMissingEvents()
-
-            handleBatch(EventBatch.NoChange)
         }
         .onEach { batch ->
             handleBatch(batch)
@@ -71,10 +69,11 @@ class ProjectionManager<TState, TTopic : EventTopic>(
                 limit = AppConfig.eventSourcingEventBatchSize
             )
             if (missing.isEmpty()) {
+                applyEvents(events = emptyList(), loadingProgress = null)
                 break
             }
 
-            applyEvents(missing, 0.0F)
+            applyEvents(events = missing, loadingProgress = 0.0F)
         }
 
         isReplaying.value = false
@@ -144,6 +143,7 @@ class ProjectionManager<TState, TTopic : EventTopic>(
         return ProjectionPagingModel(
             store = projectionStore,
             runner = runner,
+            isReplaying = isReplaying,
             scope = scope
         )
     }

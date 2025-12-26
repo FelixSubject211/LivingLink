@@ -17,19 +17,28 @@ import kotlinx.coroutines.launch
 class ProjectionPagingModel<T>(
     private val store: ProjectionStore<T>,
     private val runner: Flow<*>,
+    private val isReplaying: Flow<Boolean>,
     private val scope: CoroutineScope,
     private val pageSize: Int = 100
 ) : PagingModel<T> {
-
     private val internalState = MutableStateFlow<PagingModel.State<T>>(
         PagingModel.State.Loading(progress = 0.0f)
     )
+
+    private val internalStateLoadingAware = internalState
+        .combine(isReplaying) { pagingState, isReplaying ->
+            if (isReplaying) {
+                PagingModel.State.Loading(0.0F)
+            } else {
+                pagingState
+            }
+        }
 
     override val state: StateFlow<PagingModel.State<T>> = runner
         .onStart {
             loadNextItems()
         }
-        .combine(internalState) { _, pagingState ->
+        .combine(internalStateLoadingAware) { _, pagingState ->
             pagingState
         }
         .stateIn(

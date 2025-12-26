@@ -11,6 +11,7 @@ import dev.mokkery.verify.VerifyMode.Companion.exhaustiveOrder
 import dev.mokkery.verifyNoMoreCalls
 import dev.mokkery.verifySuspend
 import felix.projekt.common.lambdaCapture
+import felix.projekt.livinglink.server.eventSourcing.interfaces.DeleteEventsService
 import felix.projekt.livinglink.server.groups.application.RemoveUserFromGroupsDefaultService
 import felix.projekt.livinglink.server.groups.domain.Group
 import felix.projekt.livinglink.server.groups.domain.GroupRepository
@@ -24,6 +25,7 @@ import kotlin.test.assertIs
 class RemoveUserFromGroupsDefaultServiceTest {
     private lateinit var mockGroupRepository: GroupRepository
     private lateinit var mockGroupVersionCache: GroupVersionCache
+    private lateinit var mockDeleteEventsService: DeleteEventsService
     private lateinit var sut: RemoveUserFromGroupsDefaultService
 
     private val group1 = Group(
@@ -49,9 +51,11 @@ class RemoveUserFromGroupsDefaultServiceTest {
     fun setup() {
         mockGroupRepository = mock(mode = MockMode.autofill)
         mockGroupVersionCache = mock(mode = MockMode.autofill)
+        mockDeleteEventsService = mock(mode = MockMode.autofill)
         sut = RemoveUserFromGroupsDefaultService(
             groupRepository = mockGroupRepository,
             groupVersionCache = mockGroupVersionCache,
+            deleteEventsService = mockDeleteEventsService
         )
     }
 
@@ -74,6 +78,7 @@ class RemoveUserFromGroupsDefaultServiceTest {
         } returns GroupRepository.UpdateResult(entity = updatedGroup1, response = Unit)
 
         everySuspend { mockGroupRepository.deleteGroup(group2.id) } returns Unit
+        everySuspend { mockDeleteEventsService(group2.id) } returns Unit
 
         // Act
         sut.invoke(userId)
@@ -100,9 +105,14 @@ class RemoveUserFromGroupsDefaultServiceTest {
                 version = updatedGroup1.version,
             )
             mockGroupRepository.deleteGroup(group2.id)
+            mockDeleteEventsService(group2.id)
             mockGroupVersionCache.deleteGroupVersions(userId)
         }
 
-        verifyNoMoreCalls(mockGroupRepository, mockGroupVersionCache)
+        verifyNoMoreCalls(
+            mockGroupRepository,
+            mockGroupVersionCache,
+            mockDeleteEventsService
+        )
     }
 }

@@ -23,5 +23,7 @@ interface EventSourcingRepository {
         topic: String
     ): Long
 
+    suspend fun deleteGroupEvents(groupId: String)
+
     fun close()
 }

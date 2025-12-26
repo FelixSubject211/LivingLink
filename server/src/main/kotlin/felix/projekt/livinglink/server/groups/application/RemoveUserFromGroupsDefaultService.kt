@@ -1,18 +1,21 @@
 package felix.projekt.livinglink.server.groups.application
 
+import felix.projekt.livinglink.server.eventSourcing.interfaces.DeleteEventsService
 import felix.projekt.livinglink.server.groups.domain.GroupRepository
 import felix.projekt.livinglink.server.groups.domain.GroupVersionCache
 import felix.projekt.livinglink.server.groups.interfaces.RemoveUserFromGroupsService
 
 class RemoveUserFromGroupsDefaultService(
     private val groupRepository: GroupRepository,
-    private val groupVersionCache: GroupVersionCache
+    private val groupVersionCache: GroupVersionCache,
+    private val deleteEventsService: DeleteEventsService
 ) : RemoveUserFromGroupsService {
     override suspend fun invoke(userId: String) {
         val allGroups = groupRepository.getGroupsForMember(userId)
         allGroups.values.forEach { group ->
             if (group.isSingleMember(userId)) {
                 groupRepository.deleteGroup(group.id)
+                deleteEventsService(group.id)
             } else {
                 val result = groupRepository.updateWithOptimisticLocking(group.id) { currentGroup ->
                     GroupRepository.UpdateOperationResult.Updated(

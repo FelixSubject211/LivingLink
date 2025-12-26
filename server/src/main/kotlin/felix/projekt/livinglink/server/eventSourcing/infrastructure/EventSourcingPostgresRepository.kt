@@ -143,6 +143,40 @@ class EventSourcingPostgresRepository(
         }
     }
 
+    override suspend fun deleteGroupEvents(groupId: String) {
+        withConnection { connection ->
+            connection.autoCommit = false
+            try {
+                connection.prepareStatement(
+                    """
+                    DELETE FROM event_sourcing_events
+                    WHERE group_id = ?
+                    """.trimIndent()
+                ).use { statement ->
+                    statement.setString(1, groupId)
+                    statement.executeUpdate()
+                }
+
+                connection.prepareStatement(
+                    """
+                    DELETE FROM event_sourcing_topic_counters
+                    WHERE group_id = ?
+                    """.trimIndent()
+                ).use { statement ->
+                    statement.setString(1, groupId)
+                    statement.executeUpdate()
+                }
+
+                connection.commit()
+            } catch (e: Throwable) {
+                connection.rollback()
+                throw e
+            } finally {
+                connection.autoCommit = true
+            }
+        }
+    }
+
     override fun close() {
         source.close()
     }
