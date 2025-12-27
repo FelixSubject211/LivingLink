@@ -49,7 +49,7 @@ FROM projection_meta
 WHERE projectionId = ? AND groupId = ? AND topic = ?;
 
 selectAppliedEventCount:
-SELECT lastEventId
+SELECT appliedEventCount
 FROM projection_meta
 WHERE projectionId = ? AND groupId = ? AND topic = ?;
 

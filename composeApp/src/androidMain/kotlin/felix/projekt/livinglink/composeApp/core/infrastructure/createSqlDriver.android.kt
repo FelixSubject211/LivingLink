@@ -9,14 +9,22 @@ import felix.projekt.livinglink.composeApp.core.Database
 
 actual fun createSqlDriver(): SqlDriver {
     val context: Context = AppContext.context
+
     return AndroidSqliteDriver(
         schema = Database.Schema,
         context = context,
         name = "database.db",
         callback = object : AndroidSqliteDriver.Callback(Database.Schema) {
-            override fun onOpen(db: SupportSQLiteDatabase) {
-                db.query("PRAGMA journal_mode=WAL;").use { cursor -> }
-                db.execSQL("PRAGMA synchronous=NORMAL;")
+            override fun onConfigure(db: SupportSQLiteDatabase) {
+                super.onConfigure(db)
+                setPragma(db, "JOURNAL_MODE = WAL")
+                setPragma(db, "SYNCHRONOUS = 2")
+            }
+
+            private fun setPragma( db: SupportSQLiteDatabase, pragma: String) {
+                val cursor = db.query("PRAGMA $pragma")
+                cursor.moveToFirst()
+                cursor.close()
             }
         }
     )
