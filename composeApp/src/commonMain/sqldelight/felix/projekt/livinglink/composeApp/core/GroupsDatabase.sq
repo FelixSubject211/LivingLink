@@ -1,0 +1,18 @@
+CREATE TABLE groups (
+    id TEXT NOT NULL PRIMARY KEY,
+    groupJson TEXT NOT NULL
+);
+
+selectGroups:
+SELECT *
+FROM groups;
+
+upsertGroup:
+INSERT OR REPLACE INTO groups(
+    id,
+    groupJson
+)
+VALUES (?, ?);
+
+deleteAllGroups:
+DELETE FROM groups;

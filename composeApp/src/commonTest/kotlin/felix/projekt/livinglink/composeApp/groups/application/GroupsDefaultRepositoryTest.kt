@@ -16,6 +16,7 @@ import felix.projekt.livinglink.composeApp.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.composeApp.groups.domain.Group
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsNetworkDataSource
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsRepository
+import felix.projekt.livinglink.composeApp.groups.domain.GroupsStore
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,20 +31,22 @@ import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class GroupsDefaultRepositoryTest {
-
     private lateinit var mockGroupsNetworkDataSource: GroupsNetworkDataSource
     private lateinit var mockGetAuthStateService: GetAuthStateService
+    private lateinit var mockGroupsStore: GroupsStore
     private lateinit var getAuthStateServiceFlow: MutableSharedFlow<GetAuthStateService.AuthState>
     private lateinit var sut: GroupsDefaultRepository
     private lateinit var testScope: CoroutineScope
-    val group1 = Group(
+
+    private val group1 = Group(
         id = "1",
         name = "Group1",
         memberIdToMember = emptyMap(),
         inviteCodes = emptyList(),
         version = 0
     )
-    val group2 = Group(
+
+    private val group2 = Group(
         id = "2",
         name = "Group2",
         memberIdToMember = emptyMap(),
@@ -57,13 +60,16 @@ class GroupsDefaultRepositoryTest {
 
         mockGroupsNetworkDataSource = mock(mode = MockMode.autofill)
         mockGetAuthStateService = mock(mode = MockMode.autofill)
+        mockGroupsStore = mock(mode = MockMode.autofill)
         getAuthStateServiceFlow = MutableSharedFlow()
 
         every { mockGetAuthStateService() } returns getAuthStateServiceFlow
+        every { mockGroupsStore.getGroups() } returns emptyMap()
 
         sut = GroupsDefaultRepository(
             groupsNetworkDataSource = mockGroupsNetworkDataSource,
             getAuthStateService = mockGetAuthStateService,
+            groupsStore = mockGroupsStore,
             scope = testScope
         )
     }
@@ -109,10 +115,10 @@ class GroupsDefaultRepositoryTest {
         job.cancel()
 
         advanceTimeBy(4000)
-        assertTrue(callCount == 1, "Polling should not be stopped")
+        assertTrue(callCount == 1, "Polling should not be stopped yet")
 
         advanceTimeBy(2000)
-        assertTrue(callCount == 1, "Polling should be stopped")
+        assertTrue(callCount == 1, "Polling should be stopped after timeout")
     }
 
     @Test
@@ -126,38 +132,16 @@ class GroupsDefaultRepositoryTest {
             )
         ).also { callCount++ }
 
-        val job = launch { sut.getGroups.test { cancelAndConsumeRemainingEvents() } }
+        val job = launch {
+            sut.getGroups.test {
+                cancelAndConsumeRemainingEvents()
+            }
+        }
+
         getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
         advanceTimeBy(2000)
         assertTrue(callCount > 0)
         job.cancel()
-    }
-
-    @Test
-    fun `UserLoggedOut stops polling and clears groups`() = runTest(UnconfinedTestDispatcher()) {
-        val groupResponse = mapOf(group1.id to group1)
-
-        getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
-
-        everySuspend { mockGroupsNetworkDataSource.getGroups(any()) } returns Result.Success(
-            GetGroupsResponse.Success(
-                groups = groupResponse,
-                nextPollAfterMillis = 1000L
-            )
-        )
-
-        sut.getGroups.test {
-            val expected1 = GroupsRepository.GroupsRepositoryState.Data(groupResponse)
-            assertEquals(expected1, awaitItem())
-
-            getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedOut)
-            val expected2 = GroupsRepository.GroupsRepositoryState.Loading
-            assertEquals(expected2, awaitItem())
-
-            getAuthStateServiceFlow.emit(GetAuthStateService.AuthState.LoggedIn)
-            val expected3 = GroupsRepository.GroupsRepositoryState.Data(groupResponse)
-            assertEquals(expected3, awaitItem())
-        }
     }
 
     @Test

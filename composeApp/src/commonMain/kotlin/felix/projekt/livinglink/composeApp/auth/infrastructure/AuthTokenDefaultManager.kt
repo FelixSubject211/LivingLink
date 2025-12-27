@@ -10,6 +10,7 @@ import felix.projekt.livinglink.composeApp.core.domain.Result
 import felix.projekt.livinglink.shared.json
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.auth.Auth
 import io.ktor.client.plugins.auth.authProvider
 import io.ktor.client.plugins.auth.providers.BearerAuthProvider
@@ -60,6 +61,11 @@ class AuthTokenDefaultManager(
     override val client: HttpClient by lazy {
         HttpClient {
             install(ContentNegotiation) { json(json) }
+            install(HttpTimeout) {
+                connectTimeoutMillis = 2_000
+                requestTimeoutMillis = 4_000
+                socketTimeoutMillis = 10_000
+            }
             install(Auth) {
                 bearer {
                     loadTokens { _bearerTokens.value }

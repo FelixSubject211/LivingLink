@@ -11,6 +11,7 @@ import felix.projekt.livinglink.composeApp.groups.domain.GetGroupsResponse
 import felix.projekt.livinglink.composeApp.groups.domain.Group
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsNetworkDataSource
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsRepository
+import felix.projekt.livinglink.composeApp.groups.domain.GroupsStore
 import felix.projekt.livinglink.composeApp.groups.domain.JoinGroupResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -32,12 +33,13 @@ import kotlin.concurrent.atomics.ExperimentalAtomicApi
 class GroupsDefaultRepository(
     private val groupsNetworkDataSource: GroupsNetworkDataSource,
     private val getAuthStateService: GetAuthStateService,
+    private val groupsStore: GroupsStore,
     private val scope: CoroutineScope
 ) : GroupsRepository {
     private val manualUpdateChannel = Channel<ManualUpdateItem>(Channel.UNLIMITED)
     private val logoutChannel = Channel<Unit>(Channel.UNLIMITED)
     private val loginChannel = Channel<Unit>(Channel.UNLIMITED)
-    private var currentGroups = MutableStateFlow<Map<String, Group>>(emptyMap())
+    private var currentGroups = MutableStateFlow(groupsStore.getGroups())
 
     sealed class ManualUpdateItem {
         data class AddGroup(val group: Group) : ManualUpdateItem()
@@ -118,6 +120,9 @@ class GroupsDefaultRepository(
 
     @OptIn(ExperimentalCoroutinesApi::class, ExperimentalAtomicApi::class)
     private fun pollGroups(): Flow<Map<String, Group>?> = flow {
+        if (currentGroups.value.isNotEmpty()) {
+            emit(currentGroups.value)
+        }
         while (scope.isActive) {
             val currentGroupVersions = currentGroups.value.mapValues { it.value.version }
             val result = groupsNetworkDataSource.getGroups(currentGroupVersions)
@@ -125,7 +130,7 @@ class GroupsDefaultRepository(
                 is Result.Success -> {
                     when (val data = result.data) {
                         is GetGroupsResponse.Success -> {
-                            currentGroups.update { data.groups }
+                            updateCurrentGroups(data.groups)
                             emit(data.groups)
                             data.nextPollAfterMillis
                         }
@@ -137,12 +142,15 @@ class GroupsDefaultRepository(
                     }
                 }
 
-                is Result.Error -> AppConfig.groupsPollFallbackMills
+                is Result.Error -> {
+                    AppConfig.groupsPollFallbackMills
+                }
             }
             select {
                 onTimeout(nextPollDelay) {}
                 logoutChannel.onReceive {
                     currentGroups.update { emptyMap() }
+                    groupsStore.clear()
                     emit(null)
                     select {
                         loginChannel.onReceive {}
@@ -159,12 +167,18 @@ class GroupsDefaultRepository(
     private fun handleManualUpdate(item: ManualUpdateItem) {
         when (item) {
             is ManualUpdateItem.AddGroup -> {
-                currentGroups.update { current ->
-                    current + (item.group.id to item.group)
-                }
+                val updatedGroups = currentGroups.value + (item.group.id to item.group)
+                updateCurrentGroups(updatedGroups)
             }
 
-            is ManualUpdateItem.Update -> {}
+            is ManualUpdateItem.Update -> {
+                updateCurrentGroups(currentGroups.value)
+            }
         }
+    }
+
+    private fun updateCurrentGroups(groups: Map<String, Group>) {
+        currentGroups.update { groups }
+        groupsStore.saveGroups(groups)
     }
 }

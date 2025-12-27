@@ -141,7 +141,6 @@ class OnlineEventSynchronizer(
         )
     }
 
-
     private suspend fun handlePollResult(
         subscription: TopicSubscription<*>,
         result: Result<PollEventsResponse, NetworkError>
@@ -174,7 +173,7 @@ class OnlineEventSynchronizer(
             }
 
             is Result.Error -> {
-                null to AppConfig.eventSourcingPollFallbackMills
+                EventBatch.NoChange to AppConfig.eventSourcingPollFallbackMills
             }
         }
     }

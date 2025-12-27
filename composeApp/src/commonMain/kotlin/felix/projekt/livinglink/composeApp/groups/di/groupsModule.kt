@@ -10,7 +10,9 @@ import felix.projekt.livinglink.composeApp.groups.application.GetGroupsDefaultUs
 import felix.projekt.livinglink.composeApp.groups.application.GroupsDefaultRepository
 import felix.projekt.livinglink.composeApp.groups.application.JoinGroupWithInviteCodeDefaultUseCase
 import felix.projekt.livinglink.composeApp.groups.domain.GroupsRepository
+import felix.projekt.livinglink.composeApp.groups.domain.GroupsStore
 import felix.projekt.livinglink.composeApp.groups.infrastructure.GroupsNetworkDefaultDataSource
+import felix.projekt.livinglink.composeApp.groups.infrastructure.SqlDelightGroupsStore
 import felix.projekt.livinglink.composeApp.groups.interfaces.CreateGroupUseCase
 import felix.projekt.livinglink.composeApp.groups.interfaces.CreateInviteCodeUseCase
 import felix.projekt.livinglink.composeApp.groups.interfaces.DeleteInviteCodeUseCase
@@ -23,12 +25,17 @@ import org.koin.dsl.bind
 import org.koin.dsl.module
 
 val groupsModule = module {
+    single<GroupsStore> {
+        SqlDelightGroupsStore(database = get())
+    }
+
     single<GroupsRepository>(createdAtStart = true) {
         GroupsDefaultRepository(
             groupsNetworkDataSource = GroupsNetworkDefaultDataSource(
                 httpClient = get<AuthTokenManager>().client
             ),
             getAuthStateService = get(),
+            groupsStore = get(),
             scope = get()
         )
     }

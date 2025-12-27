@@ -18,7 +18,7 @@ actual fun createSqlDriver(): SqlDriver {
             override fun onConfigure(db: SupportSQLiteDatabase) {
                 super.onConfigure(db)
                 setPragma(db, "JOURNAL_MODE = WAL")
-                setPragma(db, "SYNCHRONOUS = 2")
+                setPragma(db, "SYNCHRONOUS = 1")
             }
 
             private fun setPragma( db: SupportSQLiteDatabase, pragma: String) {
