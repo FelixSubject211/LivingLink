@@ -177,6 +177,52 @@ class EventSourcingPostgresRepository(
         }
     }
 
+    override suspend fun anonymizeUserEvents(
+        groupId: String,
+        userId: String,
+        anonymizedUserId: String
+    ) {
+        withConnection { connection ->
+            connection.autoCommit = false
+            try {
+                connection.prepareStatement(
+                    """
+                UPDATE event_sourcing_events
+                SET created_by = ?
+                WHERE group_id = ?
+                  AND created_by = ?
+                """.trimIndent()
+                ).use { stmt ->
+                    stmt.setString(1, anonymizedUserId)
+                    stmt.setString(2, groupId)
+                    stmt.setString(3, userId)
+                    stmt.executeUpdate()
+                }
+
+                connection.prepareStatement(
+                    """
+                UPDATE event_sourcing_events
+                SET payload = erase_personal_data(payload)
+                WHERE group_id = ?
+                  AND created_by = ?
+                """.trimIndent()
+                ).use { stmt ->
+                    stmt.setString(1, groupId)
+                    stmt.setString(2, anonymizedUserId)
+                    stmt.executeUpdate()
+                }
+
+                connection.commit()
+            } catch (e: Throwable) {
+                connection.rollback()
+                throw e
+            } finally {
+                connection.autoCommit = true
+            }
+        }
+    }
+
+
     override fun close() {
         source.close()
     }
@@ -264,6 +310,45 @@ class EventSourcingPostgresRepository(
                     """
                     CREATE INDEX IF NOT EXISTS event_sourcing_events_group_topic_created_idx
                     ON event_sourcing_events (group_id, topic, event_id)
+                    """.trimIndent()
+                )
+                statement.execute(
+                    """
+                    CREATE OR REPLACE FUNCTION erase_personal_data(input jsonb)
+                    RETURNS jsonb
+                    LANGUAGE sql
+                    STABLE
+                    AS $$
+                        SELECT
+                            CASE
+                                WHEN jsonb_typeof(input) = 'object'
+                                     AND input ? 'type'
+                                     AND input->>'type' = 'Present'
+                                THEN
+                                    jsonb_build_object('type', 'Erased')
+
+                                WHEN jsonb_typeof(input) = 'object'
+                                THEN
+                                    (
+                                        SELECT jsonb_object_agg(
+                                            key,
+                                            erase_personal_data(value)
+                                        )
+                                        FROM jsonb_each(input)
+                                    )
+
+                                WHEN jsonb_typeof(input) = 'array'
+                                THEN
+                                    (
+                                        SELECT jsonb_agg(
+                                            erase_personal_data(value)
+                                        )
+                                        FROM jsonb_array_elements(input)
+                                    )
+                                ELSE input
+                            END;
+                    $$;
+
                     """.trimIndent()
                 )
             }

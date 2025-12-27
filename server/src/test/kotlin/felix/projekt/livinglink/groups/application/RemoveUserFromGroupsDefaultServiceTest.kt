@@ -11,6 +11,7 @@ import dev.mokkery.verify.VerifyMode.Companion.exhaustiveOrder
 import dev.mokkery.verifyNoMoreCalls
 import dev.mokkery.verifySuspend
 import felix.projekt.common.lambdaCapture
+import felix.projekt.livinglink.server.eventSourcing.interfaces.AnonymizeUserEventsService
 import felix.projekt.livinglink.server.eventSourcing.interfaces.DeleteEventsService
 import felix.projekt.livinglink.server.groups.application.RemoveUserFromGroupsDefaultService
 import felix.projekt.livinglink.server.groups.domain.Group
@@ -26,6 +27,7 @@ class RemoveUserFromGroupsDefaultServiceTest {
     private lateinit var mockGroupRepository: GroupRepository
     private lateinit var mockGroupVersionCache: GroupVersionCache
     private lateinit var mockDeleteEventsService: DeleteEventsService
+    private lateinit var mockAnonymizeUserEventsService: AnonymizeUserEventsService
     private lateinit var sut: RemoveUserFromGroupsDefaultService
 
     private val group1 = Group(
@@ -52,10 +54,12 @@ class RemoveUserFromGroupsDefaultServiceTest {
         mockGroupRepository = mock(mode = MockMode.autofill)
         mockGroupVersionCache = mock(mode = MockMode.autofill)
         mockDeleteEventsService = mock(mode = MockMode.autofill)
+        mockAnonymizeUserEventsService = mock(mode = MockMode.autofill)
         sut = RemoveUserFromGroupsDefaultService(
             groupRepository = mockGroupRepository,
             groupVersionCache = mockGroupVersionCache,
-            deleteEventsService = mockDeleteEventsService
+            deleteEventsService = mockDeleteEventsService,
+            anonymizeUserEventsService = mockAnonymizeUserEventsService
         )
     }
 

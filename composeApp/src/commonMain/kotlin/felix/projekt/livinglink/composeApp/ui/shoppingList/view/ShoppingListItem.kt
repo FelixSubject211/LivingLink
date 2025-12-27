@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.composeApp.ui.shoppingList.view
 
+import ShoppingListLocalizables
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -61,7 +62,7 @@ fun ShoppingListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = item.name,
+                text = item.name ?: ShoppingListLocalizables.DeletedContent(),
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,

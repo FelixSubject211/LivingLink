@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.composeApp.shoppingList.application
 
+import felix.projekt.livinglink.composeApp.core.domain.getOrNull
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Projector
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.TopicSubscription
@@ -26,7 +27,7 @@ fun shoppingListProjector(groupId: String): Projector<ShoppingListItem, Shopping
                         id = shoppingEvent.id,
                         state = ShoppingListItem(
                             id = shoppingEvent.id,
-                            name = shoppingEvent.name,
+                            name = shoppingEvent.name.getOrNull(),
                             isChecked = false
                         )
                     )

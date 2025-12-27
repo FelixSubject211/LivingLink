@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.composeApp.shoppingList.application
 
+import felix.projekt.livinglink.composeApp.core.domain.getOrNull
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.Aggregator
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.EventSourcingEvent
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.TopicSubscription
@@ -46,7 +47,7 @@ fun shoppingListItemHistoryAggregator(
                 val shoppingEvent = event.decode<ShoppingListEvent>()
                 val actionType = when (shoppingEvent) {
                     is ShoppingListEvent.ItemCreated -> {
-                        itemName = shoppingEvent.name
+                        itemName = shoppingEvent.name.getOrNull()
                         ShoppingListItemHistoryState.ShoppingListItemHistoryActionType.Created
                     }
 

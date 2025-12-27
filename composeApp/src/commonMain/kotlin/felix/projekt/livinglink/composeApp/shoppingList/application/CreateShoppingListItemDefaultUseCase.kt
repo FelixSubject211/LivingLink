@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.composeApp.shoppingList.application
 
+import felix.projekt.livinglink.composeApp.core.domain.PersonalData
 import felix.projekt.livinglink.composeApp.eventSourcing.interfaces.AppendEventService
 import felix.projekt.livinglink.composeApp.shoppingList.domain.ShoppingListEvent
 import felix.projekt.livinglink.composeApp.shoppingList.interfaces.CreateShoppingListItemUseCase
@@ -23,7 +24,7 @@ class CreateShoppingListItemDefaultUseCase(
             buildEvent = {
                 val event = ShoppingListEvent.ItemCreated(
                     id = Uuid.random().toString(),
-                    name = name
+                    name = PersonalData.Present(name)
                 )
 
                 AppendEventService.OperationResult.EmitEvent(

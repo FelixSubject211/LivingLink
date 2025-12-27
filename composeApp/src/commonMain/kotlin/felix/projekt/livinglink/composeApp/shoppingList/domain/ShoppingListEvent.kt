@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.composeApp.shoppingList.domain
 
+import felix.projekt.livinglink.composeApp.core.domain.PersonalData
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,7 +10,7 @@ sealed interface ShoppingListEvent {
     @SerialName("ItemCreated")
     data class ItemCreated(
         val id: String,
-        val name: String
+        val name: PersonalData<String>
     ) : ShoppingListEvent
 
     @Serializable

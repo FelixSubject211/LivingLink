@@ -9,7 +9,7 @@ data class ShoppingListState(
 ) {
     data class Item(
         val id: String,
-        val name: String,
+        val name: String?,
         val isChecked: Boolean
     )
 }

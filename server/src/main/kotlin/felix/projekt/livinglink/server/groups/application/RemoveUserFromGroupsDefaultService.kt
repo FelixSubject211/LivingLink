@@ -1,5 +1,6 @@
 package felix.projekt.livinglink.server.groups.application
 
+import felix.projekt.livinglink.server.eventSourcing.interfaces.AnonymizeUserEventsService
 import felix.projekt.livinglink.server.eventSourcing.interfaces.DeleteEventsService
 import felix.projekt.livinglink.server.groups.domain.GroupRepository
 import felix.projekt.livinglink.server.groups.domain.GroupVersionCache
@@ -8,7 +9,8 @@ import felix.projekt.livinglink.server.groups.interfaces.RemoveUserFromGroupsSer
 class RemoveUserFromGroupsDefaultService(
     private val groupRepository: GroupRepository,
     private val groupVersionCache: GroupVersionCache,
-    private val deleteEventsService: DeleteEventsService
+    private val deleteEventsService: DeleteEventsService,
+    private val anonymizeUserEventsService: AnonymizeUserEventsService
 ) : RemoveUserFromGroupsService {
     override suspend fun invoke(userId: String) {
         val allGroups = groupRepository.getGroupsForMember(userId)
@@ -23,6 +25,8 @@ class RemoveUserFromGroupsDefaultService(
                         response = Unit
                     )
                 }
+
+                anonymizeUserEventsService(groupId = group.id, userId = userId)
 
                 result.entity?.memberIdToMember?.keys?.forEach { memberId ->
                     groupVersionCache.addOrUpdateGroupVersionIfUserExists(

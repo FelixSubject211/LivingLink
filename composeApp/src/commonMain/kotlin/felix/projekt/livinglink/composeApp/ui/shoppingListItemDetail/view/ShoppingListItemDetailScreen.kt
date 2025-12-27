@@ -65,7 +65,7 @@ fun ShoppingListItemDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(state.itemName ?: "") },
+                title = { Text(state.itemName ?: ShoppingListItemDetailLocalizables.DeletedContent()) },
                 navigationIcon = {
                     BackNavigationIcon(
                         drawableRes = Res.drawable.arrow_back_36px,

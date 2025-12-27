@@ -25,5 +25,11 @@ interface EventSourcingRepository {
 
     suspend fun deleteGroupEvents(groupId: String)
 
+    suspend fun anonymizeUserEvents(
+        groupId: String,
+        userId: String,
+        anonymizedUserId: String
+    )
+
     fun close()
 }

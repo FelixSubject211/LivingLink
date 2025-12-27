@@ -33,7 +33,7 @@ import livinglink.composeapp.generated.resources.arrow_back_36px
 fun ShoppingListScreen(
     viewModel: ViewModel<ShoppingListState, ShoppingListAction, ShoppingListSideEffect>,
     onNavigateBack: () -> Unit,
-    onNavigateToItemDetail: (itemId: String, itemName: String) -> Unit
+    onNavigateToItemDetail: (itemId: String, itemName: String?) -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
