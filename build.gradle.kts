@@ -1,21 +1,10 @@
+
 plugins {
-    alias(libs.plugins.kotlin.jvm)
-    application
-}
-
-group = "com.felix"
-version = "1.0.0-SNAPSHOT"
-
-application {
-    mainClass = "com.felix.LivingLinkMcpMainKt"
-}
-
-kotlin {
-    jvmToolchain(21)
-}
-
-dependencies {
-    implementation(libs.mcp.kotlin.sdk.server)
-    implementation(libs.logback.classic)
-    testImplementation(libs.kotlin.test)
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.kotlinMultiplatform) apply false
+    alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.androidMultiplatformLibrary) apply false
+    alias(libs.plugins.composeMultiplatform) apply false
+    alias(libs.plugins.composeCompiler) apply false
 }

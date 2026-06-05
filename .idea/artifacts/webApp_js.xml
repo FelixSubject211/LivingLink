@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="webApp-js">
+    <output-path>$PROJECT_DIR$/app/webApp/build/libs</output-path>
+    <root id="archive" name="webApp-js.jar">
+      <element id="module-output" name="livinglink.app.webApp.jsMain" />
+    </root>
+  </artifact>
+</component>

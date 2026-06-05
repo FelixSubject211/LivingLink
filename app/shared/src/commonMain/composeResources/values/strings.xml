@@ -1,0 +1,15 @@
+<resources>
+    <string name="login_title">LivingLink</string>
+    <string name="login_api_key_placeholder">API key</string>
+    <string name="login_connect_button">Connect</string>
+
+    <string name="login_error_title">Error</string>
+    <string name="login_error_invalid_key">Invalid Key</string>
+    <string name="login_error_network">Network Error</string>
+
+    <string name="login_error_confirm">Ok</string>
+
+    <string name="home_title">LivingLink</string>
+    <string name="home_message">You are logged in.</string>
+    <string name="home_logout_button">Logout</string>
+</resources>

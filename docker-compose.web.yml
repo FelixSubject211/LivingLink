@@ -1,0 +1,9 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: livinglink-web
+    restart: unless-stopped
+    expose:
+      - "80"

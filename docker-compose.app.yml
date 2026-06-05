@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    container_name: livinglink-app
+    restart: unless-stopped
+    expose:
+      - "3000"
+      - "3001"
+    env_file:
+      - .env
+    depends_on:
+      - mongo

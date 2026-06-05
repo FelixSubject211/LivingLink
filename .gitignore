@@ -1,5 +1,16 @@
 # Project exclude paths
-/.gradle/
-/build/
-/build/classes/
-/build/classes/kotlin/main/local.properties
+.gradle/
+build/
+**/build/
+**/build/classes/
+**/build/classes/kotlin/main/
+
+local.properties
+**/local.properties
+
+.kotlin/
+**/.kotlin/
+**/.klib/
+
+.env
+vsc.xml

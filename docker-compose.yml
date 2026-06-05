@@ -1,0 +1,27 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: livinglink-mongo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: livinglink
+    volumes:
+      - livinglink-mongo-data:/data/db
+
+  mongo-express:
+    image: mongo-express:1.0.2
+    container_name: livinglink-mongo-express
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_SERVER: mongo
+      ME_CONFIG_MONGODB_PORT: 27017
+      ME_CONFIG_BASICAUTH: "false"
+    depends_on:
+      - mongo
+
+volumes:
+  livinglink-mongo-data:
