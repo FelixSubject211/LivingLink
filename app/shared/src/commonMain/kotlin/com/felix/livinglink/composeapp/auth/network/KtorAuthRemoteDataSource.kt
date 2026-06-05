@@ -27,7 +27,11 @@ class KtorAuthRemoteDataSource(
                     }.body()
 
             when (response) {
-                is LoginResponse.Success -> LoginResult.Success
+                is LoginResponse.Success -> LoginResult.Success(
+                    apiKey = apiKey,
+                    userId = response.userId,
+                    username = response.username,
+                )
                 is LoginResponse.InvalidKey -> LoginResult.InvalidKey
             }
         } catch (_: Exception) {
