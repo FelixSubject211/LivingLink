@@ -8,7 +8,9 @@ import com.felix.livinglink.server.calendar.delivery.mcp.dto.RecurrenceRuleMcpDt
 import com.felix.livinglink.server.calendar.delivery.mcp.dto.toMcpReferenceDto
 import com.felix.livinglink.server.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.server.core.delivery.mcp.dsl.success
+import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
@@ -16,6 +18,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpToolRegistrar::class])
 class AddCalendarEventTool(
     private val addCalendarEventUseCase: AddCalendarEventUseCase,
+    private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -63,10 +66,15 @@ class AddCalendarEventTool(
                 )
 
             handle {
+                val group =
+                    getActiveMcpGroupUseCase(userId)
+                        ?: return@handle toolError("No group is available for this user.")
+
                 val event =
                     addCalendarEventUseCase(
                         AddCalendarEventUseCase.Input(
                             byUserId = userId,
+                            groupId = group.id,
                             title = title(),
                             description = description(),
                             span = span().toDomain(),

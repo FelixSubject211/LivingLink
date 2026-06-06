@@ -5,7 +5,6 @@ import com.felix.livinglink.server.calendar.domain.EventCategory
 import com.felix.livinglink.server.calendar.domain.EventSpan
 import com.felix.livinglink.server.calendar.domain.Participant
 import com.felix.livinglink.server.calendar.domain.RecurrenceRule
-import com.felix.livinglink.server.calendar.infrastructure.mongo.MongoCalendarEventDocument
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -25,6 +24,7 @@ class MongoCalendarEventDocumentTest {
         val event =
             calendarEvent(
                 id = "id-1",
+                groupId = "group-1",
                 title = "Dinner",
                 description = "with the in-laws",
                 createdByUserId = "creator",
@@ -56,6 +56,7 @@ class MongoCalendarEventDocumentTest {
         val expected =
             MongoCalendarEventDocument(
                 id = "id-1",
+                groupId = "group-1",
                 title = "Dinner",
                 description = "with the in-laws",
                 createdByUserId = "creator",
@@ -255,6 +256,7 @@ class MongoCalendarEventDocumentTest {
         val event =
             calendarEvent(
                 id = "id-1",
+                groupId = "group-1",
                 title = "Weekly sync",
                 description = "team standup",
                 createdByUserId = "creator",
@@ -308,6 +310,7 @@ class MongoCalendarEventDocumentTest {
         val event =
             calendarEvent(
                 id = "id-2",
+                groupId = "group-1",
                 title = "Holiday",
                 description = null,
                 span =
@@ -353,6 +356,7 @@ class MongoCalendarEventDocumentTest {
 
     private fun calendarEvent(
         id: String = "id-1",
+        groupId: String = "group-1",
         title: String = "event-$id",
         description: String? = null,
         createdByUserId: String = "creator",
@@ -366,6 +370,7 @@ class MongoCalendarEventDocumentTest {
     ): CalendarEvent =
         CalendarEvent(
             id = id,
+            groupId = groupId,
             title = title,
             description = description,
             createdByUserId = createdByUserId,

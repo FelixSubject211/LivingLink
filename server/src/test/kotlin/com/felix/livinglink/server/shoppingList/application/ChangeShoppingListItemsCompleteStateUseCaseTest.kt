@@ -3,29 +3,37 @@ package com.felix.livinglink.server.shoppingList.application
 import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.core.domain.stubConflict
 import com.felix.livinglink.server.core.domain.stubDoesNotUpdate
-import com.felix.livinglink.server.core.domain.stubNotFound
 import com.felix.livinglink.server.core.domain.stubUpdates
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
 import com.felix.livinglink.server.shoppingList.domain.completionEvent
 import com.felix.livinglink.server.shoppingList.domain.shoppingListItem
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
+import dev.mokkery.everySuspend
+import dev.mokkery.matcher.any
 import dev.mokkery.mock
+import dev.mokkery.verify.VerifyMode.Companion.exactly
+import dev.mokkery.verifySuspend
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 class ChangeShoppingListItemsCompleteStateUseCaseTest {
     private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
+    private val requireGroupMembershipUseCase = mock<RequireGroupMembershipUseCase>()
     private val timeProvider = mock<TimeProvider>()
 
     private val useCase =
         ChangeShoppingListItemsCompleteStateUseCase(
             shoppingListItemRepository = shoppingListItemRepository,
+            requireGroupMembershipUseCase = requireGroupMembershipUseCase,
             timeProvider = timeProvider,
         )
 
@@ -34,6 +42,7 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     private val openItem =
         shoppingListItem(
             id = "id-1",
+            groupId = "group-1",
             createdAt = now - 1.days,
         )
 
@@ -48,8 +57,10 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `completed items land in changedItems`() =
         runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
             every { timeProvider() } returns now
 
+            everySuspend { shoppingListItemRepository.findById("id-1") } returns openItem
             shoppingListItemRepository.stubUpdates(
                 id = "id-1",
                 currentItem = openItem,
@@ -65,10 +76,8 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
                 useCase(
                     ChangeShoppingListItemsCompleteStateUseCase.Input(
                         byUserId = "user-1",
-                        idsToCompleteState =
-                            mapOf(
-                                "id-1" to true,
-                            ),
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to true),
                     ),
                 )
 
@@ -86,8 +95,10 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `uncompleted items land in changedItems`() =
         runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
             every { timeProvider() } returns now
 
+            everySuspend { shoppingListItemRepository.findById("id-1") } returns completedItem
             shoppingListItemRepository.stubUpdates(
                 id = "id-1",
                 currentItem = completedItem,
@@ -103,10 +114,8 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
                 useCase(
                     ChangeShoppingListItemsCompleteStateUseCase.Input(
                         byUserId = "user-1",
-                        idsToCompleteState =
-                            mapOf(
-                                "id-1" to false,
-                            ),
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to false),
                     ),
                 )
 
@@ -124,6 +133,9 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
     @Test
     fun `already completed items land in alreadyChangedItems`() =
         runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+
+            everySuspend { shoppingListItemRepository.findById("id-1") } returns completedItem
             shoppingListItemRepository.stubDoesNotUpdate(
                 id = "id-1",
                 currentItem = completedItem,
@@ -133,10 +145,8 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
                 useCase(
                     ChangeShoppingListItemsCompleteStateUseCase.Input(
                         byUserId = "user-1",
-                        idsToCompleteState =
-                            mapOf(
-                                "id-1" to true,
-                            ),
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to true),
                     ),
                 )
 
@@ -152,48 +162,18 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
         }
 
     @Test
-    fun `already uncompleted items land in alreadyChangedItems`() =
-        runTest {
-            shoppingListItemRepository.stubDoesNotUpdate(
-                id = "id-1",
-                currentItem = openItem,
-            )
-
-            val result =
-                useCase(
-                    ChangeShoppingListItemsCompleteStateUseCase.Input(
-                        byUserId = "user-1",
-                        idsToCompleteState =
-                            mapOf(
-                                "id-1" to false,
-                            ),
-                    ),
-                )
-
-            assertEquals(
-                ChangeShoppingListItemsCompleteStateUseCase.Output(
-                    changedItems = emptyList(),
-                    alreadyChangedItems = listOf(openItem),
-                    missingIds = emptyList(),
-                    conflictedIds = emptyList(),
-                ),
-                result,
-            )
-        }
-
-    @Test
     fun `missing items land in missingIds`() =
         runTest {
-            shoppingListItemRepository.stubNotFound<ShoppingListItem>(id = "id-1")
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+
+            everySuspend { shoppingListItemRepository.findById("id-1") } returns null
 
             val result =
                 useCase(
                     ChangeShoppingListItemsCompleteStateUseCase.Input(
                         byUserId = "user-1",
-                        idsToCompleteState =
-                            mapOf(
-                                "id-1" to true,
-                            ),
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to true),
                     ),
                 )
 
@@ -206,21 +186,64 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
                 ),
                 result,
             )
+
+            verifySuspend(exactly(0)) {
+                shoppingListItemRepository.updateWithOptimisticLocking<ShoppingListItem>(
+                    id = any(),
+                    modify = any(),
+                )
+            }
+        }
+
+    @Test
+    fun `items from another group land in missingIds and are never updated`() =
+        runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+
+            everySuspend { shoppingListItemRepository.findById("id-1") } returns
+                shoppingListItem(id = "id-1", groupId = "other-group")
+
+            val result =
+                useCase(
+                    ChangeShoppingListItemsCompleteStateUseCase.Input(
+                        byUserId = "user-1",
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to true),
+                    ),
+                )
+
+            assertEquals(
+                ChangeShoppingListItemsCompleteStateUseCase.Output(
+                    changedItems = emptyList(),
+                    alreadyChangedItems = emptyList(),
+                    missingIds = listOf("id-1"),
+                    conflictedIds = emptyList(),
+                ),
+                result,
+            )
+
+            verifySuspend(exactly(0)) {
+                shoppingListItemRepository.updateWithOptimisticLocking<ShoppingListItem>(
+                    id = any(),
+                    modify = any(),
+                )
+            }
         }
 
     @Test
     fun `conflicted items land in conflictedIds`() =
         runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+
+            everySuspend { shoppingListItemRepository.findById("id-1") } returns openItem
             shoppingListItemRepository.stubConflict<ShoppingListItem>(id = "id-1")
 
             val result =
                 useCase(
                     ChangeShoppingListItemsCompleteStateUseCase.Input(
                         byUserId = "user-1",
-                        idsToCompleteState =
-                            mapOf(
-                                "id-1" to true,
-                            ),
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to true),
                     ),
                 )
 
@@ -233,5 +256,30 @@ class ChangeShoppingListItemsCompleteStateUseCaseTest {
                 ),
                 result,
             )
+        }
+
+    @Test
+    fun `throws and updates nothing when the user is not a member of the group`() =
+        runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } throws
+                IllegalArgumentException("User 'user-1' is not a member of group 'group-1'.")
+
+            assertFailsWith<IllegalArgumentException> {
+                useCase(
+                    ChangeShoppingListItemsCompleteStateUseCase.Input(
+                        byUserId = "user-1",
+                        groupId = "group-1",
+                        idsToCompleteState = mapOf("id-1" to true),
+                    ),
+                )
+            }
+
+            verifySuspend(exactly(0)) { shoppingListItemRepository.findById(any()) }
+            verifySuspend(exactly(0)) {
+                shoppingListItemRepository.updateWithOptimisticLocking<ShoppingListItem>(
+                    id = any(),
+                    modify = any(),
+                )
+            }
         }
 }

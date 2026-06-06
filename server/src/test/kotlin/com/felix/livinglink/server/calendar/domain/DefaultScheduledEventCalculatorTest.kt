@@ -535,6 +535,7 @@ class DefaultScheduledEventCalculatorTest {
 
     private fun timedEvent(
         id: String = "id-1",
+        groupId: String = "groupId",
         title: String = "event-$id",
         description: String? = null,
         createdByUserId: String = "creator",
@@ -548,6 +549,7 @@ class DefaultScheduledEventCalculatorTest {
     ): CalendarEvent =
         CalendarEvent(
             id = id,
+            groupId = groupId,
             title = title,
             description = description,
             createdByUserId = createdByUserId,
@@ -561,6 +563,7 @@ class DefaultScheduledEventCalculatorTest {
 
     private fun allDayEvent(
         id: String = "id-1",
+        groupId: String = "groupId",
         title: String = "event-$id",
         startDate: LocalDate,
         endDate: LocalDate,
@@ -570,6 +573,7 @@ class DefaultScheduledEventCalculatorTest {
     ): CalendarEvent =
         CalendarEvent(
             id = id,
+            groupId = groupId,
             title = title,
             description = null,
             createdByUserId = "creator",

@@ -4,6 +4,7 @@ import kotlin.time.Instant
 
 data class ShoppingListItem(
     val id: String,
+    val groupId: String,
     val name: String,
     val createdByUserId: String,
     val completionEvents: List<CompletionEvent>,

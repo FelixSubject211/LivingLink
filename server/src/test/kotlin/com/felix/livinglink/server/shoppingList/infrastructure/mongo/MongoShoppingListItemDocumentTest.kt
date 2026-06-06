@@ -15,6 +15,7 @@ class MongoShoppingListItemDocumentTest {
         val item =
             shoppingListItem(
                 id = "id-1",
+                groupId = "group-1",
                 name = "Bread",
                 createdByUserId = "creator",
                 createdAt = t0,
@@ -30,6 +31,7 @@ class MongoShoppingListItemDocumentTest {
         val expected =
             MongoShoppingListItemDocument(
                 id = "id-1",
+                groupId = "group-1",
                 name = "Bread",
                 createdByUserId = "creator",
                 completed = false,
@@ -59,6 +61,7 @@ class MongoShoppingListItemDocumentTest {
         val item =
             shoppingListItem(
                 id = "id-1",
+                groupId = "group-1",
                 name = "Bread",
                 createdByUserId = "creator",
                 createdAt = t0,

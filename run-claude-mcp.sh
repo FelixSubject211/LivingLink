@@ -11,5 +11,5 @@ set -a
 source "$PROJECT_DIR/.env"
 set +a
 
-./build/install/livinglink/bin/livinglink \
+./server/build/install/server/bin/server \
     | sed -u '/^kotlin-logging: initializing/d'

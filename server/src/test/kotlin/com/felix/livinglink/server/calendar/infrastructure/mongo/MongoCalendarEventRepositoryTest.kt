@@ -36,6 +36,30 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
     }
 
     @Test
+    fun `find returns only events of the queried group`() =
+        runTest {
+            val inGroup1 = timedEvent(id = "in-group-1", start = t0, end = t0 + 1.hours, groupId = "group-1")
+            val alsoGroup1 = timedEvent(id = "also-group-1", start = t0, end = t0 + 1.hours, groupId = "group-1")
+            val inGroup2 = timedEvent(id = "in-group-2", start = t0, end = t0 + 1.hours, groupId = "group-2")
+
+            insert(inGroup1, alsoGroup1, inGroup2)
+
+            val result =
+                repository.find(
+                    CalendarEventQuery(
+                        groupId = "group-1",
+                        from = t0 - 1.hours,
+                        to = t0 + 2.hours,
+                    ),
+                )
+
+            assertEquals(
+                setOf("in-group-1", "also-group-1"),
+                result.toList().map { it.id }.toSet(),
+            )
+        }
+
+    @Test
     fun `find returns events whose effective window intersects the query window`() =
         runTest {
             val before = timedEvent(id = "before", start = t0 - 5.days, end = t0 - 4.days)
@@ -49,6 +73,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0,
                         to = t0 + 1.days,
                     ),
@@ -81,6 +106,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0 + 365.days,
                         to = t0 + 366.days,
                     ),
@@ -110,6 +136,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0,
                         to = t0 + 7.days,
                     ),
@@ -131,6 +158,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0 - 1.hours,
                         to = t0 + 2.hours,
                         participantUserIds = setOf("alice"),
@@ -154,6 +182,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0 - 1.hours,
                         to = t0 + 2.hours,
                         createdByUserIds = setOf("alice"),
@@ -204,6 +233,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0 - 1.hours,
                         to = t0 + 2.hours,
                         participantUserIds = setOf("bob"),
@@ -225,6 +255,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
             val result =
                 repository.find(
                     CalendarEventQuery(
+                        groupId = "group-1",
                         from = t0 - 1.hours,
                         to = t0 + 2.hours,
                         participantUserIds = emptySet(),
@@ -256,6 +287,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
                 repository
                     .find(
                         CalendarEventQuery(
+                            groupId = "group-1",
                             from = t0 - 1.hours,
                             to = t0 + 2.hours,
                         ),
@@ -265,7 +297,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
         }
 
     @Test
-    fun `findDistinctCustomCategoryLabels returns sorted distinct labels of custom categories`() =
+    fun `findDistinctCustomCategoryLabels returns sorted distinct labels of the group's custom categories`() =
         runTest {
             insert(
                 timedEvent(id = "1", start = t0, end = t0 + 1.hours, category = EventCategory.Custom("Urlaub")),
@@ -273,9 +305,11 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
                 timedEvent(id = "3", start = t0, end = t0 + 1.hours, category = EventCategory.Custom("Urlaub")),
                 timedEvent(id = "4", start = t0, end = t0 + 1.hours, category = EventCategory.None),
                 timedEvent(id = "5", start = t0, end = t0 + 1.hours, category = EventCategory.Shopping(shoppingListItemIds = listOf("item-1"))),
+                // different group, must never appear
+                timedEvent(id = "6", start = t0, end = t0 + 1.hours, groupId = "group-2", category = EventCategory.Custom("Arzt")),
             )
 
-            val result = repository.findDistinctCustomCategoryLabels()
+            val result = repository.findDistinctCustomCategoryLabels("group-1")
 
             assertEquals(listOf("Besuch", "Urlaub"), result)
         }
@@ -287,7 +321,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
                 timedEvent(id = "1", start = t0, end = t0 + 1.hours, category = EventCategory.None),
             )
 
-            val result = repository.findDistinctCustomCategoryLabels()
+            val result = repository.findDistinctCustomCategoryLabels("group-1")
 
             assertEquals(emptyList(), result)
         }
@@ -302,6 +336,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
         id: String,
         start: Instant,
         end: Instant,
+        groupId: String = "group-1",
         createdBy: String = "creator",
         participantIds: List<String> = emptyList(),
         recurrence: RecurrenceRule? = null,
@@ -309,6 +344,7 @@ class MongoCalendarEventRepositoryTest : AbstractMongoRepositoryTest() {
     ): CalendarEvent =
         CalendarEvent(
             id = id,
+            groupId = groupId,
             title = "event-$id",
             description = null,
             createdByUserId = createdBy,

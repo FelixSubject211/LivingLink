@@ -2,7 +2,7 @@
 
 Kotlin MCP server.
 
-This is a personal learning project for me and my family. Everyone is effectively in one shared group. Authentication uses static API keys per user (configured via env vars) because nobody should be able to register themselves, and proper auth flows with Claude are still a bit awkward today, so static keys are the simplest thing that works for the current use case.
+This is a personal learning project for me and my family. Users and groups are static configuration (set via env vars and a JSON file) because nobody should be able to register themselves, so static configuration is the simplest thing that works for the current use case.
 
 livinglink is reachable in two ways:
 
@@ -34,6 +34,8 @@ LIVINGLINK_MCP_HTTP_HOST=0.0.0.0
 LIVINGLINK_MCP_HTTP_PORT=3000
 LIVINGLINK_MCP_HTTP_PATH=/mcp
 LIVINGLINK_MCP_API_KEYS=max:MaxMusterfrau:CHANGE_ME_MAX,anna:AnnaMusterfrau:CHANGE_ME_ANNA
+
+LIVINGLINK_GROUPS_FILE=/absolute/path/to/groups.json
 
 LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://mongo:27017
 LIVINGLINK_MONGO_DATABASE=livinglink
@@ -75,6 +77,8 @@ LIVINGLINK_MCP_TRANSPORT=stdio
 LIVINGLINK_STDIO_USER_ID=max
 LIVINGLINK_STDIO_USERNAME=MaxMusterfrau
 
+LIVINGLINK_GROUPS_FILE=/absolute/path/to/groups.json
+
 LIVINGLINK_MONGO_CONNECTION_STRING=mongodb://localhost:27017
 LIVINGLINK_MONGO_DATABASE=livinglink
 
@@ -92,6 +96,27 @@ docker compose up -d
 ```bash
 ./gradlew installDist
 ```
+
+## Groups
+
+Groups are configured in a JSON file. Set the path via `LIVINGLINK_GROUPS_FILE`.
+
+### `groups.json`
+
+```json
+{
+  "groups": [
+    { "id": "familie", "name": "Familie Musterfrau", "memberUserIds": ["max", "anna"] },
+    { "id": "freunde", "name": "Freunde",            "memberUserIds": ["max", "tom"] }
+  ]
+}
+```
+
+Rules:
+
+- Each entry in `memberUserIds` must match a user id. In `http` mode that is the first field of an `LIVINGLINK_MCP_API_KEYS` entry; in `stdio` mode it is `LIVINGLINK_STDIO_USER_ID`.
+- A user can be in several groups. For MCP, the active group is stored per user in the database and switched via the `set_active_group` tool. `get_session` shows the available groups and which one is active.
+- In `stdio` mode the file must contain at least one group whose `memberUserIds` includes your `LIVINGLINK_STDIO_USER_ID`.
 
 ## local.properties
 

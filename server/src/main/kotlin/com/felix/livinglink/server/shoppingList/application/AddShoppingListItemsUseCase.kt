@@ -2,6 +2,7 @@ package com.felix.livinglink.server.shoppingList.application
 
 import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.core.domain.UuidGenerator
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
 import kotlinx.coroutines.async
@@ -12,11 +13,14 @@ import org.koin.core.annotation.Single
 @Single
 class AddShoppingListItemsUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val requireGroupMembershipUseCase: RequireGroupMembershipUseCase,
     private val uuidGenerator: UuidGenerator,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(input: Input): List<ShoppingListItem> =
-        coroutineScope {
+    suspend operator fun invoke(input: Input): List<ShoppingListItem> {
+        requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
+
+        return coroutineScope {
             input.names
                 .map { name ->
                     async {
@@ -24,6 +28,7 @@ class AddShoppingListItemsUseCase(
                         shoppingListItemRepository.create(
                             ShoppingListItem(
                                 id = uuidGenerator(),
+                                groupId = input.groupId,
                                 name = name,
                                 createdByUserId = input.byUserId,
                                 completionEvents = emptyList(),
@@ -34,9 +39,11 @@ class AddShoppingListItemsUseCase(
                     }
                 }.awaitAll()
         }
+    }
 
     data class Input(
         val byUserId: String,
+        val groupId: String,
         val names: List<String>,
     )
 }

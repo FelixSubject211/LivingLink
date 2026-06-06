@@ -6,6 +6,7 @@ import com.felix.livinglink.server.calendar.domain.CalendarEventSort
 import com.felix.livinglink.server.calendar.domain.EventSpan
 import com.felix.livinglink.server.calendar.domain.ScheduledEvent
 import com.felix.livinglink.server.calendar.domain.ScheduledEventCalculator
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.flatMapConcat
@@ -20,9 +21,12 @@ import kotlin.time.Instant
 class GetScheduledEventsUseCase(
     private val calendarEventRepository: CalendarEventRepository,
     private val scheduledEventCalculator: ScheduledEventCalculator,
+    private val requireGroupMembershipUseCase: RequireGroupMembershipUseCase,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
     suspend operator fun invoke(input: Input): List<ScheduledEvent> {
+        requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.query.groupId)
+
         val capped =
             calendarEventRepository
                 .find(input.query)
@@ -69,6 +73,7 @@ class GetScheduledEventsUseCase(
         }
 
     data class Input(
+        val byUserId: String,
         val query: CalendarEventQuery,
         val sort: CalendarEventSort,
         val timeZone: TimeZone,

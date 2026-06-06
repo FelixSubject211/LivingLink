@@ -32,6 +32,8 @@ class MongoCalendarEventRepository(
     override suspend fun find(query: CalendarEventQuery): Flow<CalendarEvent> {
         val filters =
             buildList<Bson> {
+                add(Filters.eq(MongoCalendarEventFields.GROUP_ID, query.groupId))
+
                 add(
                     Filters.and(
                         Filters.lte(MongoCalendarEventFields.EFFECTIVE_FROM, query.to),
@@ -53,11 +55,18 @@ class MongoCalendarEventRepository(
             .map { it.toDomain() }
     }
 
-    override suspend fun findDistinctCustomCategoryLabels(): List<String> =
+    override suspend fun findDistinctCustomCategoryLabels(groupId: String): List<String> =
         collection
             .distinct<String>(
                 fieldName = "${MongoCalendarEventFields.CATEGORY}.${MongoCalendarEventFields.Category.LABEL}",
-                filter = Filters.eq("${MongoCalendarEventFields.CATEGORY}.${MongoCalendarEventFields.Category.TYPE}", MongoCalendarEventDocument.Category.TYPE_CUSTOM),
+                filter =
+                    Filters.and(
+                        Filters.eq(MongoCalendarEventFields.GROUP_ID, groupId),
+                        Filters.eq(
+                            "${MongoCalendarEventFields.CATEGORY}.${MongoCalendarEventFields.Category.TYPE}",
+                            MongoCalendarEventDocument.Category.TYPE_CUSTOM,
+                        ),
+                    ),
             ).toList()
             .sorted()
 }

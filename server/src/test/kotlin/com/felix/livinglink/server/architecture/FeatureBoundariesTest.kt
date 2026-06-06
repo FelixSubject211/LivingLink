@@ -9,6 +9,7 @@ import kotlin.test.Test
 class FeatureBoundariesTest {
     private val core = Layer("Core", "com.felix.livinglink.server.core..")
     private val user = Layer("User", "com.felix.livinglink.server.user..")
+    private val group = Layer("Group", "com.felix.livinglink.server.group..")
     private val auth = Layer("Auth", "com.felix.livinglink.server.auth..")
     private val shoppingList = Layer("ShoppingList", "com.felix.livinglink.server.shoppingList..")
     private val calendar = Layer("Calendar", "com.felix.livinglink.server.calendar..")
@@ -22,18 +23,21 @@ class FeatureBoundariesTest {
                 core.dependsOnNothing()
 
                 user.dependsOn(core)
-                user.doesNotDependOn(auth, shoppingList, calendar, session)
+                user.doesNotDependOn(group, auth, shoppingList, calendar, session)
+
+                group.dependsOn(core)
+                group.doesNotDependOn(user, auth, shoppingList, calendar, session)
 
                 auth.dependsOn(core, user)
-                auth.doesNotDependOn(shoppingList, calendar, session)
+                auth.doesNotDependOn(group, shoppingList, calendar, session)
 
-                shoppingList.dependsOn(core, user)
+                shoppingList.dependsOn(core, user, group)
                 shoppingList.doesNotDependOn(auth, calendar, session)
 
-                calendar.dependsOn(core, user)
+                calendar.dependsOn(core, user, group)
                 calendar.doesNotDependOn(auth, shoppingList, session)
 
-                session.dependsOn(core, user, shoppingList, calendar)
+                session.dependsOn(core, user, group, shoppingList, calendar)
                 session.doesNotDependOn(auth)
             }
     }
@@ -44,6 +48,7 @@ class FeatureBoundariesTest {
             "session",
             "shoppingList",
             "calendar",
+            "group",
         ).forEach { feature ->
             assertNoImportsFrom(
                 featurePackagePrefix = "com.felix.livinglink.server.$feature",

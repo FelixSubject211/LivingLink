@@ -29,10 +29,13 @@ class MongoShoppingListItemRepository(
         toDomain = MongoShoppingListItemDocument::toDomain,
     ) {
     override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> {
-        val filter =
-            query.completed?.let { completed ->
-                Filters.eq("completed", completed)
-            } ?: Filters.empty()
+        val filters =
+            buildList {
+                add(Filters.eq("groupId", query.groupId))
+                query.completed?.let { completed ->
+                    add(Filters.eq("completed", completed))
+                }
+            }
 
         val sort =
             when (query.sort) {
@@ -45,12 +48,10 @@ class MongoShoppingListItemRepository(
             }
 
         return collection
-            .find(filter)
+            .find(Filters.and(filters))
             .sort(sort)
             .limit(query.limit)
             .toList()
-            .map { document ->
-                document.toDomain()
-            }
+            .map { it.toDomain() }
     }
 }

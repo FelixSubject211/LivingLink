@@ -3,6 +3,7 @@ package com.felix.livinglink.server.calendar.domain
 import kotlin.time.Instant
 
 data class CalendarEventQuery(
+    val groupId: String,
     val from: Instant,
     val to: Instant,
     val participantUserIds: Set<String>? = null,

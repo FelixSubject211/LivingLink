@@ -1,6 +1,5 @@
 package com.felix.livinglink.server.calendar.application
 
-import com.felix.livinglink.server.calendar.application.GetScheduledEventsUseCase
 import com.felix.livinglink.server.calendar.domain.CalendarEvent
 import com.felix.livinglink.server.calendar.domain.CalendarEventQuery
 import com.felix.livinglink.server.calendar.domain.CalendarEventRepository
@@ -9,7 +8,9 @@ import com.felix.livinglink.server.calendar.domain.EventCategory
 import com.felix.livinglink.server.calendar.domain.EventSpan
 import com.felix.livinglink.server.calendar.domain.ScheduledEvent
 import com.felix.livinglink.server.calendar.domain.ScheduledEventCalculator
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import dev.mokkery.answering.returns
+import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
@@ -20,6 +21,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -30,11 +32,13 @@ import kotlin.time.Instant
 class GetScheduledEventsUseCaseTest {
     private val calendarEventRepository = mock<CalendarEventRepository>()
     private val scheduledEventCalculator = mock<ScheduledEventCalculator>()
+    private val requireGroupMembershipUseCase = mock<RequireGroupMembershipUseCase>()
 
     private val useCase =
         GetScheduledEventsUseCase(
             calendarEventRepository = calendarEventRepository,
             scheduledEventCalculator = scheduledEventCalculator,
+            requireGroupMembershipUseCase = requireGroupMembershipUseCase,
         )
 
     private val t0 = Instant.fromEpochSeconds(1_700_000_000)
@@ -43,9 +47,15 @@ class GetScheduledEventsUseCaseTest {
 
     private val query =
         CalendarEventQuery(
+            groupId = "group-1",
             from = t0,
             to = t0 + 30.days,
         )
+
+    @BeforeTest
+    fun setUp() {
+        every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+    }
 
     @Test
     fun `passes query and timeZone to repository and calculator`() =
@@ -59,6 +69,7 @@ class GetScheduledEventsUseCaseTest {
             val result =
                 useCase(
                     GetScheduledEventsUseCase.Input(
+                        byUserId = "user-1",
                         query = query,
                         sort = CalendarEventSort.EffectiveStartAscending,
                         timeZone = utc,
@@ -86,6 +97,7 @@ class GetScheduledEventsUseCaseTest {
             val result =
                 useCase(
                     GetScheduledEventsUseCase.Input(
+                        byUserId = "user-1",
                         query = query,
                         sort = CalendarEventSort.EffectiveStartAscending,
                         timeZone = utc,
@@ -216,12 +228,26 @@ class GetScheduledEventsUseCaseTest {
             }
         }
 
+    @Test
+    fun `throws and queries nothing when the user is not a member of the group`() =
+        runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } throws
+                IllegalArgumentException("User 'user-1' is not a member of group 'group-1'.")
+
+            assertFailsWith<IllegalArgumentException> {
+                invoke(sort = CalendarEventSort.EffectiveStartAscending)
+            }
+
+            verifySuspend(exactly(0)) { calendarEventRepository.find(any()) }
+        }
+
     private suspend fun invoke(
         sort: CalendarEventSort,
         timeZone: TimeZone = utc,
     ): List<ScheduledEvent> =
         useCase(
             GetScheduledEventsUseCase.Input(
+                byUserId = "user-1",
                 query = query,
                 sort = sort,
                 timeZone = timeZone,
@@ -239,6 +265,7 @@ class GetScheduledEventsUseCaseTest {
     private fun calendarEvent(id: String): CalendarEvent =
         CalendarEvent(
             id = id,
+            groupId = "group-1",
             title = "event-$id",
             description = null,
             createdByUserId = "creator",

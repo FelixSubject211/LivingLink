@@ -9,6 +9,7 @@ import kotlin.time.Instant
 data class MongoShoppingListItemDocument(
     @param:BsonId
     override val id: String,
+    val groupId: String,
     val name: String,
     val createdByUserId: String,
     val completed: Boolean,
@@ -24,6 +25,7 @@ data class MongoShoppingListItemDocument(
     fun toDomain(): ShoppingListItem =
         ShoppingListItem(
             id = id,
+            groupId = groupId,
             name = name,
             createdByUserId = createdByUserId,
             completionEvents =
@@ -39,6 +41,7 @@ data class MongoShoppingListItemDocument(
         fun fromDomain(item: ShoppingListItem): MongoShoppingListItemDocument =
             MongoShoppingListItemDocument(
                 id = item.id,
+                groupId = item.groupId,
                 name = item.name,
                 createdByUserId = item.createdByUserId,
                 completed = item.isCompleted,

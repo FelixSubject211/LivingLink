@@ -1,6 +1,7 @@
 package com.felix.livinglink.server.shoppingList.domain
 
 data class ShoppingListItemQuery(
+    val groupId: String,
     val completed: Boolean? = null,
     val limit: Int,
     val sort: ShoppingListItemSort = ShoppingListItemSort.CreatedAtDescending,

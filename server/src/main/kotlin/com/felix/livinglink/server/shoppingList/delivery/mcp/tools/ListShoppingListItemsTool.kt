@@ -3,12 +3,13 @@ package com.felix.livinglink.server.shoppingList.delivery.mcp.tools
 import com.felix.livinglink.server.core.config.TimezoneSettings
 import com.felix.livinglink.server.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.server.core.delivery.mcp.dsl.success
+import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.shoppingList.application.ListShoppingListItemsUseCase
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemDetailMcpDto
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemSortMcpDto
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.toMcpDetailDto
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.server.user.application.FindUsersByIdsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
@@ -18,6 +19,7 @@ import org.koin.core.annotation.Single
 class ListShoppingListItemsTool(
     private val listShoppingListItemsUseCase: ListShoppingListItemsUseCase,
     private val findUsersByIdsUseCase: FindUsersByIdsUseCase,
+    private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
     private val timezoneSettings: TimezoneSettings,
 ) : McpToolRegistrar {
     override fun register(
@@ -51,14 +53,19 @@ class ListShoppingListItemsTool(
                 )
 
             handle {
+                val group =
+                    getActiveMcpGroupUseCase(userId)
+                        ?: return@handle toolError("No group is available for this user.")
+
                 val items =
                     listShoppingListItemsUseCase(
-                        query =
-                            ShoppingListItemQuery(
-                                completed = completed(),
-                                limit = limit(),
-                                sort = sort().toDomain(),
-                            ),
+                        ListShoppingListItemsUseCase.Input(
+                            byUserId = userId,
+                            groupId = group.id,
+                            completed = completed(),
+                            limit = limit(),
+                            sort = sort().toDomain(),
+                        ),
                     )
 
                 val usersById =

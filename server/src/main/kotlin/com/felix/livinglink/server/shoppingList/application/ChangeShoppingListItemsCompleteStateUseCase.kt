@@ -3,60 +3,37 @@ package com.felix.livinglink.server.shoppingList.application
 import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.core.domain.UpdateOperationResult
 import com.felix.livinglink.server.core.domain.UpdateResult
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.koin.core.annotation.Single
-import kotlin.collections.plusAssign
 
 @Single
 class ChangeShoppingListItemsCompleteStateUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val requireGroupMembershipUseCase: RequireGroupMembershipUseCase,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(input: Input): Output =
-        coroutineScope {
+    suspend operator fun invoke(input: Input): Output {
+        requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
+
+        return coroutineScope {
             val results =
                 input.idsToCompleteState
                     .map { (id, completeAction) ->
                         async {
-                            val result =
-                                shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
-                                    when (completeAction) {
-                                        true -> {
-                                            if (current.isCompleted) {
-                                                UpdateOperationResult.noUpdate(current = current)
-                                            } else {
-                                                val completed =
-                                                    current.complete(
-                                                        byUserId = input.byUserId,
-                                                        at = timeProvider(),
-                                                    )
-                                                UpdateOperationResult.updated(newEntity = completed)
-                                            }
-                                        }
-                                        false -> {
-                                            if (!current.isCompleted) {
-                                                UpdateOperationResult.noUpdate(current = current)
-                                            } else {
-                                                val unCompleted =
-                                                    current.unComplete(
-                                                        byUserId = input.byUserId,
-                                                        at = timeProvider(),
-                                                    )
-                                                UpdateOperationResult.updated(newEntity = unCompleted)
-                                            }
-                                        }
-                                    }
-                                }
-
-                            when (result) {
-                                is UpdateResult.NotFound -> ItemResult.Missing(id)
-                                is UpdateResult.OptimisticLockingError -> ItemResult.Conflict(id)
-                                is UpdateResult.NotUpdated -> ItemResult.AlreadyChanged(result.response)
-                                is UpdateResult.Updated -> ItemResult.Changed(result.newEntity)
+                            val existing = shoppingListItemRepository.findById(id)
+                            if (existing == null || existing.groupId != input.groupId) {
+                                ItemResult.Missing(id)
+                            } else {
+                                applyChange(
+                                    id = id,
+                                    completeAction = completeAction,
+                                    byUserId = input.byUserId,
+                                )
                             }
                         }
                     }.awaitAll()
@@ -82,6 +59,42 @@ class ChangeShoppingListItemsCompleteStateUseCase(
                 conflictedIds = conflictedIds,
             )
         }
+    }
+
+    private suspend fun applyChange(
+        id: String,
+        completeAction: Boolean,
+        byUserId: String,
+    ): ItemResult {
+        val result =
+            shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
+                when (completeAction) {
+                    true ->
+                        if (current.isCompleted) {
+                            UpdateOperationResult.noUpdate(current = current)
+                        } else {
+                            UpdateOperationResult.updated(
+                                newEntity = current.complete(byUserId = byUserId, at = timeProvider()),
+                            )
+                        }
+                    false ->
+                        if (!current.isCompleted) {
+                            UpdateOperationResult.noUpdate(current = current)
+                        } else {
+                            UpdateOperationResult.updated(
+                                newEntity = current.unComplete(byUserId = byUserId, at = timeProvider()),
+                            )
+                        }
+                }
+            }
+
+        return when (result) {
+            is UpdateResult.NotFound -> ItemResult.Missing(id)
+            is UpdateResult.OptimisticLockingError -> ItemResult.Conflict(id)
+            is UpdateResult.NotUpdated -> ItemResult.AlreadyChanged(result.response)
+            is UpdateResult.Updated -> ItemResult.Changed(result.newEntity)
+        }
+    }
 
     private sealed class ItemResult {
         data class Changed(
@@ -103,6 +116,7 @@ class ChangeShoppingListItemsCompleteStateUseCase(
 
     data class Input(
         val byUserId: String,
+        val groupId: String,
         val idsToCompleteState: Map<String, Boolean>,
     )
 

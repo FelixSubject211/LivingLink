@@ -2,7 +2,9 @@ package com.felix.livinglink.server.shoppingList.delivery.mcp.tools
 
 import com.felix.livinglink.server.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.server.core.delivery.mcp.dsl.success
+import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.shoppingList.application.AddShoppingListItemsUseCase
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.toMcpReferenceDto
@@ -13,6 +15,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpToolRegistrar::class])
 class AddShoppingListItemsTool(
     private val addShoppingListItemsUseCase: AddShoppingListItemsUseCase,
+    private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -29,10 +32,15 @@ class AddShoppingListItemsTool(
                 )
 
             handle {
+                val group =
+                    getActiveMcpGroupUseCase(userId)
+                        ?: return@handle toolError("No group is available for this user.")
+
                 val items =
                     addShoppingListItemsUseCase(
                         AddShoppingListItemsUseCase.Input(
                             byUserId = userId,
+                            groupId = group.id,
                             names = names(),
                         ),
                     )

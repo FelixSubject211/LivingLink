@@ -8,7 +8,9 @@ import com.felix.livinglink.server.calendar.domain.CalendarEventQuery
 import com.felix.livinglink.server.core.config.TimezoneSettings
 import com.felix.livinglink.server.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.server.core.delivery.mcp.dsl.success
+import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.user.application.FindUsersByIdsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
@@ -18,6 +20,7 @@ import org.koin.core.annotation.Single
 class GetScheduledEventsTool(
     private val getScheduledEventsUseCase: GetScheduledEventsUseCase,
     private val findUsersByIdsUseCase: FindUsersByIdsUseCase,
+    private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
     private val timezoneSettings: TimezoneSettings,
 ) : McpToolRegistrar {
     override fun register(
@@ -60,11 +63,17 @@ class GetScheduledEventsTool(
                 )
 
             handle {
+                val group =
+                    getActiveMcpGroupUseCase(userId)
+                        ?: return@handle toolError("No group is available for this user.")
+
                 val scheduledEvents =
                     getScheduledEventsUseCase(
                         GetScheduledEventsUseCase.Input(
+                            byUserId = userId,
                             query =
                                 CalendarEventQuery(
+                                    groupId = group.id,
                                     from = from(),
                                     to = to(),
                                     participantUserIds = participantUserIds()?.toSet(),

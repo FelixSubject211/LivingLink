@@ -17,6 +17,8 @@ import kotlin.time.Instant
 data class MongoCalendarEventDocument(
     @param:BsonId
     override val id: String,
+    @param:BsonProperty(MongoCalendarEventFields.GROUP_ID)
+    val groupId: String,
     @param:BsonProperty(MongoCalendarEventFields.TITLE)
     val title: String,
     @param:BsonProperty(MongoCalendarEventFields.DESCRIPTION)
@@ -48,6 +50,7 @@ data class MongoCalendarEventDocument(
     fun toDomain(): CalendarEvent =
         CalendarEvent(
             id = id,
+            groupId = groupId,
             title = title,
             description = description,
             createdByUserId = createdByUserId,
@@ -284,6 +287,7 @@ data class MongoCalendarEventDocument(
 
             return MongoCalendarEventDocument(
                 id = event.id,
+                groupId = event.groupId,
                 title = event.title,
                 description = event.description,
                 createdByUserId = event.createdByUserId,

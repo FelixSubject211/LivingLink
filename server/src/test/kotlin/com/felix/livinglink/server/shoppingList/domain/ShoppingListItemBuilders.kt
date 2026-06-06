@@ -6,6 +6,7 @@ private val defaultInstant = Instant.fromEpochSeconds(0)
 
 fun shoppingListItem(
     id: String = "id-1",
+    groupId: String = "group-1",
     name: String = "item-$id",
     createdByUserId: String = "creator",
     completionEvents: List<ShoppingListItem.CompletionEvent> = emptyList(),
@@ -15,6 +16,7 @@ fun shoppingListItem(
 ): ShoppingListItem =
     ShoppingListItem(
         id = id,
+        groupId = groupId,
         name = name,
         createdByUserId = createdByUserId,
         completionEvents = completionEvents,

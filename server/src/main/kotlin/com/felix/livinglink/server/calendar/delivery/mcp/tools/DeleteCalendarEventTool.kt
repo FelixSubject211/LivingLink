@@ -5,6 +5,7 @@ import com.felix.livinglink.server.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.server.core.delivery.mcp.dsl.success
 import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
 import kotlinx.serialization.Serializable
 import org.koin.core.annotation.Single
@@ -12,6 +13,7 @@ import org.koin.core.annotation.Single
 @Single(binds = [McpToolRegistrar::class])
 class DeleteCalendarEventTool(
     private val deleteCalendarEventUseCase: DeleteCalendarEventUseCase,
+    private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -28,8 +30,18 @@ class DeleteCalendarEventTool(
                 )
 
             handle {
+                val group =
+                    getActiveMcpGroupUseCase(userId)
+                        ?: return@handle toolError("No group is available for this user.")
+
                 when (
-                    deleteCalendarEventUseCase(eventId = eventId())
+                    deleteCalendarEventUseCase(
+                        DeleteCalendarEventUseCase.Input(
+                            byUserId = userId,
+                            groupId = group.id,
+                            eventId = eventId(),
+                        ),
+                    )
                 ) {
                     is DeleteCalendarEventUseCase.Output.Deleted ->
                         success(Output(deletedEventId = eventId()))

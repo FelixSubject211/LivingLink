@@ -4,6 +4,7 @@ import kotlin.time.Instant
 
 data class CalendarEvent(
     val id: String,
+    val groupId: String,
     val title: String,
     val description: String?,
     val createdByUserId: String,

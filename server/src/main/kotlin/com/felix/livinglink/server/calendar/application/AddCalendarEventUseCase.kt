@@ -8,15 +8,19 @@ import com.felix.livinglink.server.calendar.domain.Participant
 import com.felix.livinglink.server.calendar.domain.RecurrenceRule
 import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.core.domain.UuidGenerator
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import org.koin.core.annotation.Single
 
 @Single
 class AddCalendarEventUseCase(
     private val calendarEventRepository: CalendarEventRepository,
+    private val requireGroupMembershipUseCase: RequireGroupMembershipUseCase,
     private val uuidGenerator: UuidGenerator,
     private val timeProvider: TimeProvider,
 ) {
     suspend operator fun invoke(input: Input): CalendarEvent {
+        requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
+
         val now = timeProvider()
 
         val participants =
@@ -30,6 +34,7 @@ class AddCalendarEventUseCase(
         return calendarEventRepository.create(
             CalendarEvent(
                 id = uuidGenerator(),
+                groupId = input.groupId,
                 title = input.title,
                 description = input.description,
                 createdByUserId = input.byUserId,
@@ -45,6 +50,7 @@ class AddCalendarEventUseCase(
 
     data class Input(
         val byUserId: String,
+        val groupId: String,
         val title: String,
         val description: String?,
         val span: EventSpan,

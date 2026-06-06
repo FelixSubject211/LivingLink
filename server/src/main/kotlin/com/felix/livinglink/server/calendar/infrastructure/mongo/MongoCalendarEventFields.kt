@@ -1,6 +1,7 @@
 package com.felix.livinglink.server.calendar.infrastructure.mongo
 
 object MongoCalendarEventFields {
+    const val GROUP_ID = "groupId"
     const val TITLE = "title"
     const val DESCRIPTION = "description"
     const val CREATED_BY_USER_ID = "createdByUserId"
