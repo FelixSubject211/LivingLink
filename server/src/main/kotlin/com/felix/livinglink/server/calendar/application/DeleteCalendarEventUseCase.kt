@@ -8,18 +8,14 @@ import org.koin.core.annotation.Single
 class DeleteCalendarEventUseCase(
     private val calendarEventRepository: CalendarEventRepository,
 ) {
-    suspend operator fun invoke(input: Input): Output {
-        val result = calendarEventRepository.deleteById(input.eventId)
+    suspend operator fun invoke(eventId: String): Output {
+        val result = calendarEventRepository.deleteById(eventId)
 
         return when (result) {
             is DeleteResult.Deleted -> Output.Deleted
             is DeleteResult.NotFound -> Output.NotFound
         }
     }
-
-    data class Input(
-        val eventId: String,
-    )
 
     sealed class Output {
         data object Deleted : Output()

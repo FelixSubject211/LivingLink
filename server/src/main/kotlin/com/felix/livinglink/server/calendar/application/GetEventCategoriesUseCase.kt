@@ -7,13 +7,5 @@ import org.koin.core.annotation.Single
 class GetEventCategoriesUseCase(
     private val calendarEventRepository: CalendarEventRepository,
 ) {
-    suspend operator fun invoke(): Output {
-        val knownCustomLabels = calendarEventRepository.findDistinctCustomCategoryLabels()
-
-        return Output(knownCustomLabels = knownCustomLabels)
-    }
-
-    data class Output(
-        val knownCustomLabels: List<String>,
-    )
+    suspend operator fun invoke(): List<String> = calendarEventRepository.findDistinctCustomCategoryLabels()
 }

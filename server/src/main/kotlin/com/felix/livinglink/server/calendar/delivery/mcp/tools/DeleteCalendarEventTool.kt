@@ -29,9 +29,7 @@ class DeleteCalendarEventTool(
 
             handle {
                 when (
-                    deleteCalendarEventUseCase(
-                        DeleteCalendarEventUseCase.Input(eventId = eventId()),
-                    )
+                    deleteCalendarEventUseCase(eventId = eventId())
                 ) {
                     is DeleteCalendarEventUseCase.Output.Deleted ->
                         success(Output(deletedEventId = eventId()))

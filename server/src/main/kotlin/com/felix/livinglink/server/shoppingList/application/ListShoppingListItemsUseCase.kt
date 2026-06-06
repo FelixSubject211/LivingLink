@@ -9,14 +9,6 @@ import org.koin.core.annotation.Single
 class ListShoppingListItemsUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
 ) {
-    suspend operator fun invoke(input: Input): Output =
-        Output(items = shoppingListItemRepository.find(input.query))
-
-    data class Input(
-        val query: ShoppingListItemQuery,
-    )
-
-    data class Output(
-        val items: List<ShoppingListItem>,
-    )
+    suspend operator fun invoke(query: ShoppingListItemQuery): List<ShoppingListItem> =
+        shoppingListItemRepository.find(query)
 }

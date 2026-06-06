@@ -28,11 +28,7 @@ class DeleteShoppingListItemsTool(
 
             handle {
                 val output =
-                    deleteShoppingListItemsUseCase(
-                        DeleteShoppingListItemsUseCase.Input(
-                            idsToDelete = idsToDelete(),
-                        ),
-                    )
+                    deleteShoppingListItemsUseCase(idsToDelete = idsToDelete())
 
                 success(
                     Output(

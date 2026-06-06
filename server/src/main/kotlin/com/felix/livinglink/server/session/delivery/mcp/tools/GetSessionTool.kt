@@ -34,13 +34,13 @@ class GetSessionTool(
         ) {
             handle {
                 val allUsers = getAllUsersUseCase()
-                val categoriesOutput = getEventCategoriesUseCase()
+                val knownCustomEventCategoryLabels = getEventCategoriesUseCase()
 
                 success(
                     Output(
                         currentUserId = userId,
                         availableUsers = allUsers.map { user -> user.toUserReferenceMcpDto() },
-                        knownCustomEventCategoryLabels = categoriesOutput.knownCustomLabels,
+                        knownCustomEventCategoryLabels = knownCustomEventCategoryLabels,
                     ),
                 )
             }

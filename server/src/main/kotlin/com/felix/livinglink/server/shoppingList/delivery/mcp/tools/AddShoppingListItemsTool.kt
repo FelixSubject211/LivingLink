@@ -29,7 +29,7 @@ class AddShoppingListItemsTool(
                 )
 
             handle {
-                val output =
+                val items =
                     addShoppingListItemsUseCase(
                         AddShoppingListItemsUseCase.Input(
                             byUserId = userId,
@@ -39,8 +39,7 @@ class AddShoppingListItemsTool(
 
                 success(
                     Output(
-                        addedItems =
-                            output.items.map { it.toMcpReferenceDto() },
+                        addedItems = items.map { it.toMcpReferenceDto() },
                     ),
                 )
             }

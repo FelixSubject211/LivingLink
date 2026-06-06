@@ -16,7 +16,7 @@ class AddCalendarEventUseCase(
     private val uuidGenerator: UuidGenerator,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(input: Input): Output {
+    suspend operator fun invoke(input: Input): CalendarEvent {
         val now = timeProvider()
 
         val participants =
@@ -27,23 +27,20 @@ class AddCalendarEventUseCase(
                 )
             }
 
-        val event =
-            calendarEventRepository.create(
-                CalendarEvent(
-                    id = uuidGenerator(),
-                    title = input.title,
-                    description = input.description,
-                    createdByUserId = input.byUserId,
-                    span = input.span,
-                    recurrence = input.recurrence,
-                    participants = participants,
-                    category = input.category,
-                    createdAt = now,
-                    updatedAt = now,
-                ),
-            )
-
-        return Output(event = event)
+        return calendarEventRepository.create(
+            CalendarEvent(
+                id = uuidGenerator(),
+                title = input.title,
+                description = input.description,
+                createdByUserId = input.byUserId,
+                span = input.span,
+                recurrence = input.recurrence,
+                participants = participants,
+                category = input.category,
+                createdAt = now,
+                updatedAt = now,
+            ),
+        )
     }
 
     data class Input(
@@ -54,9 +51,5 @@ class AddCalendarEventUseCase(
         val recurrence: RecurrenceRule?,
         val category: EventCategory,
         val participantUserIds: Set<String>,
-    )
-
-    data class Output(
-        val event: CalendarEvent,
     )
 }

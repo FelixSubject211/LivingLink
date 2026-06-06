@@ -65,7 +65,7 @@ class GetScheduledEventsUseCaseTest {
                     ),
                 )
 
-            assertEquals(listOf(occurrence), result.scheduledEvents)
+            assertEquals(listOf(occurrence), result)
             verifySuspend(exactly(1)) { calendarEventRepository.find(query) }
         }
 
@@ -92,7 +92,7 @@ class GetScheduledEventsUseCaseTest {
                     ),
                 )
 
-            assertEquals(listOf(a1, b1, a2), result.scheduledEvents)
+            assertEquals(listOf(a1, b1, a2), result)
         }
 
     @Test
@@ -106,7 +106,7 @@ class GetScheduledEventsUseCaseTest {
 
             val result = invoke(sort = CalendarEventSort.EffectiveStartAscending)
 
-            assertEquals(listOf(first, middle, last), result.scheduledEvents)
+            assertEquals(listOf(first, middle, last), result)
         }
 
     @Test
@@ -120,7 +120,7 @@ class GetScheduledEventsUseCaseTest {
 
             val result = invoke(sort = CalendarEventSort.EffectiveStartDescending)
 
-            assertEquals(listOf(last, middle, first), result.scheduledEvents)
+            assertEquals(listOf(last, middle, first), result)
         }
 
     @Test
@@ -134,7 +134,7 @@ class GetScheduledEventsUseCaseTest {
 
             val result = invoke(sort = CalendarEventSort.CreatedAtAscending)
 
-            assertEquals(listOf(first, middle, last), result.scheduledEvents)
+            assertEquals(listOf(first, middle, last), result)
         }
 
     @Test
@@ -148,7 +148,7 @@ class GetScheduledEventsUseCaseTest {
 
             val result = invoke(sort = CalendarEventSort.CreatedAtDescending)
 
-            assertEquals(listOf(last, middle, first), result.scheduledEvents)
+            assertEquals(listOf(last, middle, first), result)
         }
 
     @Test
@@ -170,10 +170,10 @@ class GetScheduledEventsUseCaseTest {
             stubSingleEvent(returning = sequenceOf(timed, allDay))
 
             val inUtc = invoke(sort = CalendarEventSort.EffectiveStartAscending, timeZone = utc)
-            assertEquals(listOf(timed, allDay), inUtc.scheduledEvents)
+            assertEquals(listOf(timed, allDay), inUtc)
 
             val inBerlin = invoke(sort = CalendarEventSort.EffectiveStartAscending, timeZone = berlin)
-            assertEquals(listOf(allDay, timed), inBerlin.scheduledEvents)
+            assertEquals(listOf(allDay, timed), inBerlin)
         }
 
     @Test
@@ -183,7 +183,7 @@ class GetScheduledEventsUseCaseTest {
 
             val result = invoke(sort = CalendarEventSort.EffectiveStartAscending)
 
-            assertEquals(emptyList(), result.scheduledEvents)
+            assertEquals(emptyList(), result)
         }
 
     @Test
@@ -193,7 +193,7 @@ class GetScheduledEventsUseCaseTest {
 
             val result = invoke(sort = CalendarEventSort.EffectiveStartAscending)
 
-            assertEquals(emptyList(), result.scheduledEvents)
+            assertEquals(emptyList(), result)
         }
 
     @Test
@@ -219,7 +219,7 @@ class GetScheduledEventsUseCaseTest {
     private suspend fun invoke(
         sort: CalendarEventSort,
         timeZone: TimeZone = utc,
-    ): GetScheduledEventsUseCase.Output =
+    ): List<ScheduledEvent> =
         useCase(
             GetScheduledEventsUseCase.Input(
                 query = query,

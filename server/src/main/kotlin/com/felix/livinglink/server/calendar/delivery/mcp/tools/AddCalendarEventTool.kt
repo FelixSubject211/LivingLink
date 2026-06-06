@@ -63,7 +63,7 @@ class AddCalendarEventTool(
                 )
 
             handle {
-                val output =
+                val event =
                     addCalendarEventUseCase(
                         AddCalendarEventUseCase.Input(
                             byUserId = userId,
@@ -78,7 +78,7 @@ class AddCalendarEventTool(
 
                 success(
                     Output(
-                        addedEvent = output.event.toMcpReferenceDto(),
+                        addedEvent = event.toMcpReferenceDto(),
                     ),
                 )
             }

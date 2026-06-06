@@ -15,35 +15,28 @@ class AddShoppingListItemsUseCase(
     private val uuidGenerator: UuidGenerator,
     private val timeProvider: TimeProvider,
 ) {
-    suspend operator fun invoke(input: Input): Output =
+    suspend operator fun invoke(input: Input): List<ShoppingListItem> =
         coroutineScope {
-            val items =
-                input.names
-                    .map { name ->
-                        async {
-                            val now = timeProvider()
-                            shoppingListItemRepository.create(
-                                ShoppingListItem(
-                                    id = uuidGenerator(),
-                                    name = name,
-                                    createdByUserId = input.byUserId,
-                                    completionEvents = emptyList(),
-                                    createdAt = now,
-                                    updatedAt = now,
-                                ),
-                            )
-                        }
-                    }.awaitAll()
-
-            Output(items = items)
+            input.names
+                .map { name ->
+                    async {
+                        val now = timeProvider()
+                        shoppingListItemRepository.create(
+                            ShoppingListItem(
+                                id = uuidGenerator(),
+                                name = name,
+                                createdByUserId = input.byUserId,
+                                completionEvents = emptyList(),
+                                createdAt = now,
+                                updatedAt = now,
+                            ),
+                        )
+                    }
+                }.awaitAll()
         }
 
     data class Input(
         val byUserId: String,
         val names: List<String>,
-    )
-
-    data class Output(
-        val items: List<ShoppingListItem>,
     )
 }

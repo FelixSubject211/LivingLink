@@ -51,27 +51,25 @@ class ListShoppingListItemsTool(
                 )
 
             handle {
-                val output =
+                val items =
                     listShoppingListItemsUseCase(
-                        ListShoppingListItemsUseCase.Input(
-                            query =
-                                ShoppingListItemQuery(
-                                    completed = completed(),
-                                    limit = limit(),
-                                    sort = sort().toDomain(),
-                                ),
-                        ),
+                        query =
+                            ShoppingListItemQuery(
+                                completed = completed(),
+                                limit = limit(),
+                                sort = sort().toDomain(),
+                            ),
                     )
 
                 val usersById =
                     findUsersByIdsUseCase(
-                        ids = output.items.flatMap { it.referencedUserIds },
+                        ids = items.flatMap { it.referencedUserIds },
                     )
 
                 success(
                     Output(
                         items =
-                            output.items.map { item ->
+                            items.map { item ->
                                 item.toMcpDetailDto(
                                     usersById = usersById,
                                     timezoneSettings = timezoneSettings,

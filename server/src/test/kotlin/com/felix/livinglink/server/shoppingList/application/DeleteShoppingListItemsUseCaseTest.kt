@@ -24,12 +24,7 @@ class DeleteShoppingListItemsUseCaseTest {
             everySuspend { shoppingListItemRepository.deleteById("id-1") } returns DeleteResult.Deleted
             everySuspend { shoppingListItemRepository.deleteById("id-2") } returns DeleteResult.Deleted
 
-            val result =
-                useCase(
-                    DeleteShoppingListItemsUseCase.Input(
-                        idsToDelete = setOf("id-1", "id-2"),
-                    ),
-                )
+            val result = useCase(idsToDelete = setOf("id-1", "id-2"))
 
             assertEquals(
                 DeleteShoppingListItemsUseCase.Output(
@@ -45,12 +40,7 @@ class DeleteShoppingListItemsUseCaseTest {
         runTest {
             everySuspend { shoppingListItemRepository.deleteById("id-1") } returns DeleteResult.NotFound
 
-            val result =
-                useCase(
-                    DeleteShoppingListItemsUseCase.Input(
-                        idsToDelete = setOf("id-1"),
-                    ),
-                )
+            val result = useCase(idsToDelete = setOf("id-1"))
 
             assertEquals(
                 DeleteShoppingListItemsUseCase.Output(
@@ -67,12 +57,7 @@ class DeleteShoppingListItemsUseCaseTest {
             everySuspend { shoppingListItemRepository.deleteById("id-1") } returns DeleteResult.Deleted
             everySuspend { shoppingListItemRepository.deleteById("id-2") } returns DeleteResult.NotFound
 
-            val result =
-                useCase(
-                    DeleteShoppingListItemsUseCase.Input(
-                        idsToDelete = setOf("id-1", "id-2"),
-                    ),
-                )
+            val result = useCase(idsToDelete = setOf("id-1", "id-2"))
 
             assertEquals(
                 DeleteShoppingListItemsUseCase.Output(

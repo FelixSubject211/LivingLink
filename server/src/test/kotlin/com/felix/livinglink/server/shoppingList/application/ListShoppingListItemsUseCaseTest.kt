@@ -36,13 +36,10 @@ class ListShoppingListItemsUseCaseTest {
 
             everySuspend { shoppingListItemRepository.find(query) } returns listOf(item1, item2)
 
-            val result =
-                useCase(
-                    ListShoppingListItemsUseCase.Input(query = query),
-                )
+            val result = useCase(query = query)
 
             assertEquals(
-                ListShoppingListItemsUseCase.Output(items = listOf(item1, item2)),
+                listOf(item1, item2),
                 result,
             )
 

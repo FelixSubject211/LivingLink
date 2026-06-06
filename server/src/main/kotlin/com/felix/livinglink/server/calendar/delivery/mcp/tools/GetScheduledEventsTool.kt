@@ -60,7 +60,7 @@ class GetScheduledEventsTool(
                 )
 
             handle {
-                val output =
+                val scheduledEvents =
                     getScheduledEventsUseCase(
                         GetScheduledEventsUseCase.Input(
                             query =
@@ -77,13 +77,13 @@ class GetScheduledEventsTool(
 
                 val usersById =
                     findUsersByIdsUseCase(
-                        ids = output.scheduledEvents.flatMap { it.referencedUserIds },
+                        ids = scheduledEvents.flatMap { it.referencedUserIds },
                     )
 
                 success(
                     Output(
                         scheduledEvents =
-                            output.scheduledEvents.map { event ->
+                            scheduledEvents.map { event ->
                                 event.toMcpDetailDto(
                                     usersById = usersById,
                                     timezoneSettings = timezoneSettings,

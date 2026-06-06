@@ -81,6 +81,6 @@ class AddCalendarEventUseCaseTest {
                     updatedAt = now,
                 )
 
-            assertEquals(expected, result.event)
+            assertEquals(expected, result)
         }
 }

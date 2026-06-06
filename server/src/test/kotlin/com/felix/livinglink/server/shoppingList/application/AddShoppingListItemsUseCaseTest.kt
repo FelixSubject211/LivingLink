@@ -76,7 +76,7 @@ class AddShoppingListItemsUseCaseTest {
                     ),
                 )
 
-            assertEquals(expected, result.items)
+            assertEquals(expected, result)
 
             verifySuspend(exactly(2)) { shoppingListItemRepository.create(any()) }
         }

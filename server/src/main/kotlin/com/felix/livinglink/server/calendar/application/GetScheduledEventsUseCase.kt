@@ -22,7 +22,7 @@ class GetScheduledEventsUseCase(
     private val scheduledEventCalculator: ScheduledEventCalculator,
 ) {
     @OptIn(ExperimentalCoroutinesApi::class)
-    suspend operator fun invoke(input: Input): Output {
+    suspend operator fun invoke(input: Input): List<ScheduledEvent> {
         val capped =
             calendarEventRepository
                 .find(input.query)
@@ -41,9 +41,7 @@ class GetScheduledEventsUseCase(
             "Calendar query produced more than $MAX_RESULTS scheduled events. Narrow the time range or filters."
         }
 
-        val sorted = capped.sortedWith(comparatorFor(input.sort, input.timeZone))
-
-        return Output(scheduledEvents = sorted)
+        return capped.sortedWith(comparatorFor(input.sort, input.timeZone))
     }
 
     private fun comparatorFor(
@@ -74,10 +72,6 @@ class GetScheduledEventsUseCase(
         val query: CalendarEventQuery,
         val sort: CalendarEventSort,
         val timeZone: TimeZone,
-    )
-
-    data class Output(
-        val scheduledEvents: List<ScheduledEvent>,
     )
 
     companion object {

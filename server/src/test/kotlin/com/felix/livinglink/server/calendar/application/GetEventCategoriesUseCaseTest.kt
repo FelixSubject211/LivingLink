@@ -21,7 +21,7 @@ class GetEventCategoriesUseCaseTest {
 
             val result = useCase()
 
-            assertEquals(listOf("Arzt", "Besuch", "Urlaub"), result.knownCustomLabels)
+            assertEquals(listOf("Arzt", "Besuch", "Urlaub"), result)
         }
 
     @Test
@@ -31,6 +31,6 @@ class GetEventCategoriesUseCaseTest {
 
             val result = useCase()
 
-            assertEquals(emptyList(), result.knownCustomLabels)
+            assertEquals(emptyList(), result)
         }
 }

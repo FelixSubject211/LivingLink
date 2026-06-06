@@ -11,10 +11,10 @@ import org.koin.core.annotation.Single
 class DeleteShoppingListItemsUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
 ) {
-    suspend operator fun invoke(input: Input): Output =
+    suspend operator fun invoke(idsToDelete: Set<String>): Output =
         coroutineScope {
             val results =
-                input.idsToDelete
+                idsToDelete
                     .map { id ->
                         async {
                             id to shoppingListItemRepository.deleteById(id)
@@ -31,10 +31,6 @@ class DeleteShoppingListItemsUseCase(
                 missingIds = missingPairs.map { it.first },
             )
         }
-
-    data class Input(
-        val idsToDelete: Set<String>,
-    )
 
     data class Output(
         val deletedIds: List<String>,

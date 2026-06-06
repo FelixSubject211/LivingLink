@@ -23,10 +23,7 @@ class DeleteCalendarEventUseCaseTest {
         runTest {
             everySuspend { calendarEventRepository.deleteById("event-1") } returns DeleteResult.Deleted
 
-            val result =
-                useCase(
-                    DeleteCalendarEventUseCase.Input(eventId = "event-1"),
-                )
+            val result = useCase(eventId = "event-1")
 
             assertEquals(DeleteCalendarEventUseCase.Output.Deleted, result)
         }
@@ -36,10 +33,7 @@ class DeleteCalendarEventUseCaseTest {
         runTest {
             everySuspend { calendarEventRepository.deleteById("event-99") } returns DeleteResult.NotFound
 
-            val result =
-                useCase(
-                    DeleteCalendarEventUseCase.Input(eventId = "event-99"),
-                )
+            val result = useCase(eventId = "event-99")
 
             assertEquals(DeleteCalendarEventUseCase.Output.NotFound, result)
         }
