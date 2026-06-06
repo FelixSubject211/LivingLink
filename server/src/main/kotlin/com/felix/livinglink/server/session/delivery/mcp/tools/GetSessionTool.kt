@@ -8,7 +8,7 @@ import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.group.application.GetGroupsForUserUseCase
 import com.felix.livinglink.server.group.delivery.mcp.dto.GroupReferenceMcpDto
 import com.felix.livinglink.server.group.delivery.mcp.dto.toMcpReferenceDto
-import com.felix.livinglink.server.user.application.GetAllUsersUseCase
+import com.felix.livinglink.server.user.application.FindUsersByIdsUseCase
 import com.felix.livinglink.server.user.delivery.mcp.UserReferenceMcpDto
 import com.felix.livinglink.server.user.delivery.mcp.toUserReferenceMcpDto
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -17,7 +17,7 @@ import org.koin.core.annotation.Single
 
 @Single(binds = [McpToolRegistrar::class])
 class GetSessionTool(
-    private val getAllUsersUseCase: GetAllUsersUseCase,
+    private val findUsersByIdsUseCase: FindUsersByIdsUseCase,
     private val getEventCategoriesUseCase: GetEventCategoriesUseCase,
     private val getGroupsForUserUseCase: GetGroupsForUserUseCase,
     private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
@@ -37,14 +37,20 @@ class GetSessionTool(
                 All operations apply to the active group. Use set_active_group to switch.
 
                 knownCustomEventCategoryLabels are scoped to the active group. Prefer reusing
-                existing ones; create new ones when it makes sense. Keep them in mind internally
+                existing ones. Create new ones when it makes sense. Keep them in mind internally
                 and do not display them to the user unless asked.
                 """.trimIndent(),
         ) {
             handle {
-                val allUsers = getAllUsersUseCase()
                 val groups = getGroupsForUserUseCase(userId)
                 val activeGroup = getActiveMcpGroupUseCase(userId)
+
+                val usersInActiveGroup =
+                    activeGroup
+                        ?.let { findUsersByIdsUseCase(it.memberUserIds) }
+                        ?.values
+                        ?.toList()
+                        ?: emptyList()
 
                 val labels =
                     activeGroup?.let {
@@ -59,7 +65,7 @@ class GetSessionTool(
                 success(
                     Output(
                         currentUserId = userId,
-                        availableUsers = allUsers.map { it.toUserReferenceMcpDto() },
+                        usersInActiveGroup = usersInActiveGroup.map { it.toUserReferenceMcpDto() },
                         availableGroups = groups.map { it.toMcpReferenceDto() },
                         activeGroupId = activeGroup?.id,
                         knownCustomEventCategoryLabels = labels,
@@ -72,7 +78,7 @@ class GetSessionTool(
     @Serializable
     private data class Output(
         val currentUserId: String,
-        val availableUsers: List<UserReferenceMcpDto>,
+        val usersInActiveGroup: List<UserReferenceMcpDto>,
         val availableGroups: List<GroupReferenceMcpDto>,
         val activeGroupId: String?,
         val knownCustomEventCategoryLabels: List<String>,
