@@ -1,9 +1,9 @@
-package com.felix.livinglink.server.user.delivery.http
+package com.felix.livinglink.server.auth.delivery.http
 
+import com.felix.livinglink.server.auth.application.LoginUseCase
 import com.felix.livinglink.server.core.delivery.http.HttpRouteRegistrar
-import com.felix.livinglink.server.user.application.LoginUseCase
-import com.felix.livinglink.shared.login.LoginRequest
-import com.felix.livinglink.shared.login.LoginResponse
+import com.felix.livinglink.shared.auth.LoginRequestV1
+import com.felix.livinglink.shared.auth.LoginResponseV1
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
@@ -16,22 +16,22 @@ class LoginHttpRoute(
     private val loginUseCase: LoginUseCase,
 ) : HttpRouteRegistrar {
     override fun register(route: Route) {
-        route.post(LoginRequest.ROUTE) {
-            val request = call.receive<LoginRequest>()
+        route.post(LoginRequestV1.ROUTE) {
+            val request = call.receive<LoginRequestV1>()
 
             val response =
                 when (val output = loginUseCase(request.apiKey)) {
                     is LoginUseCase.Output.Valid ->
-                        LoginResponse.Success(
+                        LoginResponseV1.Success(
                             userId = output.userId,
                             username = output.username,
                         )
 
                     is LoginUseCase.Output.Invalid ->
-                        LoginResponse.InvalidKey
+                        LoginResponseV1.InvalidKey
                 }
 
-            call.respond<LoginResponse>(HttpStatusCode.OK, response)
+            call.respond<LoginResponseV1>(HttpStatusCode.OK, response)
         }
     }
 }

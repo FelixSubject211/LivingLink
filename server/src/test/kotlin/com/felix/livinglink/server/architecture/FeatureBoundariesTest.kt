@@ -9,6 +9,7 @@ import kotlin.test.Test
 class FeatureBoundariesTest {
     private val core = Layer("Core", "com.felix.livinglink.server.core..")
     private val user = Layer("User", "com.felix.livinglink.server.user..")
+    private val auth = Layer("Auth", "com.felix.livinglink.server.auth..")
     private val shoppingList = Layer("ShoppingList", "com.felix.livinglink.server.shoppingList..")
     private val calendar = Layer("Calendar", "com.felix.livinglink.server.calendar..")
     private val session = Layer("Session", "com.felix.livinglink.server.session..")
@@ -21,15 +22,19 @@ class FeatureBoundariesTest {
                 core.dependsOnNothing()
 
                 user.dependsOn(core)
-                user.doesNotDependOn(shoppingList, calendar, session)
+                user.doesNotDependOn(auth, shoppingList, calendar, session)
+
+                auth.dependsOn(core, user)
+                auth.doesNotDependOn(shoppingList, calendar, session)
 
                 shoppingList.dependsOn(core, user)
-                shoppingList.doesNotDependOn(calendar, session)
+                shoppingList.doesNotDependOn(auth, calendar, session)
 
                 calendar.dependsOn(core, user)
-                calendar.doesNotDependOn(shoppingList, session)
+                calendar.doesNotDependOn(auth, shoppingList, session)
 
                 session.dependsOn(core, user, shoppingList, calendar)
+                session.doesNotDependOn(auth)
             }
     }
 
