@@ -3,6 +3,7 @@ package com.felix.livinglink.composeapp
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.ui.login.LoginScreen
 import com.felix.livinglink.composeapp.ui.login.LoginViewModel
 import com.felix.livinglink.composeapp.di.LivingLinkClientModule
@@ -31,12 +32,13 @@ fun App() {
         content = {
             LivingLinkTheme {
                 val rootViewModel = koinViewModel<RootViewModel>()
-                val apiKey = rootViewModel.apiKey.collectAsStateWithLifecycle()
+                val authState = rootViewModel.authState.collectAsStateWithLifecycle()
 
-                if (apiKey.value == null) {
-                    LoginScreen(viewModel = koinViewModel<LoginViewModel>())
-                } else {
-                    HomeScreen(viewModel = koinViewModel<HomeViewModel>())
+                when (authState.value) {
+                    is AuthState.LoggedOut ->
+                        LoginScreen(viewModel = koinViewModel<LoginViewModel>())
+                    is AuthState.LoggedIn ->
+                        HomeScreen(viewModel = koinViewModel<HomeViewModel>())
                 }
             }
         },

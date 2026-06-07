@@ -10,6 +10,14 @@
     <string name="login_error_confirm">Ok</string>
 
     <string name="home_title">LivingLink</string>
-    <string name="home_message">You are logged in.</string>
     <string name="home_logout_button">Logout</string>
+
+    <string name="home_logged_in_as">Logged in as %1$s</string>
+    <string name="home_groups_title">Groups</string>
+    <string name="home_groups_single_subtitle">Everything you view and change applies to this group.</string>
+    <string name="home_groups_subtitle">Choose which group you are currently active in. Everything you view and change applies to the selected group.</string>
+    <string name="home_groups_empty">You are not a member of any group.</string>
+    <string name="home_error_network">Could not load groups. Check your connection.</string>
+    <string name="home_error_session_expired">Your session has expired. Please log in again.</string>
+    <string name="home_relogin_button">Log in again</string>
 </resources>

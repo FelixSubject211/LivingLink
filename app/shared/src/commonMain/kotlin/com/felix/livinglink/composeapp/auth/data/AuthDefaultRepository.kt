@@ -3,8 +3,9 @@ package com.felix.livinglink.composeapp.auth.data
 import com.felix.livinglink.composeapp.auth.domain.AuthLocalDataSource
 import com.felix.livinglink.composeapp.auth.domain.AuthRemoteDataSource
 import com.felix.livinglink.composeapp.auth.domain.AuthRepository
-import com.felix.livinglink.composeapp.auth.domain.LoginResult
+import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.auth.domain.Credentials
+import com.felix.livinglink.composeapp.auth.domain.LoginResult
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,26 +17,39 @@ class AuthDefaultRepository(
     private val authLocalDataSource: AuthLocalDataSource,
 ) : AuthRepository {
 
-    private val _apiKey = MutableStateFlow(authLocalDataSource.getCredentials()?.apiKey)
-    override val apiKey: StateFlow<String?> = _apiKey.asStateFlow()
+    private val _authState =
+        MutableStateFlow(authLocalDataSource.getCredentials().toAuthState())
+
+    override val authState: StateFlow<AuthState> = _authState.asStateFlow()
 
     override suspend fun login(apiKey: String): LoginResult {
         val result = authRemoteDataSource.login(apiKey)
         if (result is LoginResult.Success) {
-            authLocalDataSource.saveCredentials(
+            val credentials =
                 Credentials(
                     apiKey = result.apiKey,
                     userId = result.userId,
                     username = result.username,
-                ),
-            )
-            _apiKey.value = result.apiKey
+                )
+            authLocalDataSource.saveCredentials(credentials)
+            _authState.value = credentials.toAuthState()
         }
         return result
     }
 
     override suspend fun clear() {
         authLocalDataSource.clear()
-        _apiKey.value = null
+        _authState.value = AuthState.LoggedOut
     }
+
+    private fun Credentials?.toAuthState(): AuthState =
+        if (this == null) {
+            AuthState.LoggedOut
+        } else {
+            AuthState.LoggedIn(
+                apiKey = apiKey,
+                userId = userId,
+                username = username,
+            )
+        }
 }

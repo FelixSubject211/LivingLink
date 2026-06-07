@@ -2,6 +2,8 @@ package com.felix.livinglink.server.runner
 
 import com.felix.livinglink.server.core.config.HttpTransportSettings
 import com.felix.livinglink.server.core.delivery.http.HttpRouteRegistrar
+import com.felix.livinglink.server.core.delivery.http.installApiKeyAuth
+import com.felix.livinglink.server.user.config.ApiKeyUserSettings
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
@@ -19,6 +21,7 @@ import org.koin.core.annotation.Single
 class RestServerRunner(
     private val httpTransportSettings: HttpTransportSettings,
     private val httpRouteRegistrars: List<HttpRouteRegistrar>,
+    private val apiKeyUserSettings: ApiKeyUserSettings,
 ) {
     fun run() {
         embeddedServer(
@@ -46,6 +49,8 @@ class RestServerRunner(
                         },
                 )
             }
+
+            installApiKeyAuth(apiKeyUserSettings)
 
             routing {
                 httpRouteRegistrars.forEach { registrar ->

@@ -1,4 +1,4 @@
-package com.felix.livinglink.composeapp.auth.network
+package com.felix.livinglink.composeapp.core.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation

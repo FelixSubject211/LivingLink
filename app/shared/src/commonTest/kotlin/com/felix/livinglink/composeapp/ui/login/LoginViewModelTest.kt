@@ -25,6 +25,12 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class LoginViewModelTest {
 
+    private val loginSuccessResult = LoginResult.Success(
+        apiKey = "apiKey",
+        userId = "userId",
+        username = "username",
+    )
+
     private lateinit var loginUseCase: LoginUseCase
     private lateinit var viewModel: LoginViewModel
 
@@ -59,7 +65,7 @@ class LoginViewModelTest {
 
     @Test
     fun `onSubmit calls use case with trimmed key`() = runTest {
-        everySuspend { loginUseCase(any()) } returns LoginResult.Success
+        everySuspend { loginUseCase(any()) } returns loginSuccessResult
 
         viewModel.onApiKeyChanged("  my-key  ")
         viewModel.onSubmit()
@@ -71,7 +77,7 @@ class LoginViewModelTest {
 
     @Test
     fun `onSubmit clears state on success`() = runTest {
-        everySuspend { loginUseCase(any()) } returns LoginResult.Success
+        everySuspend { loginUseCase(any()) } returns loginSuccessResult
 
         viewModel.onApiKeyChanged("my-key")
         viewModel.onSubmit()
