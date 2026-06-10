@@ -1,6 +1,5 @@
-package com.felix.livinglink.server.user.config
+package com.felix.livinglink.server.core.config
 
-import com.felix.livinglink.server.core.config.Env
 import com.felix.livinglink.server.core.domain.User
 import org.koin.core.annotation.Single
 

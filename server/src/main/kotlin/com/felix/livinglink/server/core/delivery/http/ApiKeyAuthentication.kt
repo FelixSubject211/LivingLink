@@ -1,7 +1,7 @@
 package com.felix.livinglink.server.core.delivery.http
 
+import com.felix.livinglink.server.core.config.ApiKeyUserSettings
 import com.felix.livinglink.server.core.domain.User
-import com.felix.livinglink.server.user.config.ApiKeyUserSettings
 import io.ktor.server.application.Application
 import io.ktor.server.application.install
 import io.ktor.server.auth.Authentication

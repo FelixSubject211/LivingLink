@@ -20,6 +20,7 @@ class ListShoppingListItemsUseCase(
                 groupId = input.groupId,
                 completed = input.completed,
                 limit = input.limit,
+                offset = 0,
                 sort = input.sort,
             ),
         )

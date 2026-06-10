@@ -1,6 +1,6 @@
 package com.felix.livinglink.server.auth.application
 
-import com.felix.livinglink.server.user.config.ApiKeyUserSettings
+import com.felix.livinglink.server.core.config.ApiKeyUserSettings
 import org.koin.core.annotation.Single
 
 @Single

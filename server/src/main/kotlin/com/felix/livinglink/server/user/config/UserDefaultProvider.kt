@@ -1,5 +1,6 @@
 package com.felix.livinglink.server.user.config
 
+import com.felix.livinglink.server.core.config.ApiKeyUserSettings
 import com.felix.livinglink.server.core.config.McpTransport
 import com.felix.livinglink.server.core.config.McpTransportSettings
 import com.felix.livinglink.server.core.domain.User

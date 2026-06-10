@@ -1,9 +1,9 @@
 package com.felix.livinglink.server.runner
 
+import com.felix.livinglink.server.core.config.ApiKeyUserSettings
 import com.felix.livinglink.server.core.config.HttpTransportSettings
 import com.felix.livinglink.server.core.delivery.http.HttpRouteRegistrar
 import com.felix.livinglink.server.core.delivery.http.installApiKeyAuth
-import com.felix.livinglink.server.user.config.ApiKeyUserSettings
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod

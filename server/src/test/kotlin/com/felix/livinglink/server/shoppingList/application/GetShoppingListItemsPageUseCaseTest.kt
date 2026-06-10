@@ -1,6 +1,7 @@
 package com.felix.livinglink.server.shoppingList.application
 
 import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
+import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
@@ -17,22 +18,23 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 
-class ListShoppingListItemsUseCaseTest {
+class GetShoppingListItemsPageUseCaseTest {
     private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
     private val requireGroupMembershipUseCase = mock<RequireGroupMembershipUseCase>()
 
     private val useCase =
-        ListShoppingListItemsUseCase(
+        GetShoppingListItemsPageUseCase(
             shoppingListItemRepository = shoppingListItemRepository,
             requireGroupMembershipUseCase = requireGroupMembershipUseCase,
         )
 
-    private val item1 = shoppingListItem(id = "id-1", groupId = "group-1", name = "Milk")
-    private val item2 = shoppingListItem(id = "id-2", groupId = "group-1", name = "Bread")
+    private fun items(count: Int): List<ShoppingListItem> =
+        (1..count).map { shoppingListItem(id = "id-$it", groupId = "group-1", name = "item-$it") }
 
     @Test
-    fun `builds a group-scoped query and returns the repository result`() =
+    fun `fetches limit plus one and reports a next cursor when there are more items`() =
         runTest {
             every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
 
@@ -40,26 +42,71 @@ class ListShoppingListItemsUseCaseTest {
                 ShoppingListItemQuery(
                     groupId = "group-1",
                     completed = false,
-                    limit = 50,
+                    limit = 3,
                     offset = 0,
                     sort = ShoppingListItemSort.NameAscending,
                 )
 
-            everySuspend { shoppingListItemRepository.find(expectedQuery) } returns listOf(item1, item2)
+            everySuspend { shoppingListItemRepository.find(expectedQuery) } returns items(3)
 
             val result =
                 useCase(
-                    ListShoppingListItemsUseCase.Input(
+                    GetShoppingListItemsPageUseCase.Input(
                         byUserId = "user-1",
                         groupId = "group-1",
                         completed = false,
-                        limit = 50,
+                        limit = 2,
+                        offset = 0,
                         sort = ShoppingListItemSort.NameAscending,
                     ),
                 )
 
-            assertEquals(listOf(item1, item2), result)
+            assertEquals(listOf("id-1", "id-2"), result.items.map { it.id })
+            assertEquals(2, result.nextOffset)
             verifySuspend(exactly(1)) { shoppingListItemRepository.find(expectedQuery) }
+        }
+
+    @Test
+    fun `returns no next cursor when the page is not full`() =
+        runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+            everySuspend { shoppingListItemRepository.find(any()) } returns items(2)
+
+            val result =
+                useCase(
+                    GetShoppingListItemsPageUseCase.Input(
+                        byUserId = "user-1",
+                        groupId = "group-1",
+                        completed = null,
+                        limit = 5,
+                        offset = 0,
+                        sort = ShoppingListItemSort.CreatedAtDescending,
+                    ),
+                )
+
+            assertEquals(2, result.items.size)
+            assertNull(result.nextOffset)
+        }
+
+    @Test
+    fun `advances the offset by the page size for the next cursor`() =
+        runTest {
+            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+            everySuspend { shoppingListItemRepository.find(any()) } returns items(3)
+
+            val result =
+                useCase(
+                    GetShoppingListItemsPageUseCase.Input(
+                        byUserId = "user-1",
+                        groupId = "group-1",
+                        completed = null,
+                        limit = 2,
+                        offset = 10,
+                        sort = ShoppingListItemSort.CreatedAtDescending,
+                    ),
+                )
+
+            assertEquals(12, result.nextOffset)
         }
 
     @Test
@@ -70,12 +117,13 @@ class ListShoppingListItemsUseCaseTest {
 
             assertFailsWith<IllegalArgumentException> {
                 useCase(
-                    ListShoppingListItemsUseCase.Input(
+                    GetShoppingListItemsPageUseCase.Input(
                         byUserId = "user-1",
                         groupId = "group-1",
                         completed = null,
-                        limit = 50,
-                        sort = ShoppingListItemSort.NameAscending,
+                        limit = 2,
+                        offset = 0,
+                        sort = ShoppingListItemSort.CreatedAtDescending,
                     ),
                 )
             }

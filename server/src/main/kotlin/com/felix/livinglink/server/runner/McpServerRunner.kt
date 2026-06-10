@@ -1,8 +1,8 @@
 package com.felix.livinglink.server.runner
 
+import com.felix.livinglink.server.core.config.ApiKeyUserSettings
 import com.felix.livinglink.server.core.config.McpTransportSettings
 import com.felix.livinglink.server.core.delivery.mcp.server.McpServerFactory
-import com.felix.livinglink.server.user.config.ApiKeyUserSettings
 import io.ktor.server.cio.CIO
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.routing.routing

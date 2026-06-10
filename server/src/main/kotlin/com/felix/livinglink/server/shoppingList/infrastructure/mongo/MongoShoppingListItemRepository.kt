@@ -50,6 +50,7 @@ class MongoShoppingListItemRepository(
         return collection
             .find(Filters.and(filters))
             .sort(sort)
+            .skip(query.offset)
             .limit(query.limit)
             .toList()
             .map { it.toDomain() }

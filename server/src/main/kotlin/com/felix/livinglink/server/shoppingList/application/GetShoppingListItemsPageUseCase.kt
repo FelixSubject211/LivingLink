@@ -1,0 +1,52 @@
+package com.felix.livinglink.server.shoppingList.application
+
+import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
+import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
+import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
+import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
+import org.koin.core.annotation.Single
+
+@Single
+class GetShoppingListItemsPageUseCase(
+    private val shoppingListItemRepository: ShoppingListItemRepository,
+    private val requireGroupMembershipUseCase: RequireGroupMembershipUseCase,
+) {
+    suspend operator fun invoke(input: Input): Output {
+        require(input.limit >= 1) { "limit must be >= 1" }
+        require(input.offset >= 0) { "offset must be >= 0" }
+
+        requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
+
+        val fetched =
+            shoppingListItemRepository.find(
+                ShoppingListItemQuery(
+                    groupId = input.groupId,
+                    completed = input.completed,
+                    limit = input.limit + 1,
+                    offset = input.offset,
+                    sort = input.sort,
+                ),
+            )
+
+        val hasMore = fetched.size > input.limit
+        val items = if (hasMore) fetched.take(input.limit) else fetched
+        val nextOffset = if (hasMore) input.offset + input.limit else null
+
+        return Output(items = items, nextOffset = nextOffset)
+    }
+
+    data class Input(
+        val byUserId: String,
+        val groupId: String,
+        val completed: Boolean?,
+        val limit: Int,
+        val offset: Int,
+        val sort: ShoppingListItemSort,
+    )
+
+    data class Output(
+        val items: List<ShoppingListItem>,
+        val nextOffset: Int?,
+    )
+}
