@@ -2,7 +2,7 @@ package com.felix.livinglink.composeapp.groups.data
 
 import com.felix.livinglink.composeapp.auth.domain.AuthRepository
 import com.felix.livinglink.composeapp.auth.domain.AuthState
-import com.felix.livinglink.composeapp.groups.domain.GetGroupsResult
+import com.felix.livinglink.composeapp.core.domain.NetworkResult
 import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupState
 import com.felix.livinglink.composeapp.groups.domain.GroupsRemoteDataSource
@@ -42,13 +42,13 @@ class GroupsDefaultRepository(
                 ?: return LoadResult.Loading
 
         return when (val result = groupsRemoteDataSource.getGroups(apiKey)) {
-            is GetGroupsResult.Success -> {
-                LoadResult.Loaded(result.groups)
+            is NetworkResult.Success -> {
+                LoadResult.Loaded(result.value)
             }
-            is GetGroupsResult.NetworkError -> {
+            is NetworkResult.NetworkError -> {
                 LoadResult.Error(GroupState.Error.Network)
             }
-            is GetGroupsResult.Unauthorized -> {
+            is NetworkResult.Unauthorized -> {
                 authRepository.clear()
                 LoadResult.Loading
             }
