@@ -8,7 +8,7 @@ import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.shared.shoppingList.ListShoppingListItemsRequestV1
 import com.felix.livinglink.shared.shoppingList.ListShoppingListItemsResponseV1
-import com.felix.livinglink.shared.shoppingList.ShoppingListItemDto
+import com.felix.livinglink.shared.shoppingList.ShoppingListItemDtoV1
 import com.felix.livinglink.shared.shoppingList.ShoppingListItemSortV1
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -92,8 +92,8 @@ private fun ShoppingListItemSortV1.toDomain(): ShoppingListItemSort =
         ShoppingListItemSortV1.NameDescending -> ShoppingListItemSort.NameDescending
     }
 
-private fun ShoppingListItem.toDtoV1(): ShoppingListItemDto =
-    ShoppingListItemDto(
+private fun ShoppingListItem.toDtoV1(): ShoppingListItemDtoV1 =
+    ShoppingListItemDtoV1(
         id = id,
         name = name,
         completed = isCompleted,

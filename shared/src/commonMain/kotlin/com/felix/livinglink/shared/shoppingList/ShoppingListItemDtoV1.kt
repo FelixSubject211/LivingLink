@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlin.time.Instant
 
 @Serializable
-data class ShoppingListItemDto(
+data class ShoppingListItemDtoV1(
     val id: String,
     val name: String,
     val completed: Boolean,

@@ -3,7 +3,7 @@ package com.felix.livinglink.shared.groups
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class GroupDto(
+data class GroupDtoV1(
     val id: String,
     val name: String,
 )

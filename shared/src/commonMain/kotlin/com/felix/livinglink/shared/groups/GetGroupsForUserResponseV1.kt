@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class GetGroupsForUserResponseV1(
-    val groups: List<GroupDto>,
+    val groups: List<GroupDtoV1>,
 )

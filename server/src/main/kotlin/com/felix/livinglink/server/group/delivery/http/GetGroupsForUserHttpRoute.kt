@@ -6,7 +6,7 @@ import com.felix.livinglink.server.core.delivery.http.requireUser
 import com.felix.livinglink.server.group.application.GetGroupsForUserUseCase
 import com.felix.livinglink.shared.groups.GetGroupsForUserRequestV1
 import com.felix.livinglink.shared.groups.GetGroupsForUserResponseV1
-import com.felix.livinglink.shared.groups.GroupDto
+import com.felix.livinglink.shared.groups.GroupDtoV1
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
@@ -28,7 +28,7 @@ class GetGroupsForUserHttpRoute(
                 call.respond(
                     HttpStatusCode.OK,
                     GetGroupsForUserResponseV1(
-                        groups = groups.map { GroupDto(id = it.id, name = it.name) },
+                        groups = groups.map { GroupDtoV1(id = it.id, name = it.name) },
                     ),
                 )
             }

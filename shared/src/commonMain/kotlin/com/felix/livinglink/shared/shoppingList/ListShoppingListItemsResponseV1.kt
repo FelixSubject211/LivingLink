@@ -4,6 +4,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ListShoppingListItemsResponseV1(
-    val items: List<ShoppingListItemDto>,
+    val items: List<ShoppingListItemDtoV1>,
     val nextCursor: String?,
 )
