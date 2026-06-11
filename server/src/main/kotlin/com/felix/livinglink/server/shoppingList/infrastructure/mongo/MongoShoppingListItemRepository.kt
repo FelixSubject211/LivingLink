@@ -11,6 +11,7 @@ import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.flow.toList
+import org.bson.conversions.Bson
 import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
@@ -29,14 +30,6 @@ class MongoShoppingListItemRepository(
         toDomain = MongoShoppingListItemDocument::toDomain,
     ) {
     override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> {
-        val filters =
-            buildList {
-                add(Filters.eq("groupId", query.groupId))
-                query.completed?.let { completed ->
-                    add(Filters.eq("completed", completed))
-                }
-            }
-
         val sort =
             when (query.sort) {
                 ShoppingListItemSort.CreatedAtAscending -> Sorts.ascending("createdAt")
@@ -48,11 +41,23 @@ class MongoShoppingListItemRepository(
             }
 
         return collection
-            .find(Filters.and(filters))
+            .find(query.toFilter())
             .sort(sort)
             .skip(query.offset)
             .limit(query.limit)
             .toList()
             .map { it.toDomain() }
+    }
+
+    override suspend fun count(query: ShoppingListItemQuery): Long =
+        collection.countDocuments(query.toFilter())
+
+    private fun ShoppingListItemQuery.toFilter(): Bson {
+        val filters =
+            buildList {
+                add(Filters.eq("groupId", groupId))
+                completed?.let { add(Filters.eq("completed", it)) }
+            }
+        return Filters.and(filters)
     }
 }

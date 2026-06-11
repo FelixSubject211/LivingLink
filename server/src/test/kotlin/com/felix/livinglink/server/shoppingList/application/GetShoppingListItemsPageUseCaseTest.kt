@@ -48,6 +48,7 @@ class GetShoppingListItemsPageUseCaseTest {
                 )
 
             everySuspend { shoppingListItemRepository.find(expectedQuery) } returns items(3)
+            everySuspend { shoppingListItemRepository.count(expectedQuery) } returns 42
 
             val result =
                 useCase(
@@ -63,7 +64,9 @@ class GetShoppingListItemsPageUseCaseTest {
 
             assertEquals(listOf("id-1", "id-2"), result.items.map { it.id })
             assertEquals(2, result.nextOffset)
+            assertEquals(42, result.totalCount)
             verifySuspend(exactly(1)) { shoppingListItemRepository.find(expectedQuery) }
+            verifySuspend(exactly(1)) { shoppingListItemRepository.count(expectedQuery) }
         }
 
     @Test
@@ -71,6 +74,7 @@ class GetShoppingListItemsPageUseCaseTest {
         runTest {
             every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
             everySuspend { shoppingListItemRepository.find(any()) } returns items(2)
+            everySuspend { shoppingListItemRepository.count(any()) } returns 2
 
             val result =
                 useCase(
@@ -86,6 +90,7 @@ class GetShoppingListItemsPageUseCaseTest {
 
             assertEquals(2, result.items.size)
             assertNull(result.nextOffset)
+            assertEquals(2, result.totalCount)
         }
 
     @Test
@@ -93,6 +98,7 @@ class GetShoppingListItemsPageUseCaseTest {
         runTest {
             every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
             everySuspend { shoppingListItemRepository.find(any()) } returns items(3)
+            everySuspend { shoppingListItemRepository.count(any()) } returns 100
 
             val result =
                 useCase(
@@ -129,5 +135,6 @@ class GetShoppingListItemsPageUseCaseTest {
             }
 
             verifySuspend(exactly(0)) { shoppingListItemRepository.find(any()) }
+            verifySuspend(exactly(0)) { shoppingListItemRepository.count(any()) }
         }
 }

@@ -18,22 +18,27 @@ class GetShoppingListItemsPageUseCase(
 
         requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
 
-        val fetched =
-            shoppingListItemRepository.find(
-                ShoppingListItemQuery(
-                    groupId = input.groupId,
-                    completed = input.completed,
-                    limit = input.limit + 1,
-                    offset = input.offset,
-                    sort = input.sort,
-                ),
+        val query =
+            ShoppingListItemQuery(
+                groupId = input.groupId,
+                completed = input.completed,
+                limit = input.limit + 1,
+                offset = input.offset,
+                sort = input.sort,
             )
+
+        val fetched = shoppingListItemRepository.find(query)
+        val totalCount = shoppingListItemRepository.count(query)
 
         val hasMore = fetched.size > input.limit
         val items = if (hasMore) fetched.take(input.limit) else fetched
         val nextOffset = if (hasMore) input.offset + input.limit else null
 
-        return Output(items = items, nextOffset = nextOffset)
+        return Output(
+            items = items,
+            nextOffset = nextOffset,
+            totalCount = totalCount,
+        )
     }
 
     data class Input(
@@ -48,5 +53,6 @@ class GetShoppingListItemsPageUseCase(
     data class Output(
         val items: List<ShoppingListItem>,
         val nextOffset: Int?,
+        val totalCount: Long,
     )
 }

@@ -124,6 +124,70 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
             assertEquals(listOf("3", "4"), page.map { it.id })
         }
 
+    @Test
+    fun `count should only count items of the queried group`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "Milk", groupId = "group-1"),
+                    createDocument(id = "2", name = "Bread", groupId = "group-1"),
+                    createDocument(id = "3", name = "Eggs", groupId = "group-2"),
+                ),
+            )
+
+            val count =
+                repository.count(
+                    ShoppingListItemQuery(
+                        groupId = "group-1",
+                        limit = 10,
+                        offset = 0,
+                        sort = ShoppingListItemSort.NameAscending,
+                    ),
+                )
+
+            assertEquals(2, count)
+        }
+
+    @Test
+    fun `count should respect the completed filter`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "Milk", completed = false),
+                    createDocument(id = "2", name = "Bread", completed = true),
+                    createDocument(id = "3", name = "Eggs", completed = false),
+                    createDocument(id = "4", name = "Cheese", completed = false, groupId = "group-2"),
+                ),
+            )
+
+            val open = repository.count(ShoppingListItemQuery(groupId = "group-1", completed = false, limit = 10, offset = 0))
+            val completed = repository.count(ShoppingListItemQuery(groupId = "group-1", completed = true, limit = 10, offset = 0))
+            val all = repository.count(ShoppingListItemQuery(groupId = "group-1", completed = null, limit = 10, offset = 0))
+
+            assertEquals(2, open)
+            assertEquals(1, completed)
+            assertEquals(3, all)
+        }
+
+    @Test
+    fun `count should ignore limit and offset`() =
+        runTest {
+            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it") }
+            collection.insertMany(items)
+
+            val count =
+                repository.count(
+                    ShoppingListItemQuery(
+                        groupId = "group-1",
+                        limit = 2,
+                        offset = 3,
+                        sort = ShoppingListItemSort.NameAscending,
+                    ),
+                )
+
+            assertEquals(5, count)
+        }
+
     private fun createDocument(
         id: String,
         name: String,

@@ -75,6 +75,7 @@ class GetShoppingListItemsPageHttpRoute(
                     ListShoppingListItemsResponseV1(
                         items = output.items.map { it.toDtoV1() },
                         nextCursor = output.nextOffset?.toString(),
+                        totalCount = output.totalCount.toInt(),
                     ),
                 )
             }
