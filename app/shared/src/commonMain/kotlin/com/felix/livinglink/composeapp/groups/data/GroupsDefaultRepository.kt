@@ -3,8 +3,9 @@ package com.felix.livinglink.composeapp.groups.data
 import com.felix.livinglink.composeapp.auth.domain.AuthRepository
 import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.core.domain.NetworkResult
+import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.groups.domain.Group
-import com.felix.livinglink.composeapp.groups.domain.GroupState
+import com.felix.livinglink.composeapp.groups.domain.GroupsContent
 import com.felix.livinglink.composeapp.groups.domain.GroupsRemoteDataSource
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
 import kotlinx.coroutines.flow.Flow
@@ -27,7 +28,7 @@ class GroupsDefaultRepository(
             emit(loadOnce())
         }
 
-    override val state: Flow<GroupState> =
+    override val state: Flow<Loadable<GroupsContent>> =
         combine(loadResult, selectedGroupId) { result, selectedId ->
             result.toState(selectedId)
         }
@@ -46,7 +47,7 @@ class GroupsDefaultRepository(
                 LoadResult.Loaded(result.value)
             }
             is NetworkResult.NetworkError -> {
-                LoadResult.Error(GroupState.Error.Network)
+                LoadResult.Error(Loadable.Error.Network)
             }
             is NetworkResult.Unauthorized -> {
                 authRepository.clear()
@@ -63,21 +64,23 @@ class GroupsDefaultRepository(
         ) : LoadResult
 
         data class Error(
-            val error: GroupState.Error,
+            val error: Loadable.Error,
         ) : LoadResult
 
-        fun toState(selectedId: String?): GroupState =
+        fun toState(selectedId: String?): Loadable<GroupsContent> =
             when (this) {
-                is Loading -> GroupState.Loading
+                is Loading -> Loadable.Loading
                 is Error -> error
                 is Loaded ->
                     when {
-                        groups.isEmpty() -> GroupState.Empty
+                        groups.isEmpty() -> Loadable.Empty
                         else -> {
                             val selected =
                                 groups.firstOrNull { it.id == selectedId }
                                     ?: groups.first()
-                            GroupState.Content(groups = groups, selectedGroup = selected)
+                            Loadable.Content(
+                                GroupsContent(groups = groups, selectedGroup = selected)
+                            )
                         }
                     }
             }

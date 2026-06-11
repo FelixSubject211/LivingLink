@@ -5,9 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.felix.livinglink.composeapp.auth.application.LogoutUseCase
 import com.felix.livinglink.composeapp.auth.application.ObserveAuthStateUseCase
 import com.felix.livinglink.composeapp.auth.domain.AuthState
+import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.groups.application.ObserveGroupStateUseCase
 import com.felix.livinglink.composeapp.groups.application.SelectGroupUseCase
-import com.felix.livinglink.composeapp.groups.domain.GroupState
+import com.felix.livinglink.composeapp.groups.domain.GroupsContent
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -27,10 +28,10 @@ class HomeViewModel(
         combine(
             observeAuthStateUseCase(),
             observeGroupStateUseCase(),
-        ) { authState, groupRepositoryState ->
+        ) { authState, groups ->
             HomeScreenState(
                 username = (authState as? AuthState.LoggedIn)?.username,
-                groups = groupRepositoryState.toUiState(),
+                groups = groups.toUiState(),
             )
         }.stateIn(
             scope = viewModelScope,
@@ -48,19 +49,19 @@ class HomeViewModel(
         }
     }
 
-    private fun GroupState.toUiState(): GroupsUiState =
+    private fun Loadable<GroupsContent>.toUiState(): GroupsUiState =
         when (this) {
-            is GroupState.Loading -> GroupsUiState.Loading
-            is GroupState.Empty -> GroupsUiState.Empty
-            is GroupState.Content ->
-                if (groups.size == 1) {
-                    GroupsUiState.Single(group = groups.first())
+            is Loadable.Loading -> GroupsUiState.Loading
+            is Loadable.Empty -> GroupsUiState.Empty
+            is Loadable.Error -> GroupsUiState.Error
+            is Loadable.Content ->
+                if (value.groups.size == 1) {
+                    GroupsUiState.Single(group = value.groups.first())
                 } else {
                     GroupsUiState.Content(
-                        groups = groups,
-                        selectedGroupId = selectedGroup.id,
+                        groups = value.groups,
+                        selectedGroupId = value.selectedGroup.id,
                     )
                 }
-            is GroupState.Error -> GroupsUiState.Error
         }
 }
