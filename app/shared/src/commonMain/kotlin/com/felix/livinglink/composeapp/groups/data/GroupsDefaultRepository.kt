@@ -8,11 +8,13 @@ import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupsContent
 import com.felix.livinglink.composeapp.groups.domain.GroupsRemoteDataSource
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import org.koin.core.annotation.Single
+import kotlin.time.Duration.Companion.minutes
 
 @Single(binds = [GroupsRepository::class])
 class GroupsDefaultRepository(
@@ -25,7 +27,10 @@ class GroupsDefaultRepository(
     private val loadResult: Flow<LoadResult> =
         flow {
             emit(LoadResult.Loading)
-            emit(loadOnce())
+            while (true) {
+                emit(loadOnce())
+                delay(POLL_INTERVAL)
+            }
         }
 
     override val state: Flow<Loadable<GroupsContent>> =
@@ -84,5 +89,9 @@ class GroupsDefaultRepository(
                         }
                     }
             }
+    }
+
+    private companion object {
+        val POLL_INTERVAL = 1.minutes
     }
 }
