@@ -6,8 +6,8 @@ import com.felix.livinglink.server.core.delivery.http.requireUser
 import com.felix.livinglink.server.shoppingList.application.GetShoppingListItemsPageUseCase
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
-import com.felix.livinglink.shared.shoppingList.ListShoppingListItemsRequestV1
-import com.felix.livinglink.shared.shoppingList.ListShoppingListItemsResponseV1
+import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageRequestV1
+import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageResponseV1
 import com.felix.livinglink.shared.shoppingList.ShoppingListItemDtoV1
 import com.felix.livinglink.shared.shoppingList.ShoppingListItemSortV1
 import io.ktor.http.HttpStatusCode
@@ -23,37 +23,37 @@ class GetShoppingListItemsPageHttpRoute(
 ) : HttpRouteRegistrar {
     override fun register(route: Route) {
         route.authenticate(API_KEY_AUTH) {
-            get(ListShoppingListItemsRequestV1.ROUTE) {
+            get(GetShoppingListItemsPageRequestV1.ROUTE) {
                 val user = requireUser()
                 val params = call.request.queryParameters
 
-                val groupId = params[ListShoppingListItemsRequestV1.QUERY_GROUP_ID]
+                val groupId = params[GetShoppingListItemsPageRequestV1.QUERY_GROUP_ID]
                 if (groupId.isNullOrBlank()) {
                     call.respond(
                         HttpStatusCode.BadRequest,
-                        "Missing required query parameter '${ListShoppingListItemsRequestV1.QUERY_GROUP_ID}'.",
+                        "Missing required query parameter '${GetShoppingListItemsPageRequestV1.QUERY_GROUP_ID}'.",
                     )
                     return@get
                 }
 
                 val completed =
-                    params[ListShoppingListItemsRequestV1.QUERY_COMPLETED]
+                    params[GetShoppingListItemsPageRequestV1.QUERY_COMPLETED]
                         ?.toBooleanStrictOrNull()
 
                 val limit =
-                    params[ListShoppingListItemsRequestV1.QUERY_LIMIT]
+                    params[GetShoppingListItemsPageRequestV1.QUERY_LIMIT]
                         ?.toIntOrNull()
-                        ?.coerceIn(1, ListShoppingListItemsRequestV1.MAX_LIMIT)
-                        ?: ListShoppingListItemsRequestV1.DEFAULT_LIMIT
+                        ?.coerceIn(1, GetShoppingListItemsPageRequestV1.MAX_LIMIT)
+                        ?: GetShoppingListItemsPageRequestV1.DEFAULT_LIMIT
 
                 val offset =
-                    params[ListShoppingListItemsRequestV1.QUERY_CURSOR]
+                    params[GetShoppingListItemsPageRequestV1.QUERY_CURSOR]
                         ?.toIntOrNull()
                         ?.takeIf { it >= 0 }
                         ?: 0
 
                 val sort =
-                    params[ListShoppingListItemsRequestV1.QUERY_SORT]
+                    params[GetShoppingListItemsPageRequestV1.QUERY_SORT]
                         ?.let { raw -> runCatching { ShoppingListItemSortV1.valueOf(raw) }.getOrNull() }
                         ?.toDomain()
                         ?: ShoppingListItemSort.CreatedAtDescending
@@ -72,7 +72,7 @@ class GetShoppingListItemsPageHttpRoute(
 
                 call.respond(
                     HttpStatusCode.OK,
-                    ListShoppingListItemsResponseV1(
+                    GetShoppingListItemsPageResponseV1(
                         items = output.items.map { it.toDtoV1() },
                         nextCursor = output.nextOffset?.toString(),
                         totalCount = output.totalCount.toInt(),
