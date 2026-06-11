@@ -19,17 +19,16 @@ jobs:
             cd /opt/livinglink
             git fetch origin master
             git reset --hard origin/master
-            docker compose \
-              --env-file .env \
+
+            COMPOSE="docker compose --env-file .env \
               -f docker-compose.yml \
               -f docker-compose.app.yml \
               -f docker-compose.web.yml \
-              -f docker-compose.cloudflare.yml \
-              down
-            docker compose \
-              --env-file .env \
-              -f docker-compose.yml \
-              -f docker-compose.app.yml \
-              -f docker-compose.web.yml \
-              -f docker-compose.cloudflare.yml \
-              up --build -d
+              -f docker-compose.cloudflare.yml"
+
+            $COMPOSE down
+
+            $COMPOSE build app
+            $COMPOSE build web
+
+            $COMPOSE up -d

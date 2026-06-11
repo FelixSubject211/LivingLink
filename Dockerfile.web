@@ -21,7 +21,7 @@ COPY local.properties .
 COPY server/build.gradle.kts server/build.gradle.kts
 
 RUN chmod +x ./gradlew
-RUN ./gradlew --no-daemon :app:webApp:wasmJsBrowserDistribution
+RUN ./gradlew --no-daemon -Dorg.gradle.jvmargs="-Xmx2g" :app:webApp:wasmJsBrowserDistribution
 
 FROM caddy:2-alpine
 COPY --from=build /workspace/app/webApp/build/dist/wasmJs/productionExecutable /srv
