@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import kotlin.time.Duration.Companion.minutes
 
@@ -22,7 +23,7 @@ class GroupsDefaultRepository(
     private val authRepository: AuthRepository,
 ) : GroupsRepository {
 
-    private val selectedGroupId = MutableStateFlow<String?>(null)
+    private val _selectedGroupId = MutableStateFlow<String?>(null)
 
     private val loadResult: Flow<LoadResult> =
         flow {
@@ -34,12 +35,20 @@ class GroupsDefaultRepository(
         }
 
     override val state: Flow<Loadable<GroupsContent>> =
-        combine(loadResult, selectedGroupId) { result, selectedId ->
+        combine(loadResult, _selectedGroupId) { result, selectedId ->
             result.toState(selectedId)
         }
 
+    override val selectedGroupId: Flow<String?> = state.map {
+        if (it is Loadable.Content) {
+            it.value.selectedGroup.id
+        } else {
+            null
+        }
+    }
+
     override fun selectGroup(groupId: String) {
-        selectedGroupId.value = groupId
+        _selectedGroupId.value = groupId
     }
 
     private suspend fun loadOnce(): LoadResult {

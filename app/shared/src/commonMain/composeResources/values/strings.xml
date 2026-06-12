@@ -1,4 +1,6 @@
 <resources>
+    <string name="network_error_title">Network Error</string>
+
     <string name="login_title">LivingLink</string>
     <string name="login_api_key_placeholder">API key</string>
     <string name="login_connect_button">Connect</string>
@@ -20,4 +22,7 @@
     <string name="home_error_network">Could not load groups. Check your connection.</string>
     <string name="home_error_session_expired">Your session has expired. Please log in again.</string>
     <string name="home_relogin_button">Log in again</string>
+
+    <string name="shopping_list_title">Shopping List</string>
+    <string name="shopping_list_error_network_description">Could not load the shopping list. Check your connection.</string>
 </resources>

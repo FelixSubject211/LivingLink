@@ -8,8 +8,7 @@ import com.felix.livinglink.composeapp.ui.login.LoginScreen
 import com.felix.livinglink.composeapp.ui.login.LoginViewModel
 import com.felix.livinglink.composeapp.di.LivingLinkClientModule
 import com.felix.livinglink.composeapp.di.rememberPlatformKoinConfiguration
-import com.felix.livinglink.composeapp.ui.home.HomeScreen
-import com.felix.livinglink.composeapp.ui.home.HomeViewModel
+import com.felix.livinglink.composeapp.ui.shoppinglist.ShoppingListScreen
 import com.felix.livinglink.composeapp.ui.theme.LivingLinkTheme
 import org.koin.compose.KoinApplication
 import org.koin.compose.viewmodel.koinViewModel
@@ -37,8 +36,9 @@ fun App() {
                 when (authState.value) {
                     is AuthState.LoggedOut ->
                         LoginScreen(viewModel = koinViewModel<LoginViewModel>())
-                    is AuthState.LoggedIn ->
-                        HomeScreen(viewModel = koinViewModel<HomeViewModel>())
+                    is AuthState.LoggedIn -> {
+                        ShoppingListScreen(viewModel = koinViewModel())
+                    }
                 }
             }
         },
