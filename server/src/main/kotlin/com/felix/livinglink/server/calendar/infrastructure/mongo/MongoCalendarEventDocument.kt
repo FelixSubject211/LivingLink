@@ -13,6 +13,7 @@ import kotlinx.datetime.plus
 import org.bson.codecs.pojo.annotations.BsonId
 import org.bson.codecs.pojo.annotations.BsonProperty
 import kotlin.time.Instant
+import com.felix.livinglink.server.calendar.domain.Participant as DomainParticipant
 
 data class MongoCalendarEventDocument(
     @param:BsonId
@@ -196,8 +197,8 @@ data class MongoCalendarEventDocument(
         @param:BsonProperty(MongoCalendarEventFields.Participant.RSVP_EVENTS)
         val rsvpEvents: List<RsvpEvent>,
     ) {
-        fun toDomain(): com.felix.livinglink.server.calendar.domain.Participant =
-            com.felix.livinglink.server.calendar.domain.Participant(
+        fun toDomain(): DomainParticipant =
+            DomainParticipant(
                 userId = userId,
                 rsvpEvents = rsvpEvents.map { it.toDomain() },
             )
@@ -208,16 +209,14 @@ data class MongoCalendarEventDocument(
             @param:BsonProperty(MongoCalendarEventFields.Participant.RsvpEvent.AT)
             val at: Instant,
         ) {
-            fun toDomain(): com.felix.livinglink.server.calendar.domain.Participant.RsvpEvent =
-                com.felix.livinglink.server.calendar.domain.Participant.RsvpEvent(
-                    status =
-                        com.felix.livinglink.server.calendar.domain.Participant.RsvpStatus
-                            .valueOf(status),
+            fun toDomain(): DomainParticipant.RsvpEvent =
+                DomainParticipant.RsvpEvent(
+                    status = DomainParticipant.RsvpStatus.valueOf(status),
                     at = at,
                 )
 
             companion object {
-                fun fromDomain(event: com.felix.livinglink.server.calendar.domain.Participant.RsvpEvent): RsvpEvent =
+                fun fromDomain(event: DomainParticipant.RsvpEvent): RsvpEvent =
                     RsvpEvent(
                         status = event.status.name,
                         at = event.at,
@@ -226,7 +225,7 @@ data class MongoCalendarEventDocument(
         }
 
         companion object {
-            fun fromDomain(participant: com.felix.livinglink.server.calendar.domain.Participant): Participant =
+            fun fromDomain(participant: DomainParticipant): Participant =
                 Participant(
                     userId = participant.userId,
                     rsvpEvents = participant.rsvpEvents.map { RsvpEvent.fromDomain(it) },
