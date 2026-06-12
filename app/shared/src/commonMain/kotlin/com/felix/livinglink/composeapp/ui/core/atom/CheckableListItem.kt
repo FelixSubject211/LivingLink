@@ -1,4 +1,4 @@
-package com.felix.livinglink.composeapp.core.ui.atom
+package com.felix.livinglink.composeapp.ui.core.atom
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

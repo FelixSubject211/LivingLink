@@ -1,4 +1,4 @@
-package com.felix.livinglink.composeapp.core.ui.molecule
+package com.felix.livinglink.composeapp.ui.core.molecule
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable

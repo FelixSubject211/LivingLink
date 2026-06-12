@@ -1,4 +1,4 @@
-package com.felix.livinglink.composeapp.core.ui.atom
+package com.felix.livinglink.composeapp.ui.core.atom
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.MaterialTheme

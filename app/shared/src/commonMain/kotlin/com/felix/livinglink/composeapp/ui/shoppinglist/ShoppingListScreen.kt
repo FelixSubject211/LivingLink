@@ -12,9 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.felix.livinglink.composeapp.core.ui.atom.CheckableListItem
-import com.felix.livinglink.composeapp.core.ui.molecule.VisibleRangeEffect
-import com.felix.livinglink.composeapp.core.ui.organism.ErrorContent
+import com.felix.livinglink.composeapp.ui.core.atom.CheckableListItem
+import com.felix.livinglink.composeapp.ui.core.molecule.VisibleRangeEffect
+import com.felix.livinglink.composeapp.ui.core.organism.ErrorContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.tweener.czan.designsystem.atom.bars.CenterAlignedTopAppBar
 import com.tweener.czan.designsystem.atom.line.HorizontalDashedLine

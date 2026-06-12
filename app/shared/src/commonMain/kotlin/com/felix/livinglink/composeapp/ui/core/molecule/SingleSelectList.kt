@@ -1,11 +1,11 @@
-package com.felix.livinglink.composeapp.core.ui.molecule
+package com.felix.livinglink.composeapp.ui.core.molecule
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.felix.livinglink.composeapp.core.ui.atom.SelectableListItem
+import com.felix.livinglink.composeapp.ui.core.atom.SelectableListItem
 import com.tweener.czan.theme.Size
 
 @Composable

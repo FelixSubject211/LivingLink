@@ -1,4 +1,4 @@
-package com.felix.livinglink.composeapp.core.ui.organism
+package com.felix.livinglink.composeapp.ui.core.organism
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
