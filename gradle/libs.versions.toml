@@ -33,6 +33,7 @@ czan = "2.11.3"
 buildkonfig = "0.21.2"
 multiplatformSettings = "1.3.0"
 turbine = "1.2.1"
+navigationCompose = "2.9.2"
 
 [libraries]
 # Server + App + Shared
@@ -74,6 +75,7 @@ androidx-lifecycle-runtimeCompose = { module = "org.jetbrains.androidx.lifecycle
 czan = { module = "io.github.tweener:czan", version.ref = "czan" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
+navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
 
 # App: Networking (Ktor Client)
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }

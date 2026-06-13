@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.koin.compiler)
     alias(libs.plugins.mokkery)
     alias(libs.plugins.buildkonfig)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 kotlin {
@@ -74,6 +75,7 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings)
+            implementation(libs.navigation.compose)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)

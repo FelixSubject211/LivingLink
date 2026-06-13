@@ -1,6 +1,9 @@
 <resources>
     <string name="network_error_title">Network Error</string>
 
+    <string name="nav_shopping_list">Shopping List</string>
+    <string name="nav_home">Home</string>
+
     <string name="login_title">LivingLink</string>
     <string name="login_api_key_placeholder">API key</string>
     <string name="login_connect_button">Connect</string>
