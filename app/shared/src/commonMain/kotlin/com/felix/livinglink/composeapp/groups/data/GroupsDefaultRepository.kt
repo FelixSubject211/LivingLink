@@ -13,9 +13,9 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import org.koin.core.annotation.Single
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 @Single(binds = [GroupsRepository::class])
 class GroupsDefaultRepository(
@@ -25,12 +25,16 @@ class GroupsDefaultRepository(
 
     private val _selectedGroupId = MutableStateFlow<String?>(null)
 
+    private val lastLoaded = MutableStateFlow<List<Group>?>(null)
+
     private val loadResult: Flow<LoadResult> =
         flow {
             emit(LoadResult.Loading)
             while (true) {
-                emit(loadOnce())
-                delay(POLL_INTERVAL)
+                val result = loadOnce()
+                emit(result)
+                val interval = if (result is LoadResult.Error) RETRY_INTERVAL else POLL_INTERVAL
+                delay(interval)
             }
         }
 
@@ -38,14 +42,6 @@ class GroupsDefaultRepository(
         combine(loadResult, _selectedGroupId) { result, selectedId ->
             result.toState(selectedId)
         }
-
-    override val selectedGroupId: Flow<String?> = state.map {
-        if (it is Loadable.Content) {
-            it.value.selectedGroup.id
-        } else {
-            null
-        }
-    }
 
     override fun selectGroup(groupId: String) {
         _selectedGroupId.value = groupId
@@ -58,11 +54,12 @@ class GroupsDefaultRepository(
 
         return when (val result = groupsRemoteDataSource.getGroups(apiKey)) {
             is NetworkResult.Success -> {
+                lastLoaded.value = result.value
                 LoadResult.Loaded(result.value)
             }
-            is NetworkResult.NetworkError -> {
-                LoadResult.Error(Loadable.Error.Network)
-            }
+            is NetworkResult.NetworkError ->
+                lastLoaded.value?.let { LoadResult.Loaded(it) }
+                    ?: LoadResult.Error(Loadable.Error.Network)
             is NetworkResult.Unauthorized -> {
                 authRepository.clear()
                 LoadResult.Loading
@@ -102,5 +99,6 @@ class GroupsDefaultRepository(
 
     private companion object {
         val POLL_INTERVAL = 1.minutes
+        val RETRY_INTERVAL = 1.seconds
     }
 }

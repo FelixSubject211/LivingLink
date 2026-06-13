@@ -5,10 +5,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -29,6 +30,10 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
     val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val listState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
 
     Scaffold(
         topBar = {
@@ -57,6 +62,7 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
                 is ShoppingListScreenState.Content ->
                     ShoppingListContent(
                         shoppingList = current.shoppingList,
+                        listState = listState,
                         onVisibleRangeChanged = viewModel::onVisibleRangeChanged,
                     )
             }
@@ -67,10 +73,9 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
 @Composable
 private fun ShoppingListContent(
     shoppingList: ShoppingListContent,
+    listState: LazyListState,
     onVisibleRangeChanged: (first: Int, last: Int) -> Unit,
 ) {
-    val listState = rememberLazyListState()
-
     VisibleRangeEffect(
         listState = listState,
         onVisibleRangeChanged = onVisibleRangeChanged,

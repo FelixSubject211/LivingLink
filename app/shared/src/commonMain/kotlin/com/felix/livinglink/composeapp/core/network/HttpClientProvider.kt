@@ -1,6 +1,7 @@
 package com.felix.livinglink.composeapp.core.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
@@ -17,5 +18,10 @@ fun provideHttpClient(): HttpClient =
                     explicitNulls = true
                 },
             )
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 5_000
+            connectTimeoutMillis = 5_000
+            socketTimeoutMillis = 5_000
         }
     }

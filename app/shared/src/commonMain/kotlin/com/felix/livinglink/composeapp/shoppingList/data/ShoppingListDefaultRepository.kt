@@ -39,12 +39,21 @@ class ShoppingListDefaultRepository(
         channelFlow {
             launch { evictRemovedGroups() }
 
-            groupsRepository.selectedGroupId
+            groupsRepository.state
                 .distinctUntilChanged()
-                .collectLatest { groupId ->
-                    when (groupId) {
-                        null -> send(Loadable.Loading)
-                        else -> syncGroup(groupId)
+                .collectLatest { groupsState ->
+                    when (groupsState) {
+                        is Loadable.Content ->
+                            syncGroup(groupsState.value.selectedGroup.id)
+
+                        is Loadable.Error ->
+                            send(Loadable.Error.Network)
+
+                        is Loadable.Empty ->
+                            send(Loadable.Empty)
+
+                        is Loadable.Loading ->
+                            send(Loadable.Loading)
                     }
                 }
         }.flowOn(dispatcher)

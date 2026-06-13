@@ -63,28 +63,31 @@ class ShoppingListDefaultRepositoryTest {
         )
     }
 
+    private fun groupsContent(
+        groups: List<Group>,
+        selected: Group = groups.first(),
+    ) = Loadable.Content(
+        GroupsContent(groups = groups, selectedGroup = selected),
+    )
+
     @Test
     fun `retains present groups and evicts removed ones, ignoring non-content states`() = runTest {
         val groupA = Group(id = "group-1", name = "A")
         val groupB = Group(id = "group-2", name = "B")
 
         every { groupsRepository.state } returns flowOf(
-            Loadable.Content(
-                GroupsContent(
-                    groups = listOf(groupA, groupB),
-                    selectedGroup = groupA,
-                ),
-            ),
-            Loadable.Content(
-                GroupsContent(
-                    groups = listOf(groupA),
-                    selectedGroup = groupA,
-                ),
-            ),
+            groupsContent(groups = listOf(groupA, groupB), selected = groupA),
+            groupsContent(groups = listOf(groupA), selected = groupA),
             Loadable.Loading,
         )
-        every { groupsRepository.selectedGroupId } returns flowOf(null)
+        every { authRepository.authState } returns MutableStateFlow(
+            AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
+        )
+        every { localDataSource.observe(any()) } returns MutableStateFlow(null)
         everySuspend { localDataSource.retainGroups(any()) } returns Unit
+        everySuspend {
+            remoteDataSource.getPage(any(), any(), any(), any(), any())
+        } returns NetworkResult.NetworkError
 
         createRepository()
 
@@ -93,15 +96,58 @@ class ShoppingListDefaultRepositoryTest {
             cancelAndIgnoreRemainingEvents()
         }
 
-        verifySuspend(VerifyMode.exhaustiveOrder) {
+        verifySuspend(VerifyMode.order) {
             localDataSource.retainGroups(setOf("group-1", "group-2"))
             localDataSource.retainGroups(setOf("group-1"))
         }
     }
 
     @Test
+    fun `emits loading while groups are loading`() = runTest {
+        every { groupsRepository.state } returns flowOf(Loadable.Loading)
+        every { localDataSource.observe(any()) } returns MutableStateFlow(null)
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
+
+        createRepository()
+
+        repository.state.test {
+            assertEquals(Loadable.Loading, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `emits network error when groups fail to load`() = runTest {
+        every { groupsRepository.state } returns flowOf(Loadable.Error.Network)
+        every { localDataSource.observe(any()) } returns MutableStateFlow(null)
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
+
+        createRepository()
+
+        repository.state.test {
+            assertEquals(Loadable.Error.Network, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `emits empty when user has no groups`() = runTest {
+        every { groupsRepository.state } returns flowOf(Loadable.Empty)
+        every { localDataSource.observe(any()) } returns MutableStateFlow(null)
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
+
+        createRepository()
+
+        repository.state.test {
+            assertEquals(Loadable.Empty, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `fills cache from network, then serves from cache on re-subscription`() = runTest {
         val groupId = "group-1"
+        val group = Group(id = groupId, name = "A")
 
         val item = ShoppingListItem(
             id = "item-1",
@@ -118,12 +164,12 @@ class ShoppingListDefaultRepositoryTest {
 
         val cacheFlow = MutableStateFlow<ShoppingListContent?>(null)
 
-        every { groupsRepository.state } returns flowOf(Loadable.Loading)
-        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        every { groupsRepository.state } returns flowOf(groupsContent(groups = listOf(group)))
         every { authRepository.authState } returns MutableStateFlow(
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns cacheFlow
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             localDataSource.putRange(any(), any(), any(), any())
@@ -160,6 +206,7 @@ class ShoppingListDefaultRepositoryTest {
     @Test
     fun `loads correct pages when scrolling down and back up`() = runTest {
         val groupId = "group-1"
+        val group = Group(id = groupId, name = "A")
         val totalCount = 1000
 
         fun itemAt(index: Int) = ShoppingListItem(
@@ -173,12 +220,12 @@ class ShoppingListDefaultRepositoryTest {
 
         val stubCache = StubMergingCache()
 
-        every { groupsRepository.state } returns flowOf(Loadable.Loading)
-        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        every { groupsRepository.state } returns flowOf(groupsContent(groups = listOf(group)))
         every { authRepository.authState } returns MutableStateFlow(
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns stubCache.flow
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             remoteDataSource.getPage(any(), any(), any(), any(), any())
@@ -224,6 +271,7 @@ class ShoppingListDefaultRepositoryTest {
     @Test
     fun `polling refreshes the currently visible pages with fresh data`() = runTest {
         val groupId = "group-1"
+        val group = Group(id = groupId, name = "A")
         val totalCount = 1000
 
         fun itemAt(index: Int, version: String) = ShoppingListItem(
@@ -238,12 +286,12 @@ class ShoppingListDefaultRepositoryTest {
         var version = "v1"
         val stubCache = StubMergingCache()
 
-        every { groupsRepository.state } returns flowOf(Loadable.Loading)
-        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        every { groupsRepository.state } returns flowOf(groupsContent(groups = listOf(group)))
         every { authRepository.authState } returns MutableStateFlow(
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns stubCache.flow
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             remoteDataSource.getPage(any(), any(), any(), any(), any())
