@@ -13,5 +13,11 @@ interface ShoppingListLocalDataSource {
         totalCount: Int,
     )
 
+    suspend fun updateItem(
+        groupId: String,
+        itemId: String,
+        transform: (ShoppingListItem) -> ShoppingListItem,
+    )
+
     suspend fun retainGroups(groupIds: Set<String>)
 }

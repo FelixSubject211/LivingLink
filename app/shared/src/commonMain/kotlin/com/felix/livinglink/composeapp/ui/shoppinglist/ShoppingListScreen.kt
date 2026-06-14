@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,8 +22,13 @@ import com.tweener.czan.designsystem.atom.bars.CenterAlignedTopAppBar
 import com.tweener.czan.designsystem.atom.line.HorizontalDashedLine
 import com.tweener.czan.designsystem.atom.line.LineDefaults
 import com.tweener.czan.designsystem.atom.scaffold.Scaffold
+import com.tweener.czan.designsystem.atom.snackbar.Snackbar
+import com.tweener.czan.designsystem.atom.snackbar.SnackbarDefaults
+import com.tweener.czan.designsystem.atom.snackbar.rememberSnackbarHostState
+import kotlinx.coroutines.flow.collectLatest
 import livinglink.app.shared.generated.resources.Res
 import livinglink.app.shared.generated.resources.network_error_title
+import livinglink.app.shared.generated.resources.shopping_list_change_failed
 import livinglink.app.shared.generated.resources.shopping_list_error_network_description
 import livinglink.app.shared.generated.resources.shopping_list_title
 import org.jetbrains.compose.resources.stringResource
@@ -35,11 +41,29 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
         LazyListState()
     }
 
+    val snackbarHostState = rememberSnackbarHostState()
+    val changeFailedMessage = stringResource(Res.string.shopping_list_change_failed)
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collectLatest { event ->
+            when (event) {
+                is ShoppingListEvent.ChangeFailed ->
+                    snackbarHostState.showSnackbar(message = changeFailedMessage)
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = stringResource(Res.string.shopping_list_title),
                 textStyle = MaterialTheme.typography.titleLarge,
+            )
+        },
+        snackbarHost = {
+            Snackbar(
+                hostState = snackbarHostState,
+                colors = SnackbarDefaults.snackbarColors(),
             )
         },
     ) { paddingValues ->
@@ -62,8 +86,10 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
                 is ShoppingListScreenState.Content ->
                     ShoppingListContent(
                         shoppingList = current.shoppingList,
+                        pendingItemIds = current.pendingItemIds,
                         listState = listState,
                         onVisibleRangeChanged = viewModel::onVisibleRangeChanged,
+                        onToggleItem = viewModel::onToggleItem,
                     )
             }
         }
@@ -73,8 +99,10 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
 @Composable
 private fun ShoppingListContent(
     shoppingList: ShoppingListContent,
+    pendingItemIds: Set<String>,
     listState: LazyListState,
     onVisibleRangeChanged: (first: Int, last: Int) -> Unit,
+    onToggleItem: (itemId: String, completed: Boolean) -> Unit,
 ) {
     VisibleRangeEffect(
         listState = listState,
@@ -93,11 +121,15 @@ private fun ShoppingListContent(
             key = { index -> shoppingList.order[index] ?: "placeholder-$index" },
         ) { index ->
             val item = shoppingList.itemAt(index)
+            val isPending = item != null && item.id in pendingItemIds
             CheckableListItem(
                 text = item?.name.orEmpty(),
                 checked = item?.completed ?: false,
-                enabled = false,
-                onClick = null,
+                enabled = item != null && !isPending,
+                loading = isPending,
+                onClick = item?.let { current ->
+                    { onToggleItem(current.id, !current.completed) }
+                },
             )
             Divider()
         }

@@ -9,6 +9,7 @@ sealed interface ShoppingListScreenState {
 
     data class Content(
         val shoppingList: ShoppingListContent,
+        val pendingItemIds: Set<String> = emptySet(),
     ) : ShoppingListScreenState
 
     companion object {

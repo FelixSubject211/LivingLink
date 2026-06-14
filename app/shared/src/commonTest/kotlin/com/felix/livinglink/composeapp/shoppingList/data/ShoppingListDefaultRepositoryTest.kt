@@ -14,13 +14,16 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListPage
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
+import dev.mokkery.matcher.eq
 import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -69,6 +72,12 @@ class ShoppingListDefaultRepositoryTest {
     ) = Loadable.Content(
         GroupsContent(groups = groups, selectedGroup = selected),
     )
+
+    private fun stubLoggedIn() {
+        every { authRepository.authState } returns MutableStateFlow(
+            AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
+        )
+    }
 
     @Test
     fun `retains present groups and evicts removed ones, ignoring non-content states`() = runTest {
@@ -335,6 +344,128 @@ class ShoppingListDefaultRepositoryTest {
             assertEquals(itemAt(450, "v2"), afterPoll.itemAt(450))
 
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `changeItemCompleteState writes server item to cache on success`() = runTest {
+        val groupId = "group-1"
+        val serverItem = ShoppingListItem(
+            id = "item-1",
+            name = "Milk",
+            completed = true,
+            createdByUserId = "user-1",
+            createdAt = Instant.fromEpochMilliseconds(0),
+            updatedAt = Instant.fromEpochMilliseconds(0),
+        )
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
+        } returns NetworkResult.Success(serverItem)
+        everySuspend {
+            localDataSource.updateItem(any(), any(), any())
+        } returns Unit
+
+        createRepository()
+
+        val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+
+        assertEquals(ShoppingListRepository.ChangeCompleteStateResult.Success, result)
+        verifySuspend(exactly(1)) {
+            remoteDataSource.changeItemCompleteState("key", groupId, "item-1", true)
+        }
+        verifySuspend(exactly(1)) {
+            localDataSource.updateItem(eq(groupId), eq("item-1"), any())
+        }
+    }
+
+    @Test
+    fun `changeItemCompleteState does not touch cache when server returns null`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
+        } returns NetworkResult.Success(null)
+
+        createRepository()
+
+        val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+
+        assertEquals(ShoppingListRepository.ChangeCompleteStateResult.Success, result)
+        verifySuspend(exactly(0)) {
+            localDataSource.updateItem(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `changeItemCompleteState returns NetworkError and leaves cache untouched`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
+        } returns NetworkResult.NetworkError
+
+        createRepository()
+
+        val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+
+        assertEquals(ShoppingListRepository.ChangeCompleteStateResult.NetworkError, result)
+        verifySuspend(exactly(0)) {
+            localDataSource.updateItem(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `changeItemCompleteState clears auth and returns NoActiveGroup on unauthorized`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend { authRepository.clear() } returns Unit
+        everySuspend {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
+        } returns NetworkResult.Unauthorized
+
+        createRepository()
+
+        val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+
+        assertEquals(ShoppingListRepository.ChangeCompleteStateResult.NoActiveGroup, result)
+        verifySuspend(exactly(1)) { authRepository.clear() }
+    }
+
+    @Test
+    fun `changeItemCompleteState returns NoActiveGroup when not logged in`() = runTest {
+        every { authRepository.authState } returns MutableStateFlow(AuthState.LoggedOut)
+
+        createRepository()
+
+        val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+
+        assertEquals(ShoppingListRepository.ChangeCompleteStateResult.NoActiveGroup, result)
+        verifySuspend(exactly(0)) {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `changeItemCompleteState returns NoActiveGroup when no group selected`() = runTest {
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(null)
+
+        createRepository()
+
+        val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+
+        assertEquals(ShoppingListRepository.ChangeCompleteStateResult.NoActiveGroup, result)
+        verifySuspend(exactly(0)) {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
         }
     }
 

@@ -7,4 +7,15 @@ interface ShoppingListRepository {
     val state: Flow<Loadable<ShoppingListContent>>
 
     fun setVisibleRange(firstVisibleIndex: Int, lastVisibleIndex: Int)
+
+    suspend fun changeItemCompleteState(
+        itemId: String,
+        completed: Boolean,
+    ): ChangeCompleteStateResult
+
+    enum class ChangeCompleteStateResult {
+        Success,
+        NetworkError,
+        NoActiveGroup,
+    }
 }

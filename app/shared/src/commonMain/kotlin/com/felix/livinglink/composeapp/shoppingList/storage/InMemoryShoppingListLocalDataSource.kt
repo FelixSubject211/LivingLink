@@ -30,6 +30,19 @@ class InMemoryShoppingListLocalDataSource : ShoppingListLocalDataSource {
         stateOf(groupId).update { current -> current.merge(fromIndex, items, totalCount) }
     }
 
+    override suspend fun updateItem(
+        groupId: String,
+        itemId: String,
+        transform: (ShoppingListItem) -> ShoppingListItem,
+    ) {
+        stateOf(groupId).update { current ->
+            val existing = current?.itemsById?.get(itemId) ?: return@update current
+            current.copy(
+                itemsById = current.itemsById + (itemId to transform(existing)),
+            )
+        }
+    }
+
     override suspend fun retainGroups(groupIds: Set<String>) {
         mutex.withLock {
             groups.keys.retainAll(groupIds)

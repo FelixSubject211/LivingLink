@@ -3,9 +3,12 @@ package com.felix.livinglink.composeapp.shoppingList.network
 import com.felix.livinglink.composeapp.config.BuildKonfig
 import com.felix.livinglink.composeapp.core.domain.NetworkResult
 import com.felix.livinglink.composeapp.core.network.getNetworkResult
+import com.felix.livinglink.composeapp.core.network.postNetworkResult
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListPage
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
+import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateRequestV1
+import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateResponseV1
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageRequestV1
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageResponseV1
 import com.felix.livinglink.shared.shoppingList.ShoppingListItemDtoV1
@@ -39,6 +42,37 @@ class KtorShoppingListRemoteDataSource(
                 nextCursor = response.nextCursor,
                 totalCount = response.totalCount,
             )
+        }
+
+    override suspend fun changeItemCompleteState(
+        apiKey: String,
+        groupId: String,
+        itemId: String,
+        completed: Boolean,
+    ): NetworkResult<ShoppingListItem?> =
+        httpClient.postNetworkResult<ChangeShoppingListItemCompleteStateRequestV1, ChangeShoppingListItemCompleteStateResponseV1>(
+            urlString = "${BuildKonfig.BASE_URL}${ChangeShoppingListItemCompleteStateRequestV1.ROUTE}",
+            body = ChangeShoppingListItemCompleteStateRequestV1(
+                groupId = groupId,
+                itemId = itemId,
+                completed = completed,
+            ),
+        ) {
+            bearerAuth(apiKey)
+        }.map { response ->
+            when (response) {
+                is ChangeShoppingListItemCompleteStateResponseV1.Changed ->
+                    response.item.toDomain()
+
+                is ChangeShoppingListItemCompleteStateResponseV1.AlreadyInState ->
+                    response.item.toDomain()
+
+                is ChangeShoppingListItemCompleteStateResponseV1.NotFound ->
+                    null
+
+                is ChangeShoppingListItemCompleteStateResponseV1.Conflict ->
+                    null
+            }
         }
 }
 

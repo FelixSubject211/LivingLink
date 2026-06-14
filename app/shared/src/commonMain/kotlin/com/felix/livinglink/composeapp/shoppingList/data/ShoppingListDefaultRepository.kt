@@ -1,7 +1,9 @@
 package com.felix.livinglink.composeapp.shoppingList.data
 
 import com.felix.livinglink.composeapp.auth.domain.AuthRepository
+import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.core.domain.Loadable
+import com.felix.livinglink.composeapp.core.domain.NetworkResult
 import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
@@ -19,6 +21,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
@@ -30,7 +33,7 @@ class ShoppingListDefaultRepository(
     private val shoppingListLocalDataSource: ShoppingListLocalDataSource,
     private val authRepository: AuthRepository,
     private val groupsRepository: GroupsRepository,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.Default,
+    dispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ShoppingListRepository {
 
     private val visibleRange = MutableStateFlow(VisibleRange(first = 0, last = 0))
@@ -54,12 +57,54 @@ class ShoppingListDefaultRepository(
 
                         is Loadable.Loading ->
                             send(Loadable.Loading)
+
                     }
                 }
         }.flowOn(dispatcher)
 
     override fun setVisibleRange(firstVisibleIndex: Int, lastVisibleIndex: Int) {
         visibleRange.value = VisibleRange(first = firstVisibleIndex, last = lastVisibleIndex)
+    }
+
+    override suspend fun changeItemCompleteState(
+        itemId: String,
+        completed: Boolean,
+    ): ShoppingListRepository.ChangeCompleteStateResult {
+        val apiKey =
+            (authRepository.authState.value as? AuthState.LoggedIn)?.apiKey
+                ?: return ShoppingListRepository.ChangeCompleteStateResult.NoActiveGroup
+
+        val groupId = groupsRepository.selectedGroupId.first()
+            ?: return ShoppingListRepository.ChangeCompleteStateResult.NoActiveGroup
+
+        val result =
+            shoppingListRemoteDataSource.changeItemCompleteState(
+                apiKey = apiKey,
+                groupId = groupId,
+                itemId = itemId,
+                completed = completed,
+            )
+
+        return when (result) {
+            is NetworkResult.Success -> {
+                result.value?.let { serverItem ->
+                    shoppingListLocalDataSource.updateItem(
+                        groupId = groupId,
+                        itemId = itemId,
+                        transform = { serverItem }
+                    )
+                }
+                ShoppingListRepository.ChangeCompleteStateResult.Success
+            }
+
+            is NetworkResult.NetworkError ->
+                ShoppingListRepository.ChangeCompleteStateResult.NetworkError
+
+            is NetworkResult.Unauthorized -> {
+                authRepository.clear()
+                ShoppingListRepository.ChangeCompleteStateResult.NoActiveGroup
+            }
+        }
     }
 
     private suspend fun evictRemovedGroups() {

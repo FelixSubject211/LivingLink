@@ -28,4 +28,5 @@
 
     <string name="shopping_list_title">Shopping List</string>
     <string name="shopping_list_error_network_description">Could not load the shopping list. Check your connection.</string>
+    <string name="shopping_list_change_failed">Could not update the item. Check your connection.</string>
 </resources>

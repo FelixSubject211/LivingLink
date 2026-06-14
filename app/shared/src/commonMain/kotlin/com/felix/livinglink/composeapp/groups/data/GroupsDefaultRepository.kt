@@ -8,11 +8,16 @@ import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupsContent
 import com.felix.livinglink.composeapp.groups.domain.GroupsRemoteDataSource
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import org.koin.core.annotation.Single
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -21,6 +26,7 @@ import kotlin.time.Duration.Companion.seconds
 class GroupsDefaultRepository(
     private val groupsRemoteDataSource: GroupsRemoteDataSource,
     private val authRepository: AuthRepository,
+    scope: CoroutineScope = CoroutineScope(Dispatchers.Default),
 ) : GroupsRepository {
 
     private val _selectedGroupId = MutableStateFlow<String?>(null)
@@ -36,11 +42,16 @@ class GroupsDefaultRepository(
                 val interval = if (result is LoadResult.Error) RETRY_INTERVAL else POLL_INTERVAL
                 delay(interval)
             }
-        }
+        }.shareIn(scope, SharingStarted.WhileSubscribed(), replay = 1)
 
     override val state: Flow<Loadable<GroupsContent>> =
         combine(loadResult, _selectedGroupId) { result, selectedId ->
             result.toState(selectedId)
+        }
+
+    override val selectedGroupId: Flow<String?> =
+        state.map { loadable ->
+            (loadable as? Loadable.Content)?.value?.selectedGroup?.id
         }
 
     override fun selectGroup(groupId: String) {
