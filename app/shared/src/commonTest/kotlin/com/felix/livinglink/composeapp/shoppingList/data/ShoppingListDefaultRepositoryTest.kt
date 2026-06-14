@@ -477,6 +477,126 @@ class ShoppingListDefaultRepositoryTest {
             if (item is Loadable.Content && predicate(item.value)) return item.value
         }
     }
+
+    @Test
+    fun `deleteItem removes item from cache on success`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.deleteItem(any(), any(), any())
+        } returns NetworkResult.Success(true)
+        everySuspend {
+            localDataSource.removeItem(any(), any())
+        } returns Unit
+
+        createRepository()
+
+        val result = repository.deleteItem(itemId = "item-1")
+
+        assertEquals(ShoppingListRepository.DeleteResult.Success, result)
+        verifySuspend(exactly(1)) {
+            remoteDataSource.deleteItem("key", groupId, "item-1")
+        }
+        verifySuspend(exactly(1)) {
+            localDataSource.removeItem(eq(groupId), eq("item-1"))
+        }
+    }
+
+    @Test
+    fun `deleteItem removes item from cache even when server reports not found`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.deleteItem(any(), any(), any())
+        } returns NetworkResult.Success(false)
+        everySuspend {
+            localDataSource.removeItem(any(), any())
+        } returns Unit
+
+        createRepository()
+
+        val result = repository.deleteItem(itemId = "item-1")
+
+        assertEquals(ShoppingListRepository.DeleteResult.Success, result)
+        verifySuspend(exactly(1)) {
+            localDataSource.removeItem(eq(groupId), eq("item-1"))
+        }
+    }
+
+    @Test
+    fun `deleteItem returns NetworkError and leaves cache untouched`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.deleteItem(any(), any(), any())
+        } returns NetworkResult.NetworkError
+
+        createRepository()
+
+        val result = repository.deleteItem(itemId = "item-1")
+
+        assertEquals(ShoppingListRepository.DeleteResult.NetworkError, result)
+        verifySuspend(exactly(0)) {
+            localDataSource.removeItem(any(), any())
+        }
+    }
+
+    @Test
+    fun `deleteItem clears auth and returns NoActiveGroup on unauthorized`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend { authRepository.clear() } returns Unit
+        everySuspend {
+            remoteDataSource.deleteItem(any(), any(), any())
+        } returns NetworkResult.Unauthorized
+
+        createRepository()
+
+        val result = repository.deleteItem(itemId = "item-1")
+
+        assertEquals(ShoppingListRepository.DeleteResult.NoActiveGroup, result)
+        verifySuspend(exactly(1)) { authRepository.clear() }
+        verifySuspend(exactly(0)) {
+            localDataSource.removeItem(any(), any())
+        }
+    }
+
+    @Test
+    fun `deleteItem returns NoActiveGroup when not logged in`() = runTest {
+        every { authRepository.authState } returns MutableStateFlow(AuthState.LoggedOut)
+
+        createRepository()
+
+        val result = repository.deleteItem(itemId = "item-1")
+
+        assertEquals(ShoppingListRepository.DeleteResult.NoActiveGroup, result)
+        verifySuspend(exactly(0)) {
+            remoteDataSource.deleteItem(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `deleteItem returns NoActiveGroup when no group selected`() = runTest {
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(null)
+
+        createRepository()
+
+        val result = repository.deleteItem(itemId = "item-1")
+
+        assertEquals(ShoppingListRepository.DeleteResult.NoActiveGroup, result)
+        verifySuspend(exactly(0)) {
+            remoteDataSource.deleteItem(any(), any(), any())
+        }
+    }
 }
 
 private class StubMergingCache {

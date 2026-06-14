@@ -17,4 +17,10 @@ interface ShoppingListRemoteDataSource {
         itemId: String,
         completed: Boolean,
     ): NetworkResult<ShoppingListItem?>
+
+    suspend fun deleteItem(
+        apiKey: String,
+        groupId: String,
+        itemId: String,
+    ): NetworkResult<Boolean>
 }

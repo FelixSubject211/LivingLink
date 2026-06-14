@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.shoppingList.application.ChangeShoppingListItemCompleteStateUseCase
+import com.felix.livinglink.composeapp.shoppingList.application.DeleteShoppingListItemUseCase
 import com.felix.livinglink.composeapp.shoppingList.application.ObserveShoppingListUseCase
 import com.felix.livinglink.composeapp.shoppingList.application.SetShoppingListVisibleRangeUseCase
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,17 +25,20 @@ import org.koin.core.annotation.KoinViewModel
 class ShoppingListViewModel(
     private val setVisibleRangeUseCase: SetShoppingListVisibleRangeUseCase,
     private val changeItemCompleteStateUseCase: ChangeShoppingListItemCompleteStateUseCase,
+    private val deleteItemUseCase: DeleteShoppingListItemUseCase,
     observeShoppingListUseCase: ObserveShoppingListUseCase,
 ) : ViewModel() {
 
     private val pendingItemIds = MutableStateFlow<Set<String>>(emptySet())
+    private val itemPendingDelete = MutableStateFlow<ShoppingListItem?>(null)
 
     val state: StateFlow<ShoppingListScreenState> =
         combine(
             observeShoppingListUseCase(),
             pendingItemIds,
-        ) { loadable, pending ->
-            loadable.toUiState(pending)
+            itemPendingDelete,
+        ) { loadable, pending, pendingDelete ->
+            loadable.toUiState(pending, pendingDelete)
         }.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
@@ -63,8 +68,36 @@ class ShoppingListViewModel(
         }
     }
 
+    fun onRequestDeleteItem(item: ShoppingListItem) {
+        itemPendingDelete.value = item
+    }
+
+    fun onCancelDelete() {
+        itemPendingDelete.value = null
+    }
+
+    fun onConfirmDelete() {
+        val item = itemPendingDelete.value ?: return
+        itemPendingDelete.value = null
+
+        if (item.id in pendingItemIds.value) return
+
+        viewModelScope.launch {
+            pendingItemIds.update { it + item.id }
+            try {
+                val result = deleteItemUseCase(itemId = item.id)
+                if (result != ShoppingListRepository.DeleteResult.Success) {
+                    _events.emit(ShoppingListEvent.DeleteFailed)
+                }
+            } finally {
+                pendingItemIds.update { it - item.id }
+            }
+        }
+    }
+
     private fun Loadable<ShoppingListContent>.toUiState(
         pendingItemIds: Set<String>,
+        itemPendingDelete: ShoppingListItem?,
     ): ShoppingListScreenState =
         when (this) {
             is Loadable.Loading -> ShoppingListScreenState.Loading
@@ -74,10 +107,12 @@ class ShoppingListViewModel(
                 ShoppingListScreenState.Content(
                     shoppingList = value,
                     pendingItemIds = pendingItemIds,
+                    itemPendingDelete = itemPendingDelete,
                 )
         }
 }
 
 sealed interface ShoppingListEvent {
     data object ChangeFailed : ShoppingListEvent
+    data object DeleteFailed : ShoppingListEvent
 }

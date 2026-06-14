@@ -1,5 +1,8 @@
 package com.felix.livinglink.composeapp.ui.core.atom
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -25,6 +28,7 @@ import com.tweener.czan.designsystem.atom.checkbox.Checkbox
 import com.tweener.czan.theme.Size
 import kotlinx.coroutines.delay
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CheckableListItem(
     text: String,
@@ -33,6 +37,7 @@ fun CheckableListItem(
     enabled: Boolean = true,
     loading: Boolean = false,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
 ) {
     var showLoading by remember { mutableStateOf(false) }
 
@@ -46,10 +51,24 @@ fun CheckableListItem(
     }
 
     val clickable = onClick != null && enabled && !loading
+    val longClickable = onLongClick != null && enabled && !loading
+
+    val rowModifier =
+        if (longClickable) {
+            modifier
+                .fillMaxWidth()
+                .combinedClickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                    onLongClick = { onLongClick?.invoke() },
+                )
+        } else {
+            modifier.fillMaxWidth()
+        }
 
     Row(
-        modifier = modifier
-            .fillMaxWidth()
+        modifier = rowModifier
             .padding(horizontal = Size.Padding.Default, vertical = Size.Padding.ExtraSmall),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(Size.Padding.Default),
@@ -85,7 +104,7 @@ fun CheckableListItem(
                         checked = checked,
                         enabled = clickable,
                         onCheckedChange = {
-                            if (clickable) onClick.invoke()
+                            if (clickable) onClick?.invoke()
                         },
                     )
                 }

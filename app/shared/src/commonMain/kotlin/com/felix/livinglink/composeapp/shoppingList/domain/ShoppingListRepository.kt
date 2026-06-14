@@ -13,7 +13,17 @@ interface ShoppingListRepository {
         completed: Boolean,
     ): ChangeCompleteStateResult
 
+    suspend fun deleteItem(
+        itemId: String,
+    ): DeleteResult
+
     enum class ChangeCompleteStateResult {
+        Success,
+        NetworkError,
+        NoActiveGroup,
+    }
+
+    enum class DeleteResult {
         Success,
         NetworkError,
         NoActiveGroup,

@@ -18,7 +18,9 @@ import com.felix.livinglink.composeapp.ui.core.atom.CheckableListItem
 import com.felix.livinglink.composeapp.ui.core.molecule.VisibleRangeEffect
 import com.felix.livinglink.composeapp.ui.core.organism.ErrorContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.tweener.czan.designsystem.atom.bars.CenterAlignedTopAppBar
+import com.tweener.czan.designsystem.atom.dialog.AlertDialog
 import com.tweener.czan.designsystem.atom.line.HorizontalDashedLine
 import com.tweener.czan.designsystem.atom.line.LineDefaults
 import com.tweener.czan.designsystem.atom.scaffold.Scaffold
@@ -29,6 +31,11 @@ import kotlinx.coroutines.flow.collectLatest
 import livinglink.app.shared.generated.resources.Res
 import livinglink.app.shared.generated.resources.network_error_title
 import livinglink.app.shared.generated.resources.shopping_list_change_failed
+import livinglink.app.shared.generated.resources.shopping_list_delete_cancel
+import livinglink.app.shared.generated.resources.shopping_list_delete_confirm
+import livinglink.app.shared.generated.resources.shopping_list_delete_failed
+import livinglink.app.shared.generated.resources.shopping_list_delete_message
+import livinglink.app.shared.generated.resources.shopping_list_delete_title
 import livinglink.app.shared.generated.resources.shopping_list_error_network_description
 import livinglink.app.shared.generated.resources.shopping_list_title
 import org.jetbrains.compose.resources.stringResource
@@ -43,12 +50,16 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
 
     val snackbarHostState = rememberSnackbarHostState()
     val changeFailedMessage = stringResource(Res.string.shopping_list_change_failed)
+    val deleteFailedMessage = stringResource(Res.string.shopping_list_delete_failed)
 
     LaunchedEffect(Unit) {
         viewModel.events.collectLatest { event ->
             when (event) {
                 is ShoppingListEvent.ChangeFailed ->
                     snackbarHostState.showSnackbar(message = changeFailedMessage)
+
+                is ShoppingListEvent.DeleteFailed ->
+                    snackbarHostState.showSnackbar(message = deleteFailedMessage)
             }
         }
     }
@@ -87,9 +98,13 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
                     ShoppingListContent(
                         shoppingList = current.shoppingList,
                         pendingItemIds = current.pendingItemIds,
+                        itemPendingDelete = current.itemPendingDelete,
                         listState = listState,
                         onVisibleRangeChanged = viewModel::onVisibleRangeChanged,
                         onToggleItem = viewModel::onToggleItem,
+                        onRequestDeleteItem = viewModel::onRequestDeleteItem,
+                        onConfirmDelete = viewModel::onConfirmDelete,
+                        onCancelDelete = viewModel::onCancelDelete,
                     )
             }
         }
@@ -100,9 +115,13 @@ fun ShoppingListScreen(viewModel: ShoppingListViewModel) {
 private fun ShoppingListContent(
     shoppingList: ShoppingListContent,
     pendingItemIds: Set<String>,
+    itemPendingDelete: ShoppingListItem?,
     listState: LazyListState,
     onVisibleRangeChanged: (first: Int, last: Int) -> Unit,
     onToggleItem: (itemId: String, completed: Boolean) -> Unit,
+    onRequestDeleteItem: (item: ShoppingListItem) -> Unit,
+    onConfirmDelete: () -> Unit,
+    onCancelDelete: () -> Unit,
 ) {
     VisibleRangeEffect(
         listState = listState,
@@ -130,9 +149,23 @@ private fun ShoppingListContent(
                 onClick = item?.let { current ->
                     { onToggleItem(current.id, !current.completed) }
                 },
+                onLongClick = item?.let { current ->
+                    { onRequestDeleteItem(current) }
+                },
             )
             Divider()
         }
+    }
+
+    itemPendingDelete?.let { item ->
+        AlertDialog(
+            title = stringResource(Res.string.shopping_list_delete_title),
+            message = stringResource(Res.string.shopping_list_delete_message, item.name),
+            confirmButtonLabel = stringResource(Res.string.shopping_list_delete_confirm),
+            dismissButtonLabel = stringResource(Res.string.shopping_list_delete_cancel),
+            onConfirmButtonClicked = onConfirmDelete,
+            onDismiss = onCancelDelete,
+        )
     }
 }
 

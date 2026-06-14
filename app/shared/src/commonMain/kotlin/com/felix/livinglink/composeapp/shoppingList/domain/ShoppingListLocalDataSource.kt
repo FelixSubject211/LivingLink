@@ -19,5 +19,10 @@ interface ShoppingListLocalDataSource {
         transform: (ShoppingListItem) -> ShoppingListItem,
     )
 
+    suspend fun removeItem(
+        groupId: String,
+        itemId: String,
+    )
+
     suspend fun retainGroups(groupIds: Set<String>)
 }

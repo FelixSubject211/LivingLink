@@ -43,6 +43,20 @@ class InMemoryShoppingListLocalDataSource : ShoppingListLocalDataSource {
         }
     }
 
+    override suspend fun removeItem(
+        groupId: String,
+        itemId: String,
+    ) {
+        stateOf(groupId).update { current ->
+            current ?: return@update null
+            if (itemId !in current.itemsById) return@update current
+            current.copy(
+                itemsById = current.itemsById - itemId,
+                order = current.order.filterNot { it == itemId },
+            )
+        }
+    }
+
     override suspend fun retainGroups(groupIds: Set<String>) {
         mutex.withLock {
             groups.keys.retainAll(groupIds)

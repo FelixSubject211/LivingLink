@@ -107,6 +107,42 @@ class ShoppingListDefaultRepository(
         }
     }
 
+    override suspend fun deleteItem(
+        itemId: String,
+    ): ShoppingListRepository.DeleteResult {
+        val apiKey =
+            (authRepository.authState.value as? AuthState.LoggedIn)?.apiKey
+                ?: return ShoppingListRepository.DeleteResult.NoActiveGroup
+
+        val groupId = groupsRepository.selectedGroupId.first()
+            ?: return ShoppingListRepository.DeleteResult.NoActiveGroup
+
+        val result =
+            shoppingListRemoteDataSource.deleteItem(
+                apiKey = apiKey,
+                groupId = groupId,
+                itemId = itemId,
+            )
+
+        return when (result) {
+            is NetworkResult.Success -> {
+                shoppingListLocalDataSource.removeItem(
+                    groupId = groupId,
+                    itemId = itemId,
+                )
+                ShoppingListRepository.DeleteResult.Success
+            }
+
+            is NetworkResult.NetworkError ->
+                ShoppingListRepository.DeleteResult.NetworkError
+
+            is NetworkResult.Unauthorized -> {
+                authRepository.clear()
+                ShoppingListRepository.DeleteResult.NoActiveGroup
+            }
+        }
+    }
+
     private suspend fun evictRemovedGroups() {
         groupsRepository.state.collect { loadable ->
             if (loadable is Loadable.Content) {

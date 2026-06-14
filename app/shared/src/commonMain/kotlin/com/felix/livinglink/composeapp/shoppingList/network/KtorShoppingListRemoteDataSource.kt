@@ -9,6 +9,8 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListPage
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateRequestV1
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateResponseV1
+import com.felix.livinglink.shared.shoppingList.DeleteShoppingListItemRequestV1
+import com.felix.livinglink.shared.shoppingList.DeleteShoppingListItemResponseV1
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageRequestV1
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageResponseV1
 import com.felix.livinglink.shared.shoppingList.ShoppingListItemDtoV1
@@ -72,6 +74,26 @@ class KtorShoppingListRemoteDataSource(
 
                 is ChangeShoppingListItemCompleteStateResponseV1.Conflict ->
                     null
+            }
+        }
+
+    override suspend fun deleteItem(
+        apiKey: String,
+        groupId: String,
+        itemId: String,
+    ): NetworkResult<Boolean> =
+        httpClient.postNetworkResult<DeleteShoppingListItemRequestV1, DeleteShoppingListItemResponseV1>(
+            urlString = "${BuildKonfig.BASE_URL}${DeleteShoppingListItemRequestV1.ROUTE}",
+            body = DeleteShoppingListItemRequestV1(
+                groupId = groupId,
+                itemId = itemId,
+            ),
+        ) {
+            bearerAuth(apiKey)
+        }.map { response ->
+            when (response) {
+                is DeleteShoppingListItemResponseV1.Deleted -> true
+                is DeleteShoppingListItemResponseV1.NotFound -> false
             }
         }
 }

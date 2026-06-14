@@ -3,6 +3,7 @@ package com.felix.livinglink.composeapp.ui.shoppinglist
 import app.cash.turbine.test
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.shoppingList.application.ChangeShoppingListItemCompleteStateUseCase
+import com.felix.livinglink.composeapp.shoppingList.application.DeleteShoppingListItemUseCase
 import com.felix.livinglink.composeapp.shoppingList.application.ObserveShoppingListUseCase
 import com.felix.livinglink.composeapp.shoppingList.application.SetShoppingListVisibleRangeUseCase
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
@@ -29,6 +30,7 @@ import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
 
@@ -37,6 +39,7 @@ class ShoppingListViewModelTest {
 
     private lateinit var setVisibleRangeUseCase: SetShoppingListVisibleRangeUseCase
     private lateinit var changeItemCompleteStateUseCase: ChangeShoppingListItemCompleteStateUseCase
+    private lateinit var deleteItemUseCase: DeleteShoppingListItemUseCase
     private lateinit var observeShoppingListUseCase: ObserveShoppingListUseCase
 
     private val contentFlow = MutableStateFlow<Loadable<ShoppingListContent>>(Loadable.Loading)
@@ -46,6 +49,7 @@ class ShoppingListViewModelTest {
         Dispatchers.setMain(UnconfinedTestDispatcher())
         setVisibleRangeUseCase = mock()
         changeItemCompleteStateUseCase = mock()
+        deleteItemUseCase = mock()
         observeShoppingListUseCase = mock()
         every { observeShoppingListUseCase() } returns contentFlow
     }
@@ -58,6 +62,7 @@ class ShoppingListViewModelTest {
     private fun createViewModel() = ShoppingListViewModel(
         setVisibleRangeUseCase = setVisibleRangeUseCase,
         changeItemCompleteStateUseCase = changeItemCompleteStateUseCase,
+        deleteItemUseCase = deleteItemUseCase,
         observeShoppingListUseCase = observeShoppingListUseCase,
     )
 
@@ -87,6 +92,7 @@ class ShoppingListViewModelTest {
             val state = awaitItem()
             assertTrue(state is ShoppingListScreenState.Content)
             assertEquals(emptySet(), state.pendingItemIds)
+            assertNull(state.itemPendingDelete)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -183,5 +189,149 @@ class ShoppingListViewModelTest {
         viewModel.onVisibleRangeChanged(firstVisibleIndex = 10, lastVisibleIndex = 20)
 
         verify(exactly(1)) { setVisibleRangeUseCase(10, 20) }
+    }
+
+    @Test
+    fun `onRequestDeleteItem exposes the item in state`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            assertNull((awaitItem() as ShoppingListScreenState.Content).itemPendingDelete)
+
+            viewModel.onRequestDeleteItem(item("i1", completed = false))
+
+            assertEquals(
+                "i1",
+                (awaitItem() as ShoppingListScreenState.Content).itemPendingDelete?.id,
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onCancelDelete clears the pending delete item without deleting`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            awaitItem()
+
+            viewModel.onRequestDeleteItem(item("i1", completed = false))
+            assertEquals(
+                "i1",
+                (awaitItem() as ShoppingListScreenState.Content).itemPendingDelete?.id,
+            )
+
+            viewModel.onCancelDelete()
+            assertNull((awaitItem() as ShoppingListScreenState.Content).itemPendingDelete)
+
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        verifySuspend(exactly(0)) { deleteItemUseCase(any()) }
+    }
+
+    @Test
+    fun `onConfirmDelete does nothing when no item is pending`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+
+        val viewModel = createViewModel()
+
+        viewModel.onConfirmDelete()
+
+        verifySuspend(exactly(0)) { deleteItemUseCase(any()) }
+    }
+
+    @Test
+    fun `onConfirmDelete clears dialog, adds item to pending then removes it after success`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+
+        val gate = CompletableDeferred<ShoppingListRepository.DeleteResult>()
+        everySuspend { deleteItemUseCase(any()) } calls { gate.await() }
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            assertEquals(
+                emptySet(),
+                (awaitItem() as ShoppingListScreenState.Content).pendingItemIds,
+            )
+
+            viewModel.onRequestDeleteItem(item("i1", completed = false))
+            assertEquals(
+                "i1",
+                (awaitItem() as ShoppingListScreenState.Content).itemPendingDelete?.id,
+            )
+
+            viewModel.onConfirmDelete()
+
+            val dialogClosedState = awaitItem() as ShoppingListScreenState.Content
+            assertNull(dialogClosedState.itemPendingDelete)
+
+            val pendingState = awaitItem() as ShoppingListScreenState.Content
+            assertEquals(setOf("i1"), pendingState.pendingItemIds)
+
+            gate.complete(ShoppingListRepository.DeleteResult.Success)
+
+            assertEquals(
+                emptySet(),
+                (awaitItem() as ShoppingListScreenState.Content).pendingItemIds,
+            )
+
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onConfirmDelete emits DeleteFailed event on non-success result`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+        everySuspend {
+            deleteItemUseCase(any())
+        } returns ShoppingListRepository.DeleteResult.NetworkError
+
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.onRequestDeleteItem(item("i1", completed = false))
+            viewModel.onConfirmDelete()
+            assertEquals(ShoppingListEvent.DeleteFailed, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onConfirmDelete does not emit event on success`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+        everySuspend {
+            deleteItemUseCase(any())
+        } returns ShoppingListRepository.DeleteResult.Success
+
+        val viewModel = createViewModel()
+
+        viewModel.events.test {
+            viewModel.onRequestDeleteItem(item("i1", completed = false))
+            viewModel.onConfirmDelete()
+            expectNoEvents()
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `onConfirmDelete calls delete use case with the pending item id`() = runTest {
+        contentFlow.value = content(item("i1", completed = false))
+        everySuspend {
+            deleteItemUseCase(any())
+        } returns ShoppingListRepository.DeleteResult.Success
+
+        val viewModel = createViewModel()
+
+        viewModel.onRequestDeleteItem(item("i1", completed = false))
+        viewModel.onConfirmDelete()
+
+        verifySuspend(exactly(1)) { deleteItemUseCase("i1") }
     }
 }
