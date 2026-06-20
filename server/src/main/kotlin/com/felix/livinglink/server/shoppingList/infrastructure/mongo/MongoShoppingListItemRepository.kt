@@ -32,12 +32,36 @@ class MongoShoppingListItemRepository(
     override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> {
         val sort =
             when (query.sort) {
-                ShoppingListItemSort.CreatedAtAscending -> Sorts.ascending("createdAt")
-                ShoppingListItemSort.CreatedAtDescending -> Sorts.descending("createdAt")
-                ShoppingListItemSort.UpdatedAtAscending -> Sorts.ascending("updatedAt")
-                ShoppingListItemSort.UpdatedAtDescending -> Sorts.descending("updatedAt")
-                ShoppingListItemSort.NameAscending -> Sorts.ascending("name")
-                ShoppingListItemSort.NameDescending -> Sorts.descending("name")
+                ShoppingListItemSort.CreatedAtAscending ->
+                    Sorts.orderBy(
+                        Sorts.ascending("createdAt"),
+                        Sorts.ascending("_id"),
+                    )
+                ShoppingListItemSort.CreatedAtDescending ->
+                    Sorts.orderBy(
+                        Sorts.descending("createdAt"),
+                        Sorts.descending("_id"),
+                    )
+                ShoppingListItemSort.UpdatedAtAscending ->
+                    Sorts.orderBy(
+                        Sorts.ascending("updatedAt"),
+                        Sorts.ascending("_id"),
+                    )
+                ShoppingListItemSort.UpdatedAtDescending ->
+                    Sorts.orderBy(
+                        Sorts.descending("updatedAt"),
+                        Sorts.ascending("_id"),
+                    )
+                ShoppingListItemSort.NameAscending ->
+                    Sorts.orderBy(
+                        Sorts.ascending("name"),
+                        Sorts.ascending("_id"),
+                    )
+                ShoppingListItemSort.NameDescending ->
+                    Sorts.orderBy(
+                        Sorts.descending("name"),
+                        Sorts.ascending("_id"),
+                    )
             }
 
         return collection

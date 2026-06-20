@@ -20,24 +20,24 @@ class AddShoppingListItemsUseCase(
     suspend operator fun invoke(input: Input): List<ShoppingListItem> {
         requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
 
+        val itemsToCreate =
+            input.names.map { name ->
+                val now = timeProvider()
+                ShoppingListItem(
+                    id = uuidGenerator(),
+                    groupId = input.groupId,
+                    name = name,
+                    createdByUserId = input.byUserId,
+                    completionEvents = emptyList(),
+                    createdAt = now,
+                    updatedAt = now,
+                )
+            }
+
         return coroutineScope {
-            input.names
-                .map { name ->
-                    async {
-                        val now = timeProvider()
-                        shoppingListItemRepository.create(
-                            ShoppingListItem(
-                                id = uuidGenerator(),
-                                groupId = input.groupId,
-                                name = name,
-                                createdByUserId = input.byUserId,
-                                completionEvents = emptyList(),
-                                createdAt = now,
-                                updatedAt = now,
-                            ),
-                        )
-                    }
-                }.awaitAll()
+            itemsToCreate
+                .map { item -> async { shoppingListItemRepository.create(item) } }
+                .awaitAll()
         }
     }
 

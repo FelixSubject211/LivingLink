@@ -9,5 +9,5 @@ import kotlin.uuid.Uuid
 class KotlinUuidGenerator : UuidGenerator {
     @OptIn(ExperimentalUuidApi::class)
     override fun invoke(): String =
-        Uuid.random().toString()
+        Uuid.generateV7().toString()
 }
