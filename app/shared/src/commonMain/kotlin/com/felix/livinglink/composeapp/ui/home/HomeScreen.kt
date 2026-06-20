@@ -127,7 +127,7 @@ private fun GroupsSection(
             )
         }
 
-        when (groupsState) {
+        when (val state = groupsState) {
             is GroupsUiState.Loading ->
                 Box(
                     modifier = Modifier.fillMaxWidth(),
@@ -155,7 +155,7 @@ private fun GroupsSection(
                     selected = false,
                 ) {
                     Text(
-                        text = groupsState.group.name,
+                        text = state.group.name,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.fillMaxWidth(),
@@ -164,8 +164,8 @@ private fun GroupsSection(
 
             is GroupsUiState.Content ->
                 SingleSelectList(
-                    items = groupsState.groups,
-                    selectedKey = groupsState.selectedGroupId,
+                    items = state.groups,
+                    selectedKey = state.selectedGroupId,
                     key = { it.id },
                     onSelect = { onSelectGroup(it.id) },
                 ) { group, selected ->
