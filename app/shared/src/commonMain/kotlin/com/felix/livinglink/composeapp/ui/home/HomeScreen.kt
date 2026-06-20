@@ -15,8 +15,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.felix.livinglink.composeapp.ui.core.atom.SelectableListItem
-import com.felix.livinglink.composeapp.ui.core.molecule.SingleSelectList
+import com.felix.livinglink.composeapp.ui.core.molecule.SelectableListItem
+import com.felix.livinglink.composeapp.ui.core.organism.SingleSelectList
 import com.tweener.czan.designsystem.atom.bars.CenterAlignedTopAppBar
 import com.tweener.czan.designsystem.atom.button.Button
 import com.tweener.czan.designsystem.atom.button.ButtonStyle
