@@ -8,7 +8,7 @@ interface ShoppingListRemoteDataSource {
         groupId: String,
         completed: Boolean? = null,
         limit: Int? = null,
-        cursor: String? = null,
+        offset: String? = null,
     ): NetworkResult<ShoppingListPage>
 
     suspend fun changeItemCompleteState(

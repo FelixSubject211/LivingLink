@@ -377,7 +377,7 @@ class ShoppingListDefaultRepositoryTest {
             remoteDataSource.changeItemCompleteState("key", groupId, "item-1", true)
         }
         verifySuspend(exactly(1)) {
-            localDataSource.updateItem(eq(groupId), eq("item-1"), any())
+            localDataSource.updateItem(groupId, "item-1", any())
         }
     }
 
@@ -500,7 +500,7 @@ class ShoppingListDefaultRepositoryTest {
             remoteDataSource.deleteItem("key", groupId, "item-1")
         }
         verifySuspend(exactly(1)) {
-            localDataSource.removeItem(eq(groupId), eq("item-1"))
+            localDataSource.removeItem(groupId, "item-1")
         }
     }
 
@@ -523,7 +523,7 @@ class ShoppingListDefaultRepositoryTest {
 
         assertEquals(ShoppingListRepository.DeleteResult.Success, result)
         verifySuspend(exactly(1)) {
-            localDataSource.removeItem(eq(groupId), eq("item-1"))
+            localDataSource.removeItem(groupId, "item-1")
         }
     }
 

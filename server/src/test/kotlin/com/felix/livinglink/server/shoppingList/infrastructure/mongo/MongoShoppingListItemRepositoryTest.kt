@@ -72,9 +72,9 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
                     ShoppingListItemQuery(groupId = "group-1", completed = null, limit = 10, offset = 0),
                 )
 
-            assertEquals(listOf("1", "3"), openItems.map { it.id })
+            assertEquals(listOf("3", "1"), openItems.map { it.id })
             assertEquals(listOf("2"), completedItems.map { it.id })
-            assertEquals(listOf("1", "2", "3"), allItems.map { it.id })
+            assertEquals(listOf("3", "2", "1"), allItems.map { it.id })
         }
 
     @Test

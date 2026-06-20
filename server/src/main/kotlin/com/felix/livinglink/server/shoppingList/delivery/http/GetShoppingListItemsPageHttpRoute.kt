@@ -47,7 +47,7 @@ class GetShoppingListItemsPageHttpRoute(
                         ?: GetShoppingListItemsPageRequestV1.DEFAULT_LIMIT
 
                 val offset =
-                    params[GetShoppingListItemsPageRequestV1.QUERY_CURSOR]
+                    params[GetShoppingListItemsPageRequestV1.QUERY_OFFSET]
                         ?.toIntOrNull()
                         ?.takeIf { it >= 0 }
                         ?: 0

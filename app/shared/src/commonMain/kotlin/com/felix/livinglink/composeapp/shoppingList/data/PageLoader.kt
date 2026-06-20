@@ -93,7 +93,7 @@ class PageLoader(
                 apiKey = apiKey,
                 groupId = groupId,
                 limit = PAGE_SIZE,
-                cursor = (page * PAGE_SIZE).toString(),
+                offset = (page * PAGE_SIZE).toString(),
             )
 
         when (result) {

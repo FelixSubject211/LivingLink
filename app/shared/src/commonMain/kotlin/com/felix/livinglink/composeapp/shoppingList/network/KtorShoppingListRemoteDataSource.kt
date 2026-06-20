@@ -28,7 +28,7 @@ class KtorShoppingListRemoteDataSource(
         groupId: String,
         completed: Boolean?,
         limit: Int?,
-        cursor: String?,
+        offset: String?,
     ): NetworkResult<ShoppingListPage> =
         httpClient.getNetworkResult<GetShoppingListItemsPageResponseV1>(
             "${BuildKonfig.BASE_URL}${GetShoppingListItemsPageRequestV1.ROUTE}"
@@ -37,7 +37,7 @@ class KtorShoppingListRemoteDataSource(
             parameter(GetShoppingListItemsPageRequestV1.QUERY_GROUP_ID, groupId)
             completed?.let { parameter(GetShoppingListItemsPageRequestV1.QUERY_COMPLETED, it) }
             limit?.let { parameter(GetShoppingListItemsPageRequestV1.QUERY_LIMIT, it) }
-            cursor?.let { parameter(GetShoppingListItemsPageRequestV1.QUERY_CURSOR, it) }
+            offset?.let { parameter(GetShoppingListItemsPageRequestV1.QUERY_OFFSET, it) }
         }.map { response ->
             ShoppingListPage(
                 items = response.items.map { it.toDomain() },
