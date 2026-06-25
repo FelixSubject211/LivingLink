@@ -42,7 +42,6 @@ class KtorShoppingListRemoteDataSource(
         }.map { response ->
             ShoppingListPage(
                 items = response.items.map { it.toDomain() },
-                nextCursor = response.nextCursor,
                 totalCount = response.totalCount,
             )
         }

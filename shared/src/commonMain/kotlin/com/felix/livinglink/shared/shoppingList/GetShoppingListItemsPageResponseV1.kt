@@ -5,6 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GetShoppingListItemsPageResponseV1(
     val items: List<ShoppingListItemDtoV1>,
-    val nextCursor: String?,
     val totalCount: Int,
 )

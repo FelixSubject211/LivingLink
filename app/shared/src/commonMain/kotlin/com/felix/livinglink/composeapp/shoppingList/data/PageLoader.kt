@@ -74,7 +74,7 @@ class PageLoader(
             .filterNotNull()
             .collect { index ->
                 val page = index / PAGE_SIZE
-                forceLoad(page)
+                launchLoad(page)
             }
     }
 
@@ -85,18 +85,6 @@ class PageLoader(
     }
 
     private fun launchLoad(page: Int) {
-        if (!markInFlight(page)) return
-
-        scope.launch {
-            try {
-                loadPage(page)
-            } finally {
-                inFlightPages.update { it - page }
-            }
-        }
-    }
-
-    private fun forceLoad(page: Int) {
         if (!markInFlight(page)) return
 
         scope.launch {

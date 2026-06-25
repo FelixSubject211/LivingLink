@@ -32,11 +32,9 @@ class GetShoppingListItemsPageUseCase(
 
         val hasMore = fetched.size > input.limit
         val items = if (hasMore) fetched.take(input.limit) else fetched
-        val nextOffset = if (hasMore) input.offset + input.limit else null
 
         return Output(
             items = items,
-            nextOffset = nextOffset,
             totalCount = totalCount,
         )
     }
@@ -52,7 +50,6 @@ class GetShoppingListItemsPageUseCase(
 
     data class Output(
         val items: List<ShoppingListItem>,
-        val nextOffset: Int?,
         val totalCount: Long,
     )
 }

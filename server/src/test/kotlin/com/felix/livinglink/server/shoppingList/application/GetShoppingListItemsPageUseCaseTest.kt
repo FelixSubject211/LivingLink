@@ -18,7 +18,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNull
 
 class GetShoppingListItemsPageUseCaseTest {
     private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
@@ -34,7 +33,7 @@ class GetShoppingListItemsPageUseCaseTest {
         (1..count).map { shoppingListItem(id = "id-$it", groupId = "group-1", name = "item-$it") }
 
     @Test
-    fun `fetches limit plus one and reports a next cursor when there are more items`() =
+    fun `fetches limit plus one when there are more items`() =
         runTest {
             every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
 
@@ -63,56 +62,9 @@ class GetShoppingListItemsPageUseCaseTest {
                 )
 
             assertEquals(listOf("id-1", "id-2"), result.items.map { it.id })
-            assertEquals(2, result.nextOffset)
             assertEquals(42, result.totalCount)
             verifySuspend(exactly(1)) { shoppingListItemRepository.find(expectedQuery) }
             verifySuspend(exactly(1)) { shoppingListItemRepository.count(expectedQuery) }
-        }
-
-    @Test
-    fun `returns no next cursor when the page is not full`() =
-        runTest {
-            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
-            everySuspend { shoppingListItemRepository.find(any()) } returns items(2)
-            everySuspend { shoppingListItemRepository.count(any()) } returns 2
-
-            val result =
-                useCase(
-                    GetShoppingListItemsPageUseCase.Input(
-                        byUserId = "user-1",
-                        groupId = "group-1",
-                        completed = null,
-                        limit = 5,
-                        offset = 0,
-                        sort = ShoppingListItemSort.CreatedAtDescending,
-                    ),
-                )
-
-            assertEquals(2, result.items.size)
-            assertNull(result.nextOffset)
-            assertEquals(2, result.totalCount)
-        }
-
-    @Test
-    fun `advances the offset by the page size for the next cursor`() =
-        runTest {
-            every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
-            everySuspend { shoppingListItemRepository.find(any()) } returns items(3)
-            everySuspend { shoppingListItemRepository.count(any()) } returns 100
-
-            val result =
-                useCase(
-                    GetShoppingListItemsPageUseCase.Input(
-                        byUserId = "user-1",
-                        groupId = "group-1",
-                        completed = null,
-                        limit = 2,
-                        offset = 10,
-                        sort = ShoppingListItemSort.CreatedAtDescending,
-                    ),
-                )
-
-            assertEquals(12, result.nextOffset)
         }
 
     @Test

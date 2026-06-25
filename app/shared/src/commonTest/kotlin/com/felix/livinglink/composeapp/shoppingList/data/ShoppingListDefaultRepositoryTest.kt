@@ -153,7 +153,7 @@ class ShoppingListDefaultRepositoryTest {
         everySuspend {
             remoteDataSource.getPage(any(), any(), any(), any(), any())
         } returns NetworkResult.Success(
-            ShoppingListPage(items = listOf(item), nextCursor = null, totalCount = 1),
+            ShoppingListPage(items = listOf(item), totalCount = 1),
         )
 
         createRepository()
@@ -209,7 +209,7 @@ class ShoppingListDefaultRepositoryTest {
             val from = cursor.toInt()
             val items = (from until (from + limit)).map(::itemAt)
             NetworkResult.Success(
-                ShoppingListPage(items = items, nextCursor = null, totalCount = totalCount),
+                ShoppingListPage(items = items, totalCount = totalCount),
             )
         }
 
@@ -274,7 +274,7 @@ class ShoppingListDefaultRepositoryTest {
             val from = cursor.toInt()
             val items = (from until (from + limit)).map { itemAt(it, version) }
             NetworkResult.Success(
-                ShoppingListPage(items = items, nextCursor = null, totalCount = totalCount),
+                ShoppingListPage(items = items, totalCount = totalCount),
             )
         }
 
@@ -407,7 +407,7 @@ class ShoppingListDefaultRepositoryTest {
         everySuspend {
             remoteDataSource.getPage(any(), any(), any(), any(), any())
         } returns NetworkResult.Success(
-            ShoppingListPage(items = listOf(freshItem), nextCursor = null, totalCount = 1),
+            ShoppingListPage(items = listOf(freshItem), totalCount = 1),
         )
         everySuspend {
             localDataSource.putRange(any(), any(), any(), any())
