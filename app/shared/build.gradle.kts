@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.mokkery)
     alias(libs.plugins.buildkonfig)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
@@ -21,6 +22,9 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+        }
+        iosTarget.binaries.all {
+            linkerOpts("-lsqlite3")
         }
     }
     
@@ -53,6 +57,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.koin.android)
+            implementation(libs.sqldelight.android.driver)
         }
         commonMain.dependencies {
             implementation(project(":shared"))
@@ -76,6 +81,8 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.multiplatform.settings)
             implementation(libs.navigation.compose)
+            implementation(libs.sqldelight.coroutines.extensions)
+            implementation(libs.sqldelight.async.extensions)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -84,13 +91,23 @@ kotlin {
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation(libs.sqldelight.native.driver)
         }
         jsMain.dependencies {
             implementation(libs.wrappers.browser)
             implementation(libs.ktor.client.js)
+            implementation(libs.sqldelight.web.worker.driver)
+            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+            implementation(npm("sql.js", "1.12.0"))
         }
         wasmJsMain.dependencies {
             implementation(libs.ktor.client.js)
+            implementation(libs.sqldelight.web.worker.driver)
+            implementation(npm("@cashapp/sqldelight-sqljs-worker", "2.2.1"))
+            implementation(npm("sql.js", "1.12.0"))
+        }
+        webMain.dependencies {
+            implementation(libs.kotlinx.browser)
         }
     }
 }
@@ -117,5 +134,14 @@ buildkonfig {
             "BASE_URL",
             baseUrl,
         )
+    }
+}
+
+sqldelight {
+    databases {
+        create("LivingLinkDatabase") {
+            packageName.set("com.felix.livinglink.composeapp.db")
+            generateAsync.set(true)
+        }
     }
 }

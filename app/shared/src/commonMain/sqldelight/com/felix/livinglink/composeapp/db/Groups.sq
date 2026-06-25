@@ -1,0 +1,42 @@
+import kotlin.Boolean;
+
+CREATE TABLE groupEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    sortIndex INTEGER NOT NULL
+);
+
+CREATE TABLE groupCacheMeta (
+    id INTEGER NOT NULL PRIMARY KEY,
+    loaded INTEGER AS Boolean NOT NULL,
+    selectedGroupId TEXT
+);
+
+INSERT INTO groupCacheMeta(id, loaded, selectedGroupId) VALUES (0, 0, NULL);
+
+selectAllGroups:
+SELECT id, name FROM groupEntity ORDER BY sortIndex;
+
+selectLoaded:
+SELECT loaded FROM groupCacheMeta WHERE id = 0;
+
+selectSelectedGroupId:
+SELECT selectedGroupId FROM groupCacheMeta WHERE id = 0;
+
+ensureMeta:
+INSERT OR IGNORE INTO groupCacheMeta(id, loaded, selectedGroupId) VALUES (0, 0, NULL);
+
+setLoaded:
+UPDATE groupCacheMeta SET loaded = :loaded WHERE id = 0;
+
+setSelectedGroupId:
+UPDATE groupCacheMeta SET selectedGroupId = :selectedGroupId WHERE id = 0;
+
+insertGroup:
+INSERT OR REPLACE INTO groupEntity(id, name, sortIndex) VALUES (:id, :name, :sortIndex);
+
+deleteAllGroups:
+DELETE FROM groupEntity;
+
+resetMeta:
+UPDATE groupCacheMeta SET loaded = 0, selectedGroupId = NULL WHERE id = 0;

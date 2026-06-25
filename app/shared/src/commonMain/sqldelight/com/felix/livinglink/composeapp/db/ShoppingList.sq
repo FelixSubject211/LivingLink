@@ -1,0 +1,81 @@
+import kotlin.Boolean;
+
+CREATE TABLE shoppingListItemEntity (
+    groupId TEXT NOT NULL,
+    position INTEGER NOT NULL,
+    id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    completed INTEGER AS Boolean NOT NULL,
+    createdByUserId TEXT NOT NULL,
+    createdAt INTEGER NOT NULL,
+    updatedAt INTEGER NOT NULL,
+    PRIMARY KEY (groupId, position)
+);
+
+CREATE INDEX shoppingListItemEntity_group_id ON shoppingListItemEntity(groupId, id);
+
+CREATE TABLE shoppingListMeta (
+    groupId TEXT NOT NULL PRIMARY KEY,
+    totalCount INTEGER NOT NULL
+);
+
+selectItems:
+SELECT * FROM shoppingListItemEntity WHERE groupId = :groupId ORDER BY position;
+
+selectMeta:
+SELECT totalCount FROM shoppingListMeta WHERE groupId = :groupId;
+
+selectItemById:
+SELECT * FROM shoppingListItemEntity WHERE groupId = :groupId AND id = :id;
+
+selectPositionById:
+SELECT position FROM shoppingListItemEntity WHERE groupId = :groupId AND id = :id;
+
+upsertMeta:
+INSERT OR REPLACE INTO shoppingListMeta(groupId, totalCount) VALUES (:groupId, :totalCount);
+
+deleteWindow:
+DELETE FROM shoppingListItemEntity WHERE groupId = :groupId AND position >= :fromIndex AND position < :toIndex;
+
+deleteById:
+DELETE FROM shoppingListItemEntity WHERE groupId = :groupId AND id = :id;
+
+insertItem:
+INSERT OR REPLACE INTO shoppingListItemEntity(groupId, position, id, name, completed, createdByUserId, createdAt, updatedAt)
+VALUES (:groupId, :position, :id, :name, :completed, :createdByUserId, :createdAt, :updatedAt);
+
+deleteRowsFromIndex:
+DELETE FROM shoppingListItemEntity WHERE groupId = :groupId AND position >= :totalCount;
+
+updateItemById:
+UPDATE shoppingListItemEntity
+SET name = :name, completed = :completed, createdByUserId = :createdByUserId, createdAt = :createdAt, updatedAt = :updatedAt
+WHERE groupId = :groupId AND id = :id;
+
+deleteItemById:
+DELETE FROM shoppingListItemEntity WHERE groupId = :groupId AND id = :id;
+
+shiftPositionsDownStep1:
+UPDATE shoppingListItemEntity
+SET position = -position - 1
+WHERE groupId = :groupId AND position > :fromPosition;
+
+shiftPositionsDownStep2:
+UPDATE shoppingListItemEntity
+SET position = -position - 2
+WHERE groupId = :groupId AND position < 0;
+
+decrementMeta:
+UPDATE shoppingListMeta SET totalCount = totalCount - 1 WHERE groupId = :groupId;
+
+retainItems:
+DELETE FROM shoppingListItemEntity WHERE groupId NOT IN :groupIds;
+
+retainMeta:
+DELETE FROM shoppingListMeta WHERE groupId NOT IN :groupIds;
+
+deleteAllItems:
+DELETE FROM shoppingListItemEntity;
+
+deleteAllMeta:
+DELETE FROM shoppingListMeta;

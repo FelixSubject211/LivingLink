@@ -6,6 +6,7 @@ import com.felix.livinglink.composeapp.auth.domain.AuthRepository
 import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.auth.domain.Credentials
 import com.felix.livinglink.composeapp.auth.domain.LoginResult
+import com.felix.livinglink.composeapp.core.domain.LocalDataCleaner
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,6 +16,7 @@ import org.koin.core.annotation.Single
 class AuthDefaultRepository(
     private val authRemoteDataSource: AuthRemoteDataSource,
     private val authLocalDataSource: AuthLocalDataSource,
+    private val localDataCleaners: List<LocalDataCleaner>,
 ) : AuthRepository {
 
     private val _authState =
@@ -38,7 +40,7 @@ class AuthDefaultRepository(
     }
 
     override suspend fun clear() {
-        authLocalDataSource.clear()
+        localDataCleaners.forEach { it.clearLocalData() }
         _authState.value = AuthState.LoggedOut
     }
 

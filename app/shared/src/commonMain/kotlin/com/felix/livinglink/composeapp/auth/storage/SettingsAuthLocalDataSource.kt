@@ -2,12 +2,13 @@ package com.felix.livinglink.composeapp.auth.storage
 
 import com.felix.livinglink.composeapp.auth.domain.AuthLocalDataSource
 import com.felix.livinglink.composeapp.auth.domain.Credentials
+import com.felix.livinglink.composeapp.core.domain.LocalDataCleaner
 import org.koin.core.annotation.Single
 
-@Single(binds = [AuthLocalDataSource::class])
+@Single(binds = [AuthLocalDataSource::class, LocalDataCleaner::class])
 class SettingsAuthLocalDataSource(
     private val secureSettings: SecureSettings,
-) : AuthLocalDataSource {
+) : AuthLocalDataSource, LocalDataCleaner {
 
     override fun getCredentials(): Credentials? {
         val apiKey = secureSettings.getStringOrNull(KEY_API) ?: return null
@@ -22,7 +23,9 @@ class SettingsAuthLocalDataSource(
         secureSettings.putString(KEY_USERNAME, credentials.username)
     }
 
-    override fun clear() = secureSettings.clear()
+    override suspend fun clearLocalData() {
+        secureSettings.clear()
+    }
 
     private companion object {
         const val KEY_API = "apiKey"
