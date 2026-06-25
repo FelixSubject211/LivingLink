@@ -1,6 +1,6 @@
-# livinglink
+# Livinglink
 
-Kotlin MCP server.
+Kotlin Multiplatform app with a Ktor backend (REST + MCP).
 
 This is a personal learning project for me and my family. Users and groups are static configuration (set via env vars and a JSON file) because nobody should be able to register themselves, so static configuration is the simplest thing that works for the current use case.
 
@@ -8,6 +8,8 @@ livinglink is reachable in two ways:
 
 - as an **MCP server** (for Claude, via Cloudflare Tunnel or locally over stdio)
 - through a **Kotlin Multiplatform app** (Android, iOS, Web) that talks to the same backend
+
+The web target builds for both JS and Wasm. The Wasm path is experimental.
 
 ## Modes
 
@@ -33,7 +35,8 @@ LIVINGLINK_HTTP_PORT=3001
 LIVINGLINK_MCP_HTTP_HOST=0.0.0.0
 LIVINGLINK_MCP_HTTP_PORT=3000
 LIVINGLINK_MCP_HTTP_PATH=/mcp
-LIVINGLINK_MCP_API_KEYS=max:MaxMusterfrau:CHANGE_ME_MAX,anna:AnnaMusterfrau:CHANGE_ME_ANNA
+
+LIVINGLINK_API_KEYS=max:MaxMusterfrau:CHANGE_ME_MAX,anna:AnnaMusterfrau:CHANGE_ME_ANNA
 
 LIVINGLINK_GROUPS_FILE=/absolute/path/to/groups.json
 
@@ -114,7 +117,7 @@ Groups are configured in a JSON file. Set the path via `LIVINGLINK_GROUPS_FILE`.
 
 Rules:
 
-- Each entry in `memberUserIds` must match a user id. In `http` mode that is the first field of an `LIVINGLINK_MCP_API_KEYS` entry; in `stdio` mode it is `LIVINGLINK_STDIO_USER_ID`.
+- Each entry in `memberUserIds` must match a user id. In `http` mode that is the first field of an `LIVINGLINK_API_KEYS` entry; in `stdio` mode it is `LIVINGLINK_STDIO_USER_ID`.
 - A user can be in several groups. For MCP, the active group is stored per user in the database and switched via the `set_active_group` tool. `get_session` shows the available groups and which one is active.
 - In `stdio` mode the file must contain at least one group whose `memberUserIds` includes your `LIVINGLINK_STDIO_USER_ID`.
 

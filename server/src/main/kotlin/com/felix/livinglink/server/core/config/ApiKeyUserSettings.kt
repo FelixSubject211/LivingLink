@@ -7,7 +7,7 @@ import org.koin.core.annotation.Single
 class ApiKeyUserSettings {
     private val usersByApiKey: Map<String, User> by lazy {
         Env
-            .required("LIVINGLINK_MCP_API_KEYS")
+            .required("LIVINGLINK_API_KEYS")
             .split(",")
             .associate { rawEntry ->
                 val parts =
@@ -16,7 +16,7 @@ class ApiKeyUserSettings {
                         .split(":", limit = 3)
 
                 require(parts.size == 3) {
-                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry'. Expected: userId:username:apiKey"
+                    "Invalid LIVINGLINK_API_KEYS entry '$rawEntry'. Expected: userId:username:apiKey"
                 }
 
                 val userId = parts[0].trim()
@@ -24,13 +24,13 @@ class ApiKeyUserSettings {
                 val apiKey = parts[2].trim()
 
                 require(userId.isNotBlank()) {
-                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry': userId is blank."
+                    "Invalid LIVINGLINK_API_KEYS entry '$rawEntry': userId is blank."
                 }
                 require(username.isNotBlank()) {
-                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry': username is blank."
+                    "Invalid LIVINGLINK_API_KEYS entry '$rawEntry': username is blank."
                 }
                 require(apiKey.isNotBlank()) {
-                    "Invalid LIVINGLINK_MCP_API_KEYS entry '$rawEntry': apiKey is blank."
+                    "Invalid LIVINGLINK_API_KEYS entry '$rawEntry': apiKey is blank."
                 }
 
                 apiKey to
