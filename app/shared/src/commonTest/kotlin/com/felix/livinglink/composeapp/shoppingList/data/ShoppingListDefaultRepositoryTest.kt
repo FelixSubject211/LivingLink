@@ -82,42 +82,9 @@ class ShoppingListDefaultRepositoryTest {
     }
 
     @Test
-    fun `retains present groups and evicts removed ones, ignoring non-content states`() = runTest {
-        val groupA = Group(id = "group-1", name = "A")
-        val groupB = Group(id = "group-2", name = "B")
-
-        every { groupsRepository.state } returns flowOf(
-            groupsContent(groups = listOf(groupA, groupB), selected = groupA),
-            groupsContent(groups = listOf(groupA), selected = groupA),
-            Loadable.Loading,
-        )
-        every { authRepository.authState } returns MutableStateFlow(
-            AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
-        )
-        every { localDataSource.observe(any()) } returns MutableStateFlow(null)
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
-        everySuspend {
-            remoteDataSource.getPage(any(), any(), any(), any(), any())
-        } returns NetworkResult.NetworkError
-
-        createRepository()
-
-        repository.state.test {
-            awaitItem()
-            cancelAndIgnoreRemainingEvents()
-        }
-
-        verifySuspend(VerifyMode.order) {
-            localDataSource.retainGroups(setOf("group-1", "group-2"))
-            localDataSource.retainGroups(setOf("group-1"))
-        }
-    }
-
-    @Test
     fun `emits loading while groups are loading`() = runTest {
         every { groupsRepository.state } returns flowOf(Loadable.Loading)
         every { localDataSource.observe(any()) } returns MutableStateFlow(null)
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         createRepository()
 
@@ -131,7 +98,6 @@ class ShoppingListDefaultRepositoryTest {
     fun `emits network error when groups fail to load`() = runTest {
         every { groupsRepository.state } returns flowOf(Loadable.Error.Network)
         every { localDataSource.observe(any()) } returns MutableStateFlow(null)
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         createRepository()
 
@@ -145,7 +111,6 @@ class ShoppingListDefaultRepositoryTest {
     fun `emits empty when user has no groups`() = runTest {
         every { groupsRepository.state } returns flowOf(Loadable.Empty)
         every { localDataSource.observe(any()) } returns MutableStateFlow(null)
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         createRepository()
 
@@ -180,7 +145,6 @@ class ShoppingListDefaultRepositoryTest {
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns cacheFlow
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             localDataSource.putRange(any(), any(), any(), any())
@@ -236,7 +200,6 @@ class ShoppingListDefaultRepositoryTest {
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns stubCache.flow
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             remoteDataSource.getPage(any(), any(), any(), any(), any())
@@ -302,7 +265,6 @@ class ShoppingListDefaultRepositoryTest {
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns stubCache.flow
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             remoteDataSource.getPage(any(), any(), any(), any(), any())
@@ -437,7 +399,6 @@ class ShoppingListDefaultRepositoryTest {
             AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
         )
         every { localDataSource.observe(groupId) } returns cacheFlow
-        everySuspend { localDataSource.retainGroups(any()) } returns Unit
 
         everySuspend {
             remoteDataSource.changeItemCompleteState(any(), any(), any(), any())

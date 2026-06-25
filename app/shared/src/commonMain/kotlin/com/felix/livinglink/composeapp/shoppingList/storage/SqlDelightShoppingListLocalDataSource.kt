@@ -5,7 +5,8 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.felix.livinglink.composeapp.core.db.DatabaseProvider
-import com.felix.livinglink.composeapp.core.domain.LocalDataCleaner
+import com.felix.livinglink.composeapp.core.domain.GroupScopedDataCleaner
+import com.felix.livinglink.composeapp.core.domain.LogoutDataCleaner
 import com.felix.livinglink.composeapp.db.ShoppingListItemEntity
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
@@ -19,10 +20,14 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import kotlin.time.Instant
 
-@Single(binds = [ShoppingListLocalDataSource::class, LocalDataCleaner::class])
+@Single(binds = [
+    ShoppingListLocalDataSource::class,
+    LogoutDataCleaner::class,
+    GroupScopedDataCleaner::class,
+])
 class SqlDelightShoppingListLocalDataSource(
     private val databaseProvider: DatabaseProvider,
-) : ShoppingListLocalDataSource, LocalDataCleaner {
+) : ShoppingListLocalDataSource, LogoutDataCleaner, GroupScopedDataCleaner {
 
     override fun observe(groupId: String): Flow<ShoppingListContent?> = flow {
         val q = databaseProvider.get().shoppingListQueries
@@ -97,16 +102,13 @@ class SqlDelightShoppingListLocalDataSource(
             }
         }
 
-    override suspend fun retainGroups(groupIds: Set<String>) =
+    override suspend fun deleteGroups(groupIds: Set<String>) =
         withContext(Dispatchers.Default) {
+            if (groupIds.isEmpty()) return@withContext
             val q = databaseProvider.get().shoppingListQueries
             q.transaction {
-                if (groupIds.isEmpty()) {
-                    q.deleteAllItems(); q.deleteAllMeta()
-                } else {
-                    q.retainItems(groupIds.toList())
-                    q.retainMeta(groupIds.toList())
-                }
+                q.deleteItemsForGroups(groupIds.toList())
+                q.deleteMetaForGroups(groupIds.toList())
             }
         }
 

@@ -43,8 +43,6 @@ class ShoppingListDefaultRepository(
 
     override val state: Flow<Loadable<ShoppingListContent>> =
         channelFlow {
-            launch { evictRemovedGroups() }
-
             groupsRepository.state
                 .distinctUntilChanged()
                 .collectLatest { groupsState ->
@@ -164,16 +162,6 @@ class ShoppingListDefaultRepository(
         val cached = shoppingListLocalDataSource.observe(groupId).first()
         val index = cached?.order?.indexOf(itemId)?.takeIf { it >= 0 } ?: 0
         reloadRequests.emit(index)
-    }
-
-    private suspend fun evictRemovedGroups() {
-        groupsRepository.state.collect { loadable ->
-            if (loadable is Loadable.Content) {
-                shoppingListLocalDataSource.retainGroups(
-                    loadable.value.groups.map(Group::id).toSet(),
-                )
-            }
-        }
     }
 
     private suspend fun ProducerScope<Loadable<ShoppingListContent>>.syncGroup(groupId: String) =

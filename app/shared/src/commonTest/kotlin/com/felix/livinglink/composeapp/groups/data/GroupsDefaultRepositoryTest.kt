@@ -3,6 +3,7 @@ package com.felix.livinglink.composeapp.groups.data
 import app.cash.turbine.test
 import com.felix.livinglink.composeapp.auth.domain.AuthRepository
 import com.felix.livinglink.composeapp.auth.domain.AuthState
+import com.felix.livinglink.composeapp.core.domain.GroupScopedDataCleaner
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.core.domain.NetworkResult
 import com.felix.livinglink.composeapp.groups.domain.Group
@@ -41,6 +42,7 @@ class GroupsDefaultRepositoryTest {
     private lateinit var remoteDataSource: GroupsRemoteDataSource
     private lateinit var localDataSource: GroupsLocalDataSource
     private lateinit var authRepository: AuthRepository
+    private lateinit var groupScopedDataCleaner: GroupScopedDataCleaner
 
     private lateinit var repository: GroupsDefaultRepository
 
@@ -52,6 +54,7 @@ class GroupsDefaultRepositoryTest {
         remoteDataSource = mock()
         authRepository = mock()
         localDataSource = mock()
+        groupScopedDataCleaner = mock()
 
         every { localDataSource.observe() } returns cachedGroups
         every { localDataSource.observeSelectedGroupId() } returns selectedGroupId
@@ -61,6 +64,7 @@ class GroupsDefaultRepositoryTest {
         everySuspend { localDataSource.setSelectedGroupId(any()) } calls { args ->
             selectedGroupId.value = args.component1<String>()
         }
+        everySuspend { groupScopedDataCleaner.deleteGroups(any()) } returns Unit
     }
 
     private fun TestScope.createRepository() {
@@ -68,6 +72,7 @@ class GroupsDefaultRepositoryTest {
             groupsRemoteDataSource = remoteDataSource,
             groupsLocalDataSource = localDataSource,
             authRepository = authRepository,
+            groupScopedDataCleaners = listOf(groupScopedDataCleaner),
             scope = backgroundScope,
         )
     }
@@ -233,5 +238,41 @@ class GroupsDefaultRepositoryTest {
         }
 
         verifySuspend(exactly(1)) { authRepository.clear() }
+    }
+
+    @Test
+    fun `deletes group-scoped data for added and removed groups`() = runTest {
+        cachedGroups.value = listOf(Group(id = "g1", name = "A"), Group(id = "g2", name = "B"))
+
+        val remoteGroups = listOf(Group(id = "g1", name = "A"), Group(id = "g3", name = "C"))
+
+        stubLoggedIn()
+        everySuspend { remoteDataSource.getGroups(any()) } returns NetworkResult.Success(remoteGroups)
+
+        createRepository()
+
+        repository.state.contents.first()
+
+        verifySuspend(exactly(1)) {
+            groupScopedDataCleaner.deleteGroups(setOf("g2", "g3"))
+        }
+    }
+
+    @Test
+    fun `does not delete group-scoped data when group set is unchanged`() = runTest {
+        val groups = listOf(Group(id = "g1", name = "A"), Group(id = "g2", name = "B"))
+
+        cachedGroups.value = groups
+
+        stubLoggedIn()
+        everySuspend { remoteDataSource.getGroups(any()) } returns NetworkResult.Success(groups)
+
+        createRepository()
+
+        repository.state.contents.first()
+
+        verifySuspend(exactly(0)) {
+            groupScopedDataCleaner.deleteGroups(any())
+        }
     }
 }

@@ -1,5 +1,5 @@
 package com.felix.livinglink.composeapp.core.domain
 
-interface LocalDataCleaner {
+interface LogoutDataCleaner {
     suspend fun clearLocalData()
 }

@@ -23,6 +23,4 @@ interface ShoppingListLocalDataSource {
         groupId: String,
         itemId: String,
     )
-
-    suspend fun retainGroups(groupIds: Set<String>)
 }

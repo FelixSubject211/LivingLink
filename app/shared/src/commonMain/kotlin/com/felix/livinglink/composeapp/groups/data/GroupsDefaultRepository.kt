@@ -2,8 +2,10 @@ package com.felix.livinglink.composeapp.groups.data
 
 import com.felix.livinglink.composeapp.auth.domain.AuthRepository
 import com.felix.livinglink.composeapp.auth.domain.AuthState
+import com.felix.livinglink.composeapp.core.domain.GroupScopedDataCleaner
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.core.domain.NetworkResult
+import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupsContent
 import com.felix.livinglink.composeapp.groups.domain.GroupsLocalDataSource
 import com.felix.livinglink.composeapp.groups.domain.GroupsRemoteDataSource
@@ -14,6 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -27,6 +30,7 @@ class GroupsDefaultRepository(
     private val groupsRemoteDataSource: GroupsRemoteDataSource,
     private val groupsLocalDataSource: GroupsLocalDataSource,
     private val authRepository: AuthRepository,
+    private val groupScopedDataCleaners: List<GroupScopedDataCleaner>,
     private val scope: CoroutineScope = CoroutineScope(Dispatchers.Default),
 ) : GroupsRepository {
 
@@ -81,6 +85,7 @@ class GroupsDefaultRepository(
 
         return when (val result = groupsRemoteDataSource.getGroups(apiKey)) {
             is NetworkResult.Success -> {
+                deleteChangedGroups(remoteGroups = result.value)
                 groupsLocalDataSource.replaceAll(result.value)
                 null
             }
@@ -92,6 +97,19 @@ class GroupsDefaultRepository(
                 authRepository.clear()
                 null
             }
+        }
+    }
+
+    private suspend fun deleteChangedGroups(remoteGroups: List<Group>) {
+        val newIds = remoteGroups.mapTo(HashSet()) { it.id }
+        val cachedIds = groupsLocalDataSource.observe().first()
+            ?.mapTo(destination = HashSet()) { it.id }
+            ?: emptySet()
+
+        val changed = (cachedIds - newIds) + (newIds - cachedIds)
+
+        if (changed.isNotEmpty()) {
+            groupScopedDataCleaners.forEach { it.deleteGroups(changed) }
         }
     }
 

@@ -4,7 +4,7 @@ import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import app.cash.sqldelight.coroutines.mapToOneOrNull
 import com.felix.livinglink.composeapp.core.db.DatabaseProvider
-import com.felix.livinglink.composeapp.core.domain.LocalDataCleaner
+import com.felix.livinglink.composeapp.core.domain.LogoutDataCleaner
 import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupsLocalDataSource
 import kotlinx.coroutines.Dispatchers
@@ -16,10 +16,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 
-@Single(binds = [GroupsLocalDataSource::class, LocalDataCleaner::class])
+@Single(binds = [GroupsLocalDataSource::class, LogoutDataCleaner::class])
 class SqlDelightGroupsLocalDataSource(
     private val databaseProvider: DatabaseProvider,
-) : GroupsLocalDataSource, LocalDataCleaner {
+) : GroupsLocalDataSource, LogoutDataCleaner {
 
     override fun observe(): Flow<List<Group>?> = flow {
         val q = databaseProvider.get().groupsQueries

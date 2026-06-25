@@ -68,11 +68,11 @@ WHERE groupId = :groupId AND position < 0;
 decrementMeta:
 UPDATE shoppingListMeta SET totalCount = totalCount - 1 WHERE groupId = :groupId;
 
-retainItems:
-DELETE FROM shoppingListItemEntity WHERE groupId NOT IN :groupIds;
+deleteItemsForGroups:
+DELETE FROM shoppingListItemEntity WHERE groupId IN :groupIds;
 
-retainMeta:
-DELETE FROM shoppingListMeta WHERE groupId NOT IN :groupIds;
+deleteMetaForGroups:
+DELETE FROM shoppingListMeta WHERE groupId IN :groupIds;
 
 deleteAllItems:
 DELETE FROM shoppingListItemEntity;
