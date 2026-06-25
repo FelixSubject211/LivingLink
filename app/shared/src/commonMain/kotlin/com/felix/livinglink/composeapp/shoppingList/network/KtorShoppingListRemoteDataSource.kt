@@ -7,6 +7,7 @@ import com.felix.livinglink.composeapp.core.network.postNetworkResult
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListPage
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource.ChangeItemResult
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateRequestV1
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateResponseV1
 import com.felix.livinglink.shared.shoppingList.DeleteShoppingListItemRequestV1
@@ -51,7 +52,7 @@ class KtorShoppingListRemoteDataSource(
         groupId: String,
         itemId: String,
         completed: Boolean,
-    ): NetworkResult<ShoppingListItem?> =
+    ): NetworkResult<ChangeItemResult> =
         httpClient.postNetworkResult<ChangeShoppingListItemCompleteStateRequestV1, ChangeShoppingListItemCompleteStateResponseV1>(
             urlString = "${BuildKonfig.BASE_URL}${ChangeShoppingListItemCompleteStateRequestV1.ROUTE}",
             body = ChangeShoppingListItemCompleteStateRequestV1(
@@ -64,16 +65,16 @@ class KtorShoppingListRemoteDataSource(
         }.map { response ->
             when (response) {
                 is ChangeShoppingListItemCompleteStateResponseV1.Changed ->
-                    response.item.toDomain()
+                    ChangeItemResult.Updated(response.item.toDomain())
 
                 is ChangeShoppingListItemCompleteStateResponseV1.AlreadyInState ->
-                    response.item.toDomain()
+                    ChangeItemResult.Updated(response.item.toDomain())
 
                 is ChangeShoppingListItemCompleteStateResponseV1.NotFound ->
-                    null
+                    ChangeItemResult.NotFound
 
                 is ChangeShoppingListItemCompleteStateResponseV1.Conflict ->
-                    null
+                    ChangeItemResult.Conflict
             }
         }
 

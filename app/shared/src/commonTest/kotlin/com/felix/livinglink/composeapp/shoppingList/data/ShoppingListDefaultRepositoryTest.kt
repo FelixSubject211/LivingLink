@@ -14,6 +14,7 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListPage
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource.ChangeItemResult
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
@@ -23,6 +24,7 @@ import dev.mokkery.matcher.any
 import dev.mokkery.matcher.eq
 import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
+import dev.mokkery.verify.VerifyMode.Companion.atLeast
 import dev.mokkery.verify.VerifyMode.Companion.exactly
 import dev.mokkery.verifySuspend
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -363,7 +365,7 @@ class ShoppingListDefaultRepositoryTest {
         every { groupsRepository.selectedGroupId } returns flowOf(groupId)
         everySuspend {
             remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
-        } returns NetworkResult.Success(serverItem)
+        } returns NetworkResult.Success(ChangeItemResult.Updated(serverItem))
         everySuspend {
             localDataSource.updateItem(any(), any(), any())
         } returns Unit
@@ -382,22 +384,94 @@ class ShoppingListDefaultRepositoryTest {
     }
 
     @Test
-    fun `changeItemCompleteState does not touch cache when server returns null`() = runTest {
+    fun `changeItemCompleteState removes item from cache when server reports not found`() = runTest {
         val groupId = "group-1"
 
         stubLoggedIn()
         every { groupsRepository.selectedGroupId } returns flowOf(groupId)
         everySuspend {
             remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
-        } returns NetworkResult.Success(null)
+        } returns NetworkResult.Success(ChangeItemResult.NotFound)
+        everySuspend {
+            localDataSource.removeItem(any(), any())
+        } returns Unit
 
         createRepository()
 
         val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
 
         assertEquals(ShoppingListRepository.ChangeCompleteStateResult.Success, result)
+        verifySuspend(exactly(1)) {
+            localDataSource.removeItem(groupId, "item-1")
+        }
         verifySuspend(exactly(0)) {
             localDataSource.updateItem(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `changeItemCompleteState on conflict returns Conflict and triggers page reload`() = runTest {
+        val groupId = "group-1"
+        val group = Group(id = groupId, name = "A")
+
+        val staleItem = ShoppingListItem(
+            id = "item-1",
+            name = "Milk",
+            completed = false,
+            createdByUserId = "user-1",
+            createdAt = Instant.fromEpochMilliseconds(0),
+            updatedAt = Instant.fromEpochMilliseconds(0),
+        )
+        val freshItem = staleItem.copy(completed = true)
+
+        val cacheFlow = MutableStateFlow<ShoppingListContent?>(
+            ShoppingListContent(
+                itemsById = mapOf("item-1" to staleItem),
+                order = listOf("item-1"),
+            ),
+        )
+
+        every { groupsRepository.state } returns flowOf(groupsContent(groups = listOf(group)))
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        every { authRepository.authState } returns MutableStateFlow(
+            AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
+        )
+        every { localDataSource.observe(groupId) } returns cacheFlow
+        everySuspend { localDataSource.retainGroups(any()) } returns Unit
+
+        everySuspend {
+            remoteDataSource.changeItemCompleteState(any(), any(), any(), any())
+        } returns NetworkResult.Success(ChangeItemResult.Conflict)
+
+        everySuspend {
+            remoteDataSource.getPage(any(), any(), any(), any(), any())
+        } returns NetworkResult.Success(
+            ShoppingListPage(items = listOf(freshItem), nextCursor = null, totalCount = 1),
+        )
+        everySuspend {
+            localDataSource.putRange(any(), any(), any(), any())
+        } calls {
+            cacheFlow.value = ShoppingListContent(
+                itemsById = mapOf("item-1" to freshItem),
+                order = listOf("item-1"),
+            )
+        }
+
+        createRepository()
+
+        repository.state.test {
+            awaitItem()
+
+            val result = repository.changeItemCompleteState(itemId = "item-1", completed = true)
+            assertEquals(ShoppingListRepository.ChangeCompleteStateResult.Conflict, result)
+
+            awaitItemMatching { it.itemAt(0)?.completed == true }
+
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        verifySuspend(atLeast(1)) {
+            remoteDataSource.getPage("key", groupId, any(), 200, "0")
         }
     }
 

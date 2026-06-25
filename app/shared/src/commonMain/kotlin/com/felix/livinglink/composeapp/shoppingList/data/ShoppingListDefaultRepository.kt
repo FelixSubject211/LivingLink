@@ -9,6 +9,7 @@ import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource.ChangeItemResult
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -16,6 +17,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -37,6 +39,7 @@ class ShoppingListDefaultRepository(
 ) : ShoppingListRepository {
 
     private val visibleRange = MutableStateFlow(VisibleRange(first = 0, last = 0))
+    private val reloadRequests = MutableSharedFlow<Int>(extraBufferCapacity = 16)
 
     override val state: Flow<Loadable<ShoppingListContent>> =
         channelFlow {
@@ -86,16 +89,30 @@ class ShoppingListDefaultRepository(
             )
 
         return when (result) {
-            is NetworkResult.Success -> {
-                result.value?.let { serverItem ->
-                    shoppingListLocalDataSource.updateItem(
-                        groupId = groupId,
-                        itemId = itemId,
-                        transform = { serverItem }
-                    )
+            is NetworkResult.Success ->
+                when (val change = result.value) {
+                    is ChangeItemResult.Updated -> {
+                        shoppingListLocalDataSource.updateItem(
+                            groupId = groupId,
+                            itemId = itemId,
+                            transform = { change.item },
+                        )
+                        ShoppingListRepository.ChangeCompleteStateResult.Success
+                    }
+
+                    is ChangeItemResult.NotFound -> {
+                        shoppingListLocalDataSource.removeItem(
+                            groupId = groupId,
+                            itemId = itemId,
+                        )
+                        ShoppingListRepository.ChangeCompleteStateResult.Success
+                    }
+
+                    is ChangeItemResult.Conflict -> {
+                        requestReload(groupId = groupId, itemId = itemId)
+                        ShoppingListRepository.ChangeCompleteStateResult.Conflict
+                    }
                 }
-                ShoppingListRepository.ChangeCompleteStateResult.Success
-            }
 
             is NetworkResult.NetworkError ->
                 ShoppingListRepository.ChangeCompleteStateResult.NetworkError
@@ -143,6 +160,12 @@ class ShoppingListDefaultRepository(
         }
     }
 
+    private suspend fun requestReload(groupId: String, itemId: String) {
+        val cached = shoppingListLocalDataSource.observe(groupId).first()
+        val index = cached?.order?.indexOf(itemId)?.takeIf { it >= 0 } ?: 0
+        reloadRequests.emit(index)
+    }
+
     private suspend fun evictRemovedGroups() {
         groupsRepository.state.collect { loadable ->
             if (loadable is Loadable.Content) {
@@ -162,10 +185,12 @@ class ShoppingListDefaultRepository(
                 localDataSource = shoppingListLocalDataSource,
                 authRepository = authRepository,
                 visibleRange = visibleRange,
+                reloadRequests = reloadRequests,
             )
 
             launch { loader.loadMissingPagesWhileScrolling() }
             launch { loader.refreshDesiredPagesPeriodically() }
+            launch { loader.reloadRequestedPages() }
 
             combine(
                 shoppingListLocalDataSource.observe(groupId),

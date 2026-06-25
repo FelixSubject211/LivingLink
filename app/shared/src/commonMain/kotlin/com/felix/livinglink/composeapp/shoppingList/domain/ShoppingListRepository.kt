@@ -19,6 +19,7 @@ interface ShoppingListRepository {
 
     enum class ChangeCompleteStateResult {
         Success,
+        Conflict,
         NetworkError,
         NoActiveGroup,
     }

@@ -16,11 +16,17 @@ interface ShoppingListRemoteDataSource {
         groupId: String,
         itemId: String,
         completed: Boolean,
-    ): NetworkResult<ShoppingListItem?>
+    ): NetworkResult<ChangeItemResult>
 
     suspend fun deleteItem(
         apiKey: String,
         groupId: String,
         itemId: String,
     ): NetworkResult<Boolean>
+
+    sealed interface ChangeItemResult {
+        data class Updated(val item: ShoppingListItem) : ChangeItemResult
+        data object NotFound : ChangeItemResult
+        data object Conflict : ChangeItemResult
+    }
 }

@@ -8,11 +8,13 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalData
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ class PageLoader(
     private val localDataSource: ShoppingListLocalDataSource,
     private val authRepository: AuthRepository,
     visibleRange: StateFlow<VisibleRange>,
+    private val reloadRequests: Flow<Int>,
 ) {
     val failedBeforeFirstData = MutableStateFlow(false)
 
@@ -66,6 +69,15 @@ class PageLoader(
         }
     }
 
+    suspend fun reloadRequestedPages() {
+        reloadRequests
+            .filterNotNull()
+            .collect { index ->
+                val page = index / PAGE_SIZE
+                forceLoad(page)
+            }
+    }
+
     private fun isCached(page: Int): Boolean {
         val snapshot = cached.value ?: return false
         if (snapshot.totalCount == 0) return true
@@ -73,6 +85,18 @@ class PageLoader(
     }
 
     private fun launchLoad(page: Int) {
+        if (!markInFlight(page)) return
+
+        scope.launch {
+            try {
+                loadPage(page)
+            } finally {
+                inFlightPages.update { it - page }
+            }
+        }
+    }
+
+    private fun forceLoad(page: Int) {
         if (!markInFlight(page)) return
 
         scope.launch {
