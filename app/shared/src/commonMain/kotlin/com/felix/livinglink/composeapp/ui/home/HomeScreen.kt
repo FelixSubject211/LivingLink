@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.felix.livinglink.composeapp.ui.core.molecule.SelectableListItem
 import com.felix.livinglink.composeapp.ui.core.organism.SingleSelectList
-import com.tweener.czan.designsystem.atom.bars.CenterAlignedTopAppBar
 import com.tweener.czan.designsystem.atom.button.Button
 import com.tweener.czan.designsystem.atom.button.ButtonStyle
 import com.tweener.czan.designsystem.atom.scaffold.Scaffold
@@ -33,21 +32,13 @@ import livinglink.app.shared.generated.resources.home_groups_subtitle
 import livinglink.app.shared.generated.resources.home_groups_title
 import livinglink.app.shared.generated.resources.home_logged_in_as
 import livinglink.app.shared.generated.resources.home_logout_button
-import livinglink.app.shared.generated.resources.home_title
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun HomeScreen(viewModel: HomeViewModel) {
     val state = viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = stringResource(Res.string.home_title),
-                textStyle = MaterialTheme.typography.titleLarge,
-            )
-        },
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -112,22 +103,7 @@ private fun GroupsSection(
             style = MaterialTheme.typography.titleMedium,
         )
 
-        val subtitle =
-            when (groupsState) {
-                is GroupsUiState.Content -> stringResource(Res.string.home_groups_subtitle)
-                is GroupsUiState.Single -> stringResource(Res.string.home_groups_single_subtitle)
-                else -> null
-            }
-
-        subtitle?.let {
-            Text(
-                text = it,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-
-        when (val state = groupsState) {
+        when (groupsState) {
             is GroupsUiState.Loading ->
                 Box(
                     modifier = Modifier.fillMaxWidth(),
@@ -150,22 +126,35 @@ private fun GroupsSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-            is GroupsUiState.Single ->
+            is GroupsUiState.Single -> {
+                Text(
+                    text = stringResource(Res.string.home_groups_single_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
                 SelectableListItem(
                     selected = false,
                 ) {
                     Text(
-                        text = state.group.name,
+                        text = groupsState.group.name,
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+            }
 
-            is GroupsUiState.Content ->
+            is GroupsUiState.Content -> {
+                Text(
+                    text = stringResource(Res.string.home_groups_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+
                 SingleSelectList(
-                    items = state.groups,
-                    selectedKey = state.selectedGroupId,
+                    items = groupsState.groups,
+                    selectedKey = groupsState.selectedGroupId,
                     key = { it.id },
                     onSelect = { onSelectGroup(it.id) },
                 ) { group, selected ->
@@ -176,6 +165,7 @@ private fun GroupsSection(
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
+            }
         }
     }
 }

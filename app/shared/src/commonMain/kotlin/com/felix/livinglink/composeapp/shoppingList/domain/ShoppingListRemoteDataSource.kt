@@ -11,6 +11,12 @@ interface ShoppingListRemoteDataSource {
         offset: String? = null,
     ): NetworkResult<ShoppingListPage>
 
+    suspend fun addItem(
+        apiKey: String,
+        groupId: String,
+        name: String,
+    ): NetworkResult<ShoppingListItem>
+
     suspend fun changeItemCompleteState(
         apiKey: String,
         groupId: String,

@@ -4,11 +4,9 @@ import com.felix.livinglink.server.core.delivery.http.API_KEY_AUTH
 import com.felix.livinglink.server.core.delivery.http.HttpRouteRegistrar
 import com.felix.livinglink.server.core.delivery.http.requireUser
 import com.felix.livinglink.server.shoppingList.application.GetShoppingListItemsPageUseCase
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageRequestV1
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageResponseV1
-import com.felix.livinglink.shared.shoppingList.ShoppingListItemDtoV1
 import com.felix.livinglink.shared.shoppingList.ShoppingListItemSortV1
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
@@ -91,13 +89,3 @@ private fun ShoppingListItemSortV1.toDomain(): ShoppingListItemSort =
         ShoppingListItemSortV1.NameAscending -> ShoppingListItemSort.NameAscending
         ShoppingListItemSortV1.NameDescending -> ShoppingListItemSort.NameDescending
     }
-
-private fun ShoppingListItem.toDtoV1(): ShoppingListItemDtoV1 =
-    ShoppingListItemDtoV1(
-        id = id,
-        name = name,
-        completed = isCompleted,
-        createdByUserId = createdByUserId,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-    )

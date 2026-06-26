@@ -8,6 +8,8 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListPage
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource.ChangeItemResult
+import com.felix.livinglink.shared.shoppingList.AddShoppingListItemRequestV1
+import com.felix.livinglink.shared.shoppingList.AddShoppingListItemResponseV1
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateRequestV1
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateResponseV1
 import com.felix.livinglink.shared.shoppingList.DeleteShoppingListItemRequestV1
@@ -44,6 +46,23 @@ class KtorShoppingListRemoteDataSource(
                 items = response.items.map { it.toDomain() },
                 totalCount = response.totalCount,
             )
+        }
+
+    override suspend fun addItem(
+        apiKey: String,
+        groupId: String,
+        name: String,
+    ): NetworkResult<ShoppingListItem> =
+        httpClient.postNetworkResult<AddShoppingListItemRequestV1, AddShoppingListItemResponseV1>(
+            urlString = "${BuildKonfig.BASE_URL}${AddShoppingListItemRequestV1.ROUTE}",
+            body = AddShoppingListItemRequestV1(
+                groupId = groupId,
+                name = name,
+            ),
+        ) {
+            bearerAuth(apiKey)
+        }.map { response ->
+            response.item.toDomain()
         }
 
     override suspend fun changeItemCompleteState(

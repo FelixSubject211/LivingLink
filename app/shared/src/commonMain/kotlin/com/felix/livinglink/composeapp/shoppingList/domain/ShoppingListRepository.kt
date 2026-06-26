@@ -8,6 +8,8 @@ interface ShoppingListRepository {
 
     fun setVisibleRange(firstVisibleIndex: Int, lastVisibleIndex: Int)
 
+    suspend fun addItem(name: String): AddResult
+
     suspend fun changeItemCompleteState(
         itemId: String,
         completed: Boolean,
@@ -16,6 +18,14 @@ interface ShoppingListRepository {
     suspend fun deleteItem(
         itemId: String,
     ): DeleteResult
+
+    fun observeSuggestions(query: String): Flow<List<ItemSuggestion>>
+
+    enum class AddResult {
+        Success,
+        NetworkError,
+        NoActiveGroup,
+    }
 
     enum class ChangeCompleteStateResult {
         Success,

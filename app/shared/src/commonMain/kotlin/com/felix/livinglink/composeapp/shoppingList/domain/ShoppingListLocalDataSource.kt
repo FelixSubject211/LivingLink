@@ -23,4 +23,6 @@ interface ShoppingListLocalDataSource {
         groupId: String,
         itemId: String,
     )
+
+    fun observeSuggestions(groupId: String, query: String): Flow<List<ItemSuggestion>>
 }

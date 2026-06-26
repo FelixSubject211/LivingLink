@@ -4,10 +4,8 @@ import com.felix.livinglink.server.core.delivery.http.API_KEY_AUTH
 import com.felix.livinglink.server.core.delivery.http.HttpRouteRegistrar
 import com.felix.livinglink.server.core.delivery.http.requireUser
 import com.felix.livinglink.server.shoppingList.application.ChangeShoppingListItemsCompleteStateUseCase
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateRequestV1
 import com.felix.livinglink.shared.shoppingList.ChangeShoppingListItemCompleteStateResponseV1
-import com.felix.livinglink.shared.shoppingList.ShoppingListItemDtoV1
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
@@ -66,13 +64,3 @@ class ChangeShoppingListItemCompleteStateHttpRoute(
         }
     }
 }
-
-private fun ShoppingListItem.toDtoV1(): ShoppingListItemDtoV1 =
-    ShoppingListItemDtoV1(
-        id = id,
-        name = name,
-        completed = isCompleted,
-        createdByUserId = createdByUserId,
-        createdAt = createdAt,
-        updatedAt = updatedAt,
-    )

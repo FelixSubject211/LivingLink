@@ -28,6 +28,7 @@ class PageLoader(
     private val authRepository: AuthRepository,
     visibleRange: StateFlow<VisibleRange>,
     private val reloadRequests: Flow<Int>,
+    private val reloadVisibleRequests: Flow<Unit>,
 ) {
     val failedBeforeFirstData = MutableStateFlow(false)
 
@@ -76,6 +77,12 @@ class PageLoader(
                 val page = index / PAGE_SIZE
                 launchLoad(page)
             }
+    }
+
+    suspend fun reloadVisiblePagesOnRequest() {
+        reloadVisibleRequests.collect {
+            desiredPages.value.forEach(::launchLoad)
+        }
     }
 
     private fun isCached(page: Int): Boolean {

@@ -7,6 +7,6 @@ data class LoginRequestV1(
     val apiKey: String
 ) {
     companion object {
-        const val ROUTE = "/login/v1"
+        const val ROUTE = "/login-v1/"
     }
 }

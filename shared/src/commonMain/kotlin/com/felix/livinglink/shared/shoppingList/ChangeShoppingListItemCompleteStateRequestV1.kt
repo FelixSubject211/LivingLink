@@ -9,6 +9,6 @@ data class ChangeShoppingListItemCompleteStateRequestV1(
     val completed: Boolean,
 ) {
     companion object {
-        const val ROUTE = "/shopping-list-item/complete-state/v1"
+        const val ROUTE = "/change-shopping-list-item-v1/"
     }
 }

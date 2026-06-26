@@ -22,8 +22,6 @@ fun AppNavHost(
 ) {
     val authState by rootViewModel.authState.collectAsStateWithLifecycle()
     val navController = rememberNavController()
-
-    // Initialwert wird synchron aus den lokalen Credentials geseedet -> kein Login-Flash.
     val startDestination = remember { authState.toDestination() }
 
     NavHost(

@@ -4,8 +4,8 @@ import com.felix.livinglink.composeapp.auth.domain.AuthRepository
 import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.core.domain.NetworkResult
-import com.felix.livinglink.composeapp.groups.domain.Group
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
+import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
@@ -23,7 +23,9 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import org.koin.core.annotation.Single
@@ -40,6 +42,7 @@ class ShoppingListDefaultRepository(
 
     private val visibleRange = MutableStateFlow(VisibleRange(first = 0, last = 0))
     private val reloadRequests = MutableSharedFlow<Int>(extraBufferCapacity = 16)
+    private val reloadVisibleRequests = MutableSharedFlow<Unit>(extraBufferCapacity = 16)
 
     override val state: Flow<Loadable<ShoppingListContent>> =
         channelFlow {
@@ -65,6 +68,39 @@ class ShoppingListDefaultRepository(
 
     override fun setVisibleRange(firstVisibleIndex: Int, lastVisibleIndex: Int) {
         visibleRange.value = VisibleRange(first = firstVisibleIndex, last = lastVisibleIndex)
+    }
+
+    override suspend fun addItem(
+        name: String,
+    ): ShoppingListRepository.AddResult {
+        val apiKey =
+            (authRepository.authState.value as? AuthState.LoggedIn)?.apiKey
+                ?: return ShoppingListRepository.AddResult.NoActiveGroup
+
+        val groupId = groupsRepository.selectedGroupId.first()
+            ?: return ShoppingListRepository.AddResult.NoActiveGroup
+
+        val result =
+            shoppingListRemoteDataSource.addItem(
+                apiKey = apiKey,
+                groupId = groupId,
+                name = name,
+            )
+
+        return when (result) {
+            is NetworkResult.Success -> {
+                reloadVisibleRequests.emit(Unit)
+                ShoppingListRepository.AddResult.Success
+            }
+
+            is NetworkResult.NetworkError ->
+                ShoppingListRepository.AddResult.NetworkError
+
+            is NetworkResult.Unauthorized -> {
+                authRepository.clear()
+                ShoppingListRepository.AddResult.NoActiveGroup
+            }
+        }
     }
 
     override suspend fun changeItemCompleteState(
@@ -158,6 +194,18 @@ class ShoppingListDefaultRepository(
         }
     }
 
+    override fun observeSuggestions(query: String): Flow<List<ItemSuggestion>> =
+        groupsRepository.selectedGroupId.flatMapLatest { groupId ->
+            if (groupId == null) {
+                emptyFlow()
+            } else {
+                shoppingListLocalDataSource.observeSuggestions(
+                    groupId = groupId,
+                    query = query,
+                )
+            }
+        }
+
     private suspend fun requestReload(groupId: String, itemId: String) {
         val cached = shoppingListLocalDataSource.observe(groupId).first()
         val index = cached?.order?.indexOf(itemId)?.takeIf { it >= 0 } ?: 0
@@ -174,11 +222,13 @@ class ShoppingListDefaultRepository(
                 authRepository = authRepository,
                 visibleRange = visibleRange,
                 reloadRequests = reloadRequests,
+                reloadVisibleRequests = reloadVisibleRequests,
             )
 
             launch { loader.loadMissingPagesWhileScrolling() }
             launch { loader.refreshDesiredPagesPeriodically() }
             launch { loader.reloadRequestedPages() }
+            launch { loader.reloadVisiblePagesOnRequest() }
 
             combine(
                 shoppingListLocalDataSource.observe(groupId),

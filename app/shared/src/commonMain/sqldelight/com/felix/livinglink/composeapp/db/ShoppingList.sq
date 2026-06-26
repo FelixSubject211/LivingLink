@@ -68,6 +68,18 @@ WHERE groupId = :groupId AND position < 0;
 decrementMeta:
 UPDATE shoppingListMeta SET totalCount = totalCount - 1 WHERE groupId = :groupId;
 
+selectNameSuggestions:
+SELECT name, COUNT(*) AS usageCount
+FROM shoppingListItemEntity
+WHERE groupId = :groupId
+  AND (:query = '' OR LOWER(name) LIKE '%' || :query || '%')
+GROUP BY name
+ORDER BY
+    CASE WHEN :query != '' AND LOWER(name) LIKE :query || '%' THEN 0 ELSE 1 END,
+    usageCount DESC,
+    name ASC
+LIMIT :limit;
+
 deleteItemsForGroups:
 DELETE FROM shoppingListItemEntity WHERE groupId IN :groupIds;
 

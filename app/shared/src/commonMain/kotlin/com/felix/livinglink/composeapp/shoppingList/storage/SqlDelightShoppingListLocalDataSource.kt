@@ -8,6 +8,7 @@ import com.felix.livinglink.composeapp.core.db.DatabaseProvider
 import com.felix.livinglink.composeapp.core.domain.GroupScopedDataCleaner
 import com.felix.livinglink.composeapp.core.domain.LogoutDataCleaner
 import com.felix.livinglink.composeapp.db.ShoppingListItemEntity
+import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import kotlin.time.Instant
@@ -102,6 +104,31 @@ class SqlDelightShoppingListLocalDataSource(
             }
         }
 
+    override fun observeSuggestions(
+        groupId: String,
+        query: String,
+    ): Flow<List<ItemSuggestion>> = flow {
+        val q = databaseProvider.get().shoppingListQueries
+        val normalizedQuery = query.trim().lowercase()
+        emitAll(
+            q.selectNameSuggestions(
+                groupId = groupId,
+                query = normalizedQuery,
+                limit = SUGGESTIONS_LIMIT,
+            )
+                .asFlow()
+                .mapToList(Dispatchers.Default)
+                .map { rows ->
+                    rows.map { row ->
+                        ItemSuggestion(
+                            name = row.name,
+                            usageCount = row.usageCount.toInt(),
+                        )
+                    }
+                }
+        )
+    }
+
     override suspend fun deleteGroups(groupIds: Set<String>) =
         withContext(Dispatchers.Default) {
             if (groupIds.isEmpty()) return@withContext
@@ -129,6 +156,10 @@ class SqlDelightShoppingListLocalDataSource(
             itemsById[row.id] = row.toDomain()
         }
         return ShoppingListContent(itemsById = itemsById, order = order.toList())
+    }
+
+    private companion object {
+        const val SUGGESTIONS_LIMIT = 50L
     }
 }
 

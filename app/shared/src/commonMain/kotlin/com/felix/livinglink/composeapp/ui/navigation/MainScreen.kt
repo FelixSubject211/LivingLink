@@ -1,6 +1,5 @@
 package com.felix.livinglink.composeapp.ui.navigation
 
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -54,7 +53,6 @@ fun MainScreen() {
     val currentDestination = backStackEntry?.destination
 
     Scaffold(
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->
@@ -91,7 +89,10 @@ fun MainScreen() {
             modifier = Modifier.padding(innerPadding),
         ) {
             composable<Destination.Tab.ShoppingList> {
-                ShoppingListScreen(viewModel = koinViewModel())
+                ShoppingListScreen(
+                    viewModel = koinViewModel(),
+                    addItemViewModel = koinViewModel(),
+                )
             }
             composable<Destination.Tab.Home> {
                 HomeScreen(viewModel = koinViewModel())

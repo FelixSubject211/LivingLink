@@ -3,11 +3,11 @@ package com.felix.livinglink.shared.shoppingList
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class DeleteShoppingListItemRequestV1(
+data class AddShoppingListItemRequestV1(
     val groupId: String,
-    val itemId: String,
+    val name: String,
 ) {
     companion object {
-        const val ROUTE = "/delte-shopping-list-item-v1/"
+        const val ROUTE = "/add-shopping-list-item-v1/"
     }
 }

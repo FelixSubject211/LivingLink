@@ -1,7 +1,7 @@
 package com.felix.livinglink.shared.shoppingList
 
 object GetShoppingListItemsPageRequestV1 {
-    const val ROUTE = "/shopping-list-page/v1"
+    const val ROUTE = "/shopping-list-page-v1/"
 
     const val QUERY_GROUP_ID = "groupId"
     const val QUERY_COMPLETED = "completed"

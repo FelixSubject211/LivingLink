@@ -21,7 +21,6 @@ import dev.mokkery.answering.returns
 import dev.mokkery.every
 import dev.mokkery.everySuspend
 import dev.mokkery.matcher.any
-import dev.mokkery.matcher.eq
 import dev.mokkery.mock
 import dev.mokkery.verify.VerifyMode
 import dev.mokkery.verify.VerifyMode.Companion.atLeast
@@ -308,6 +307,136 @@ class ShoppingListDefaultRepositoryTest {
             assertEquals(itemAt(450, "v2"), afterPoll.itemAt(450))
 
             cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `addItem triggers a reload of the visible pages on success`() = runTest {
+        val groupId = "group-1"
+        val group = Group(id = groupId, name = "A")
+
+        val item = ShoppingListItem(
+            id = "item-1",
+            name = "Milk",
+            completed = false,
+            createdByUserId = "user-1",
+            createdAt = Instant.fromEpochMilliseconds(0),
+            updatedAt = Instant.fromEpochMilliseconds(0),
+        )
+
+        val cacheFlow = MutableStateFlow<ShoppingListContent?>(null)
+
+        every { groupsRepository.state } returns flowOf(groupsContent(groups = listOf(group)))
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        every { authRepository.authState } returns MutableStateFlow(
+            AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
+        )
+        every { localDataSource.observe(groupId) } returns cacheFlow
+
+        everySuspend {
+            remoteDataSource.addItem(any(), any(), any())
+        } returns NetworkResult.Success(item)
+
+        everySuspend {
+            remoteDataSource.getPage(any(), any(), any(), any(), any())
+        } returns NetworkResult.Success(
+            ShoppingListPage(items = listOf(item), totalCount = 1),
+        )
+        everySuspend {
+            localDataSource.putRange(any(), any(), any(), any())
+        } calls {
+            cacheFlow.value = ShoppingListContent(
+                itemsById = mapOf(item.id to item),
+                order = listOf(item.id),
+            )
+        }
+
+        createRepository()
+
+        repository.state.test {
+            awaitItem()
+
+            val result = repository.addItem(name = "Milk")
+            assertEquals(ShoppingListRepository.AddResult.Success, result)
+
+            awaitItemMatching { it.itemAt(0)?.id == "item-1" }
+
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        verifySuspend(exactly(1)) {
+            remoteDataSource.addItem("key", groupId, "Milk")
+        }
+        verifySuspend(atLeast(1)) {
+            remoteDataSource.getPage("key", groupId, any(), 200, "0")
+        }
+    }
+
+    @Test
+    fun `addItem returns NetworkError and does not reload`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend {
+            remoteDataSource.addItem(any(), any(), any())
+        } returns NetworkResult.NetworkError
+
+        createRepository()
+
+        val result = repository.addItem(name = "Milk")
+
+        assertEquals(ShoppingListRepository.AddResult.NetworkError, result)
+        verifySuspend(exactly(0)) {
+            localDataSource.putRange(any(), any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `addItem clears auth and returns NoActiveGroup on unauthorized`() = runTest {
+        val groupId = "group-1"
+
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(groupId)
+        everySuspend { authRepository.clear() } returns Unit
+        everySuspend {
+            remoteDataSource.addItem(any(), any(), any())
+        } returns NetworkResult.Unauthorized
+
+        createRepository()
+
+        val result = repository.addItem(name = "Milk")
+
+        assertEquals(ShoppingListRepository.AddResult.NoActiveGroup, result)
+        verifySuspend(exactly(1)) { authRepository.clear() }
+    }
+
+    @Test
+    fun `addItem returns NoActiveGroup when not logged in`() = runTest {
+        every { authRepository.authState } returns MutableStateFlow(AuthState.LoggedOut)
+
+        createRepository()
+
+        val result = repository.addItem(name = "Milk")
+
+        assertEquals(ShoppingListRepository.AddResult.NoActiveGroup, result)
+        verifySuspend(exactly(0)) {
+            remoteDataSource.addItem(any(), any(), any())
+        }
+    }
+
+    @Test
+    fun `addItem returns NoActiveGroup when no group selected`() = runTest {
+        stubLoggedIn()
+        every { groupsRepository.selectedGroupId } returns flowOf(null)
+
+        createRepository()
+
+        val result = repository.addItem(name = "Milk")
+
+        assertEquals(ShoppingListRepository.AddResult.NoActiveGroup, result)
+        verifySuspend(exactly(0)) {
+            remoteDataSource.addItem(any(), any(), any())
         }
     }
 
