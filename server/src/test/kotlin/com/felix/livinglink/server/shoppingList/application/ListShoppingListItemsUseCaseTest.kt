@@ -3,7 +3,6 @@ package com.felix.livinglink.server.shoppingList.application
 import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.server.shoppingList.domain.shoppingListItem
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
@@ -42,7 +41,6 @@ class ListShoppingListItemsUseCaseTest {
                     completed = false,
                     limit = 50,
                     offset = 0,
-                    sort = ShoppingListItemSort.NameAscending,
                 )
 
             everySuspend { shoppingListItemRepository.find(expectedQuery) } returns listOf(item1, item2)
@@ -54,7 +52,6 @@ class ListShoppingListItemsUseCaseTest {
                         groupId = "group-1",
                         completed = false,
                         limit = 50,
-                        sort = ShoppingListItemSort.NameAscending,
                     ),
                 )
 
@@ -75,7 +72,6 @@ class ListShoppingListItemsUseCaseTest {
                         groupId = "group-1",
                         completed = null,
                         limit = 50,
-                        sort = ShoppingListItemSort.NameAscending,
                     ),
                 )
             }

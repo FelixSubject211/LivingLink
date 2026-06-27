@@ -8,7 +8,6 @@ import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.shoppingList.application.ListShoppingListItemsUseCase
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemDetailMcpDto
-import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemSortMcpDto
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.toMcpDetailDto
 import com.felix.livinglink.server.user.application.FindUsersByIdsUseCase
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -28,7 +27,7 @@ class ListShoppingListItemsTool(
     ) {
         server.tool(
             name = "list_shopping_list_items",
-            description = "Lists shopping list items with optional filtering, sorting and limit.",
+            description = "Lists shopping list items with optional filtering and limit.",
         ) {
             val completed =
                 optional<Boolean>(
@@ -45,13 +44,6 @@ class ListShoppingListItemsTool(
                     default = 100,
                 )
 
-            val sort =
-                optional<ShoppingListItemSortMcpDto>(
-                    name = "sort",
-                    description = "Sort order.",
-                    default = ShoppingListItemSortMcpDto.CreatedAtDescending,
-                )
-
             handle {
                 val group =
                     getActiveMcpGroupUseCase(userId)
@@ -64,7 +56,6 @@ class ListShoppingListItemsTool(
                             groupId = group.id,
                             completed = completed(),
                             limit = limit(),
-                            sort = sort().toDomain(),
                         ),
                     )
 

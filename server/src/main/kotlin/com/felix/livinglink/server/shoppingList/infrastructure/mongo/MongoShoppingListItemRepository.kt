@@ -6,7 +6,6 @@ import com.felix.livinglink.server.core.infrastructure.mongo.MongoCrudRepository
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoCollection
@@ -31,38 +30,10 @@ class MongoShoppingListItemRepository(
     ) {
     override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> {
         val sort =
-            when (query.sort) {
-                ShoppingListItemSort.CreatedAtAscending ->
-                    Sorts.orderBy(
-                        Sorts.ascending("createdAt"),
-                        Sorts.ascending("_id"),
-                    )
-                ShoppingListItemSort.CreatedAtDescending ->
-                    Sorts.orderBy(
-                        Sorts.descending("createdAt"),
-                        Sorts.descending("_id"),
-                    )
-                ShoppingListItemSort.UpdatedAtAscending ->
-                    Sorts.orderBy(
-                        Sorts.ascending("updatedAt"),
-                        Sorts.ascending("_id"),
-                    )
-                ShoppingListItemSort.UpdatedAtDescending ->
-                    Sorts.orderBy(
-                        Sorts.descending("updatedAt"),
-                        Sorts.ascending("_id"),
-                    )
-                ShoppingListItemSort.NameAscending ->
-                    Sorts.orderBy(
-                        Sorts.ascending("name"),
-                        Sorts.ascending("_id"),
-                    )
-                ShoppingListItemSort.NameDescending ->
-                    Sorts.orderBy(
-                        Sorts.descending("name"),
-                        Sorts.ascending("_id"),
-                    )
-            }
+            Sorts.orderBy(
+                Sorts.descending("createdAt"),
+                Sorts.descending("_id"),
+            )
 
         return collection
             .find(query.toFilter())

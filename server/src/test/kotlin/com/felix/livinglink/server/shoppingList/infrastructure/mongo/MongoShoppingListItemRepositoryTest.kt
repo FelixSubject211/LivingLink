@@ -2,7 +2,6 @@ package com.felix.livinglink.server.shoppingList.infrastructure.mongo
 
 import com.felix.livinglink.server.core.infrastructure.mongo.AbstractMongoRepositoryTest
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.mongodb.kotlin.client.coroutine.MongoCollection
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -41,7 +40,6 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
                         groupId = "group-1",
                         limit = 10,
                         offset = 0,
-                        sort = ShoppingListItemSort.NameAscending,
                     ),
                 )
 
@@ -78,7 +76,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
         }
 
     @Test
-    fun `should sort items correctly by various criteria`() =
+    fun `should sort items correctly by created at and id descending`() =
         runTest {
             val now = Instant.fromEpochMilliseconds(1716474000000L)
 
@@ -89,39 +87,9 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
 
             val nameAsc =
                 repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", sort = ShoppingListItemSort.NameAscending, limit = 10, offset = 0),
+                    ShoppingListItemQuery(groupId = "group-1", limit = 10, offset = 0),
                 )
             assertEquals(listOf("b", "a"), nameAsc.map { it.id })
-
-            val nameDesc =
-                repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", sort = ShoppingListItemSort.NameDescending, limit = 10, offset = 0),
-                )
-            assertEquals(listOf("a", "b"), nameDesc.map { it.id })
-
-            val createdAsc =
-                repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", sort = ShoppingListItemSort.CreatedAtAscending, limit = 10, offset = 0),
-                )
-            assertEquals(listOf("a", "b"), createdAsc.map { it.id })
-
-            val createdDesc =
-                repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", sort = ShoppingListItemSort.CreatedAtDescending, limit = 10, offset = 0),
-                )
-            assertEquals(listOf("b", "a"), createdDesc.map { it.id })
-
-            val updatedAsc =
-                repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", sort = ShoppingListItemSort.UpdatedAtAscending, limit = 10, offset = 0),
-                )
-            assertEquals(listOf("b", "a"), updatedAsc.map { it.id })
-
-            val updatedDesc =
-                repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", sort = ShoppingListItemSort.UpdatedAtDescending, limit = 10, offset = 0),
-                )
-            assertEquals(listOf("a", "b"), updatedDesc.map { it.id })
         }
 
     @Test
@@ -132,11 +100,11 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
 
             val limited =
                 repository.find(
-                    ShoppingListItemQuery(groupId = "group-1", limit = 2, offset = 0, sort = ShoppingListItemSort.NameAscending),
+                    ShoppingListItemQuery(groupId = "group-1", limit = 2, offset = 0),
                 )
 
             assertEquals(2, limited.size)
-            assertEquals(listOf("1", "2"), limited.map { it.id })
+            assertEquals(listOf("5", "4"), limited.map { it.id })
         }
 
     @Test
@@ -151,11 +119,10 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
                         groupId = "group-1",
                         limit = 2,
                         offset = 2,
-                        sort = ShoppingListItemSort.NameAscending,
                     ),
                 )
 
-            assertEquals(listOf("3", "4"), page.map { it.id })
+            assertEquals(listOf("3", "2"), page.map { it.id })
         }
 
     @Test
@@ -171,7 +138,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
 
             val count =
                 repository.count(
-                    ShoppingListItemQuery(groupId = "group-1", limit = 10, offset = 0, sort = ShoppingListItemSort.NameAscending),
+                    ShoppingListItemQuery(groupId = "group-1", limit = 10, offset = 0),
                 )
 
             assertEquals(2, count)
@@ -191,17 +158,17 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
 
             val open =
                 repository.count(
-                    ShoppingListItemQuery(groupId = "group-1", completed = false, limit = 10, offset = 0, sort = ShoppingListItemSort.NameAscending),
+                    ShoppingListItemQuery(groupId = "group-1", completed = false, limit = 10, offset = 0),
                 )
 
             val completed =
                 repository.count(
-                    ShoppingListItemQuery(groupId = "group-1", completed = true, limit = 10, offset = 0, sort = ShoppingListItemSort.NameAscending),
+                    ShoppingListItemQuery(groupId = "group-1", completed = true, limit = 10, offset = 0),
                 )
 
             val all =
                 repository.count(
-                    ShoppingListItemQuery(groupId = "group-1", completed = null, limit = 10, offset = 0, sort = ShoppingListItemSort.NameAscending),
+                    ShoppingListItemQuery(groupId = "group-1", completed = null, limit = 10, offset = 0),
                 )
 
             assertEquals(2, open)
@@ -217,7 +184,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
 
             val count =
                 repository.count(
-                    ShoppingListItemQuery(groupId = "group-1", limit = 2, offset = 3, sort = ShoppingListItemSort.NameAscending),
+                    ShoppingListItemQuery(groupId = "group-1", limit = 2, offset = 3),
                 )
 
             assertEquals(5, count)

@@ -4,7 +4,6 @@ import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCa
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import org.koin.core.annotation.Single
 
 @Single
@@ -21,7 +20,6 @@ class ListShoppingListItemsUseCase(
                 completed = input.completed,
                 limit = input.limit,
                 offset = 0,
-                sort = input.sort,
             ),
         )
     }
@@ -31,6 +29,5 @@ class ListShoppingListItemsUseCase(
         val groupId: String,
         val completed: Boolean?,
         val limit: Int,
-        val sort: ShoppingListItemSort,
     )
 }

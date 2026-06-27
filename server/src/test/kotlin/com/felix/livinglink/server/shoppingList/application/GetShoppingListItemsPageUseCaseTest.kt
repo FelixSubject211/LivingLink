@@ -4,7 +4,6 @@ import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCa
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemQuery
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.server.shoppingList.domain.shoppingListItem
 import dev.mokkery.answering.returns
 import dev.mokkery.answering.throws
@@ -43,7 +42,6 @@ class GetShoppingListItemsPageUseCaseTest {
                     completed = false,
                     limit = 3,
                     offset = 0,
-                    sort = ShoppingListItemSort.NameAscending,
                 )
 
             everySuspend { shoppingListItemRepository.find(expectedQuery) } returns items(3)
@@ -57,7 +55,6 @@ class GetShoppingListItemsPageUseCaseTest {
                         completed = false,
                         limit = 2,
                         offset = 0,
-                        sort = ShoppingListItemSort.NameAscending,
                     ),
                 )
 
@@ -81,7 +78,6 @@ class GetShoppingListItemsPageUseCaseTest {
                         completed = null,
                         limit = 2,
                         offset = 0,
-                        sort = ShoppingListItemSort.CreatedAtDescending,
                     ),
                 )
             }

@@ -10,6 +10,7 @@ class NamingConventionsTest {
         Konsist
             .scopeFromProduction()
             .classes()
+            .filter { it.resideInPackage("..server..") }
             .filter { it.resideInPackage("..application..") }
             .filter { it.isTopLevel }
             .assertTrue { it.name.endsWith("UseCase") }

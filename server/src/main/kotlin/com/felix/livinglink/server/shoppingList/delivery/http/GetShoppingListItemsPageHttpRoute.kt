@@ -4,10 +4,8 @@ import com.felix.livinglink.server.core.delivery.http.API_KEY_AUTH
 import com.felix.livinglink.server.core.delivery.http.HttpRouteRegistrar
 import com.felix.livinglink.server.core.delivery.http.requireUser
 import com.felix.livinglink.server.shoppingList.application.GetShoppingListItemsPageUseCase
-import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemSort
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageRequestV1
 import com.felix.livinglink.shared.shoppingList.GetShoppingListItemsPageResponseV1
-import com.felix.livinglink.shared.shoppingList.ShoppingListItemSortV1
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.response.respond
@@ -50,12 +48,6 @@ class GetShoppingListItemsPageHttpRoute(
                         ?.takeIf { it >= 0 }
                         ?: 0
 
-                val sort =
-                    params[GetShoppingListItemsPageRequestV1.QUERY_SORT]
-                        ?.let { raw -> runCatching { ShoppingListItemSortV1.valueOf(raw) }.getOrNull() }
-                        ?.toDomain()
-                        ?: ShoppingListItemSort.CreatedAtDescending
-
                 val output =
                     getShoppingListItemsPageUseCase(
                         GetShoppingListItemsPageUseCase.Input(
@@ -64,7 +56,6 @@ class GetShoppingListItemsPageHttpRoute(
                             completed = completed,
                             limit = limit,
                             offset = offset,
-                            sort = sort,
                         ),
                     )
 
@@ -79,13 +70,3 @@ class GetShoppingListItemsPageHttpRoute(
         }
     }
 }
-
-private fun ShoppingListItemSortV1.toDomain(): ShoppingListItemSort =
-    when (this) {
-        ShoppingListItemSortV1.CreatedAtAscending -> ShoppingListItemSort.CreatedAtAscending
-        ShoppingListItemSortV1.CreatedAtDescending -> ShoppingListItemSort.CreatedAtDescending
-        ShoppingListItemSortV1.UpdatedAtAscending -> ShoppingListItemSort.UpdatedAtAscending
-        ShoppingListItemSortV1.UpdatedAtDescending -> ShoppingListItemSort.UpdatedAtDescending
-        ShoppingListItemSortV1.NameAscending -> ShoppingListItemSort.NameAscending
-        ShoppingListItemSortV1.NameDescending -> ShoppingListItemSort.NameDescending
-    }
