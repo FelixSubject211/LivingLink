@@ -8,6 +8,6 @@ data class DeleteShoppingListItemRequestV1(
     val itemId: String,
 ) {
     companion object {
-        const val ROUTE = "/delte-shopping-list-item-v1/"
+        const val ROUTE = "/delete-shopping-list-item-v1/"
     }
 }
