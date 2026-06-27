@@ -5,7 +5,7 @@ sealed interface Loadable<out T> {
 
     data object Empty : Loadable<Nothing>
 
-    data class Content<T>(val value: T) : Loadable<T>
+    data class Content<T>(val value: T, val synced: Boolean = true) : Loadable<T>
 
     sealed interface Error : Loadable<Nothing> {
         data object Network : Error

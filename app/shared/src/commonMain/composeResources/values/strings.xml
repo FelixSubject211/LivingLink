@@ -40,4 +40,6 @@
 
     <string name="shopping_list_empty_title">Your shopping list is empty</string>
     <string name="shopping_list_empty_description">Add your first item using the field below.</string>
+
+    <string name="shopping_list_offline_banner">Offline. Changes sync when you are back online</string>
 </resources>

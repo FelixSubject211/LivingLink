@@ -108,6 +108,7 @@ class ShoppingListViewModel(
                     shoppingList = value,
                     pendingItemIds = pendingItemIds,
                     itemPendingDelete = itemPendingDelete,
+                    synced = synced,
                 )
         }
 }

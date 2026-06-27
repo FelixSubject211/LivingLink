@@ -1,0 +1,37 @@
+import kotlin.Boolean;
+
+CREATE TABLE shoppingListPendingMutation (
+    sequence INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    type TEXT NOT NULL,
+    groupId TEXT NOT NULL,
+    itemId TEXT NOT NULL,
+    completed INTEGER AS Boolean
+);
+
+selectAll:
+SELECT * FROM shoppingListPendingMutation ORDER BY sequence ASC;
+
+selectSequenceForCompleteChange:
+SELECT sequence FROM shoppingListPendingMutation
+WHERE type = 'CompleteChange' AND groupId = :groupId AND itemId = :itemId AND completed = :completed
+ORDER BY sequence ASC
+LIMIT 1;
+
+selectSequenceForDelete:
+SELECT sequence FROM shoppingListPendingMutation
+WHERE type = 'Delete' AND groupId = :groupId AND itemId = :itemId
+ORDER BY sequence ASC
+LIMIT 1;
+
+insert:
+INSERT INTO shoppingListPendingMutation(type, groupId, itemId, completed)
+VALUES (:type, :groupId, :itemId, :completed);
+
+deleteBySequence:
+DELETE FROM shoppingListPendingMutation WHERE sequence = :sequence;
+
+deleteForGroups:
+DELETE FROM shoppingListPendingMutation WHERE groupId IN :groupIds;
+
+deleteAll:
+DELETE FROM shoppingListPendingMutation;

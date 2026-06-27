@@ -28,10 +28,12 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import org.koin.core.annotation.Named
 import org.koin.core.annotation.Single
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Single(binds = [ShoppingListRepository::class])
+@Named("base")
 class ShoppingListDefaultRepository(
     private val shoppingListRemoteDataSource: ShoppingListRemoteDataSource,
     private val shoppingListLocalDataSource: ShoppingListLocalDataSource,

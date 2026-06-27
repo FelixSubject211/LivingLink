@@ -14,6 +14,7 @@ sealed interface ShoppingListScreenState {
         val shoppingList: ShoppingListContent,
         val pendingItemIds: Set<String> = emptySet(),
         val itemPendingDelete: ShoppingListItem? = null,
+        val synced: Boolean,
     ) : ShoppingListScreenState
 
     companion object {

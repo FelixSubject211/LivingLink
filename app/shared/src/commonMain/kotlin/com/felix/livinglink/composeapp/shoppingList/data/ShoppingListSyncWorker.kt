@@ -1,0 +1,79 @@
+package com.felix.livinglink.composeapp.shoppingList.data
+
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository.ChangeCompleteStateResult
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository.DeleteResult
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListSyncLocalDataStore
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import org.koin.core.annotation.Named
+import org.koin.core.annotation.Single
+import kotlin.time.Duration.Companion.seconds
+
+@Single
+class ShoppingListSyncWorker(
+    @Named("base") private val baseRepository: ShoppingListRepository,
+    private val shoppingListSyncLocalDataStore: ShoppingListSyncLocalDataStore,
+) {
+    suspend fun run() {
+        while (true) {
+            shoppingListSyncLocalDataStore.pending.first { it.isNotEmpty() }
+            val drainedClean = drainOnce()
+            if (!drainedClean) delay(RETRY_INTERVAL)
+        }
+    }
+
+    private suspend fun drainOnce(): Boolean {
+        val batch = shoppingListSyncLocalDataStore.snapshot()
+
+        for (mutation in batch) {
+            when (apply(mutation)) {
+                Outcome.Done ->
+                    shoppingListSyncLocalDataStore.remove(mutation)
+
+                Outcome.RetryLater ->
+                    return false
+            }
+        }
+        return true
+    }
+
+    private suspend fun apply(mutation: ShoppingListPendingMutation): Outcome =
+        when (mutation) {
+            is ShoppingListPendingMutation.CompleteChange ->
+                baseRepository.changeItemCompleteState(
+                    itemId = mutation.itemId,
+                    completed = mutation.completed,
+                ).toOutcome()
+
+            is ShoppingListPendingMutation.Delete ->
+                baseRepository.deleteItem(mutation.itemId).toOutcome()
+        }
+
+    private fun ChangeCompleteStateResult.toOutcome(): Outcome =
+        when (this) {
+            ChangeCompleteStateResult.Success,
+            ChangeCompleteStateResult.Conflict ->
+                Outcome.Done
+
+            ChangeCompleteStateResult.NetworkError,
+            ChangeCompleteStateResult.NoActiveGroup ->
+                Outcome.RetryLater
+        }
+
+    private fun DeleteResult.toOutcome(): Outcome =
+        when (this) {
+            DeleteResult.Success ->
+                Outcome.Done
+
+            DeleteResult.NetworkError,
+            DeleteResult.NoActiveGroup ->
+                Outcome.RetryLater
+        }
+
+    private enum class Outcome { Done, RetryLater }
+
+    private companion object {
+        val RETRY_INTERVAL = 1.seconds
+    }
+}

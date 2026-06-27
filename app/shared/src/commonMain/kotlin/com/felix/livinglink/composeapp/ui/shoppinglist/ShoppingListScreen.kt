@@ -59,6 +59,8 @@ fun ShoppingListScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val addState = addItemViewModel.state.collectAsStateWithLifecycle()
 
+    val isSynced = (state.value as? ShoppingListScreenState.Content)?.synced ?: true
+
     val listState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
     }
@@ -103,6 +105,9 @@ fun ShoppingListScreen(
                 .padding(paddingValues)
                 .imePadding(),
         ) {
+
+            ShoppingListOfflineSyncBanner(visible = !isSynced)
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
