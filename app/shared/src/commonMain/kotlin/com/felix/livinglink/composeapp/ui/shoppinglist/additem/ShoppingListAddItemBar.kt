@@ -17,8 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
-import com.felix.livinglink.composeapp.ui.core.molecule.SuggestionRow
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import com.tweener.czan.designsystem.atom.button.Button
 import com.tweener.czan.designsystem.atom.button.ButtonStyle
 import com.felix.livinglink.composeapp.ui.core.atom.TextField
@@ -34,7 +33,7 @@ fun ShoppingListAddItemBar(
     state: ShoppingListAddItemState,
     onQueryChanged: (String) -> Unit,
     onSubmit: () -> Unit,
-    onSuggestionSelected: (ItemSuggestion) -> Unit,
+    onSuggestionSelected: (ShoppingListItemSuggestion) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Surface(
@@ -46,7 +45,7 @@ fun ShoppingListAddItemBar(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            SuggestionRow(
+            ShoppingListAddItemSuggestionRow(
                 suggestions = state.suggestions,
                 visible = state.showSuggestions,
                 enabled = !state.isAdding,

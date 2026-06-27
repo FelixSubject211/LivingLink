@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.felix.livinglink.composeapp.shoppingList.application.AddShoppingListItemUseCase
 import com.felix.livinglink.composeapp.shoppingList.application.ObserveItemSuggestionsUseCase
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -29,7 +29,7 @@ class ShoppingListAddItemViewModel(
     private val query = MutableStateFlow("")
     private val isAdding = MutableStateFlow(false)
 
-    private val suggestions: Flow<List<ItemSuggestion>> =
+    private val suggestions: Flow<List<ShoppingListItemSuggestion>> =
         query.flatMapLatest { current ->
             observeItemSuggestionsUseCase(query = current)
         }
@@ -64,7 +64,7 @@ class ShoppingListAddItemViewModel(
         addItem(name)
     }
 
-    fun onSuggestionSelected(suggestion: ItemSuggestion) {
+    fun onSuggestionSelected(suggestion: ShoppingListItemSuggestion) {
         if (isAdding.value) return
         addItem(suggestion.name)
     }

@@ -19,7 +19,7 @@ interface ShoppingListRepository {
         itemId: String,
     ): DeleteResult
 
-    fun observeSuggestions(query: String): Flow<List<ItemSuggestion>>
+    fun observeSuggestions(query: String): Flow<List<ShoppingListItemSuggestion>>
 
     enum class AddResult {
         Success,

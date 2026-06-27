@@ -1,6 +1,6 @@
 package com.felix.livinglink.composeapp.shoppingList.domain
 
-data class ItemSuggestion(
+data class ShoppingListItemSuggestion(
     val name: String,
     val usageCount: Int,
 )

@@ -2,7 +2,7 @@ package com.felix.livinglink.composeapp.shoppingList.data
 
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListSyncLocalDataStore
@@ -67,7 +67,7 @@ class OfflineFirstShoppingListRepository(
         return result
     }
 
-    override fun observeSuggestions(query: String): Flow<List<ItemSuggestion>> =
+    override fun observeSuggestions(query: String): Flow<List<ShoppingListItemSuggestion>> =
         delegate.observeSuggestions(query)
 }
 

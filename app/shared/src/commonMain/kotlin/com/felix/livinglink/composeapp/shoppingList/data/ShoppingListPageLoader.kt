@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
-class PageLoader(
+class ShoppingListPageLoader(
     private val groupId: String,
     private val scope: CoroutineScope,
     private val remoteDataSource: ShoppingListRemoteDataSource,

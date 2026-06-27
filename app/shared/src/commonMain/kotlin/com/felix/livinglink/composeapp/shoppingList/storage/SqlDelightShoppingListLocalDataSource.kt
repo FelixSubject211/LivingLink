@@ -8,7 +8,7 @@ import com.felix.livinglink.composeapp.core.db.DatabaseProvider
 import com.felix.livinglink.composeapp.core.domain.GroupScopedDataCleaner
 import com.felix.livinglink.composeapp.core.domain.LogoutDataCleaner
 import com.felix.livinglink.composeapp.db.ShoppingListItemEntity
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
@@ -107,7 +107,7 @@ class SqlDelightShoppingListLocalDataSource(
     override fun observeSuggestions(
         groupId: String,
         query: String,
-    ): Flow<List<ItemSuggestion>> = flow {
+    ): Flow<List<ShoppingListItemSuggestion>> = flow {
         val q = databaseProvider.get().shoppingListQueries
         val normalizedQuery = query.trim().lowercase()
         emitAll(
@@ -120,7 +120,7 @@ class SqlDelightShoppingListLocalDataSource(
                 .mapToList(Dispatchers.Default)
                 .map { rows ->
                     rows.map { row ->
-                        ItemSuggestion(
+                        ShoppingListItemSuggestion(
                             name = row.name,
                             usageCount = row.usageCount.toInt(),
                         )

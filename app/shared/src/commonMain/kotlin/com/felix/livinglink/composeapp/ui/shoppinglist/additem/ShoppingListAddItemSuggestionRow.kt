@@ -1,4 +1,4 @@
-package com.felix.livinglink.composeapp.ui.core.molecule
+package com.felix.livinglink.composeapp.ui.shoppinglist.additem
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Spring
@@ -18,16 +18,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import com.felix.livinglink.composeapp.ui.core.atom.SuggestionChip
 import com.tweener.czan.theme.Size
 
 @Composable
-fun SuggestionRow(
-    suggestions: List<ItemSuggestion>,
+fun ShoppingListAddItemSuggestionRow(
+    suggestions: List<ShoppingListItemSuggestion>,
     visible: Boolean,
     enabled: Boolean,
-    onSuggestionClick: (ItemSuggestion) -> Unit,
+    onSuggestionClick: (ShoppingListItemSuggestion) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val listState = rememberLazyListState()

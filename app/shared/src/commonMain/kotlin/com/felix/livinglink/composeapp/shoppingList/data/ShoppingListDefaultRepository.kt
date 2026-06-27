@@ -5,7 +5,7 @@ import com.felix.livinglink.composeapp.auth.domain.AuthState
 import com.felix.livinglink.composeapp.core.domain.Loadable
 import com.felix.livinglink.composeapp.core.domain.NetworkResult
 import com.felix.livinglink.composeapp.groups.domain.GroupsRepository
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListLocalDataSource
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRemoteDataSource
@@ -196,7 +196,7 @@ class ShoppingListDefaultRepository(
         }
     }
 
-    override fun observeSuggestions(query: String): Flow<List<ItemSuggestion>> =
+    override fun observeSuggestions(query: String): Flow<List<ShoppingListItemSuggestion>> =
         groupsRepository.selectedGroupId.flatMapLatest { groupId ->
             if (groupId == null) {
                 emptyFlow()
@@ -216,7 +216,7 @@ class ShoppingListDefaultRepository(
 
     private suspend fun ProducerScope<Loadable<ShoppingListContent>>.syncGroup(groupId: String) =
         coroutineScope {
-            val loader = PageLoader(
+            val loader = ShoppingListPageLoader(
                 groupId = groupId,
                 scope = this,
                 remoteDataSource = shoppingListRemoteDataSource,

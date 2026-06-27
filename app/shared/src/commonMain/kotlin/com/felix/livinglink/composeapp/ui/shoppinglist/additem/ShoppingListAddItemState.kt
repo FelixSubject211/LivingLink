@@ -1,10 +1,10 @@
 package com.felix.livinglink.composeapp.ui.shoppinglist.additem
 
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 
 data class ShoppingListAddItemState(
     val query: String,
-    val suggestions: List<ItemSuggestion>,
+    val suggestions: List<ShoppingListItemSuggestion>,
     val isAdding: Boolean,
 ) {
     val canSubmit: Boolean

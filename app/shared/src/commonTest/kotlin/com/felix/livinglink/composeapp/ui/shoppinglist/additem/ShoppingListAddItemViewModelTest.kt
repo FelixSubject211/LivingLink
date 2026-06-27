@@ -4,7 +4,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import com.felix.livinglink.composeapp.shoppingList.application.AddShoppingListItemUseCase
 import com.felix.livinglink.composeapp.shoppingList.application.ObserveItemSuggestionsUseCase
-import com.felix.livinglink.composeapp.shoppingList.domain.ItemSuggestion
+import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItemSuggestion
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
 import dev.mokkery.every
@@ -19,7 +19,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
@@ -194,7 +193,7 @@ class ShoppingListAddItemViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.onSuggestionSelected(ItemSuggestion(name = "Bread", usageCount = 3))
+        viewModel.onSuggestionSelected(ShoppingListItemSuggestion(name = "Bread", usageCount = 3))
 
         verifySuspend(exactly(1)) { addShoppingListItemUseCase("Bread") }
     }
@@ -206,8 +205,8 @@ class ShoppingListAddItemViewModelTest {
 
         val viewModel = createViewModel()
 
-        viewModel.onSuggestionSelected(ItemSuggestion(name = "Bread", usageCount = 3))
-        viewModel.onSuggestionSelected(ItemSuggestion(name = "Bread", usageCount = 3))
+        viewModel.onSuggestionSelected(ShoppingListItemSuggestion(name = "Bread", usageCount = 3))
+        viewModel.onSuggestionSelected(ShoppingListItemSuggestion(name = "Bread", usageCount = 3))
 
         gate.complete(AddShoppingListItemUseCase.Result.Success)
 
@@ -217,7 +216,7 @@ class ShoppingListAddItemViewModelTest {
     @Test
     fun `suggestions from use case are reflected in state`() = runTest {
         every { observeItemSuggestionsUseCase(any()) } returns flowOf(
-            listOf(ItemSuggestion(name = "Milk", usageCount = 5)),
+            listOf(ShoppingListItemSuggestion(name = "Milk", usageCount = 5)),
         )
 
         val viewModel = createViewModel()
