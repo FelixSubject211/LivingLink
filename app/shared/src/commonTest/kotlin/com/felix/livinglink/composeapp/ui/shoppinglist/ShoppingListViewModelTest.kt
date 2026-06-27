@@ -98,6 +98,30 @@ class ShoppingListViewModelTest {
     }
 
     @Test
+    fun `maps empty loadable to empty state`() = runTest {
+        contentFlow.value = Loadable.Empty
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            assertEquals(ShoppingListScreenState.Empty, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `maps loading loadable to loading state`() = runTest {
+        contentFlow.value = Loadable.Loading
+
+        val viewModel = createViewModel()
+
+        viewModel.state.test {
+            assertEquals(ShoppingListScreenState.Loading, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `onToggleItem adds item to pending then removes it after success`() = runTest {
         contentFlow.value = content(item("i1", completed = false))
 

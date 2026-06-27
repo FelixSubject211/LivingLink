@@ -101,7 +101,7 @@ class ShoppingListViewModel(
     ): ShoppingListScreenState =
         when (this) {
             is Loadable.Loading -> ShoppingListScreenState.Loading
-            is Loadable.Empty -> ShoppingListScreenState.Loading
+            is Loadable.Empty -> ShoppingListScreenState.Empty
             is Loadable.Error -> ShoppingListScreenState.Error
             is Loadable.Content ->
                 ShoppingListScreenState.Content(

@@ -235,6 +235,7 @@ class ShoppingListDefaultRepository(
                 loader.failedBeforeFirstData,
             ) { cached, failed ->
                 when {
+                    cached != null && cached.totalCount == 0 -> Loadable.Empty
                     cached != null -> Loadable.Content(cached)
                     failed -> Loadable.Error.Network
                     else -> Loadable.Loading

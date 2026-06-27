@@ -178,6 +178,43 @@ class ShoppingListDefaultRepositoryTest {
     }
 
     @Test
+    fun `emits empty when cache is filled but totalCount is zero`() = runTest {
+        val groupId = "group-1"
+        val group = Group(id = groupId, name = "A")
+
+        val emptyContent = ShoppingListContent(
+            itemsById = emptyMap(),
+            order = emptyList(),
+        )
+
+        val cacheFlow = MutableStateFlow<ShoppingListContent?>(null)
+
+        every { groupsRepository.state } returns flowOf(groupsContent(groups = listOf(group)))
+        every { authRepository.authState } returns MutableStateFlow(
+            AuthState.LoggedIn(apiKey = "key", userId = "user-1", username = "felix"),
+        )
+        every { localDataSource.observe(groupId) } returns cacheFlow
+
+        everySuspend {
+            localDataSource.putRange(any(), any(), any(), any())
+        } calls { cacheFlow.value = emptyContent }
+
+        everySuspend {
+            remoteDataSource.getPage(any(), any(), any(), any(), any())
+        } returns NetworkResult.Success(
+            ShoppingListPage(items = emptyList(), totalCount = 0),
+        )
+
+        createRepository()
+
+        repository.state.test {
+            assertEquals(Loadable.Loading, awaitItem())
+            assertEquals(Loadable.Empty, awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
     fun `loads correct pages when scrolling down and back up`() = runTest {
         val groupId = "group-1"
         val group = Group(id = groupId, name = "A")

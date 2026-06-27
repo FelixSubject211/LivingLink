@@ -23,6 +23,7 @@ import com.felix.livinglink.composeapp.ui.core.molecule.VisibleRangeEffect
 import com.felix.livinglink.composeapp.ui.core.organism.ErrorContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListContent
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
+import com.felix.livinglink.composeapp.ui.core.organism.EmptyContent
 import com.felix.livinglink.composeapp.ui.shoppinglist.additem.ShoppingListAddItemBar
 import com.felix.livinglink.composeapp.ui.shoppinglist.additem.AddItemEvent
 import com.felix.livinglink.composeapp.ui.shoppinglist.additem.ShoppingListAddItemViewModel
@@ -37,6 +38,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.merge
 import livinglink.app.shared.generated.resources.Res
 import livinglink.app.shared.generated.resources.network_error_title
+import livinglink.app.shared.generated.resources.shopping_basket_24px
 import livinglink.app.shared.generated.resources.shopping_list_add_failed
 import livinglink.app.shared.generated.resources.shopping_list_change_failed
 import livinglink.app.shared.generated.resources.shopping_list_delete_cancel
@@ -44,6 +46,8 @@ import livinglink.app.shared.generated.resources.shopping_list_delete_confirm
 import livinglink.app.shared.generated.resources.shopping_list_delete_failed
 import livinglink.app.shared.generated.resources.shopping_list_delete_message
 import livinglink.app.shared.generated.resources.shopping_list_delete_title
+import livinglink.app.shared.generated.resources.shopping_list_empty_description
+import livinglink.app.shared.generated.resources.shopping_list_empty_title
 import livinglink.app.shared.generated.resources.shopping_list_error_network_description
 import org.jetbrains.compose.resources.stringResource
 
@@ -108,6 +112,13 @@ fun ShoppingListScreen(
                 when (val current = state.value) {
                     is ShoppingListScreenState.Loading ->
                         CircularProgressIndicator()
+
+                    is ShoppingListScreenState.Empty ->
+                        EmptyContent(
+                            icon = Res.drawable.shopping_basket_24px,
+                            title = stringResource(Res.string.shopping_list_empty_title),
+                            description = stringResource(Res.string.shopping_list_empty_description),
+                        )
 
                     is ShoppingListScreenState.Error ->
                         ErrorContent(

@@ -6,6 +6,8 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListItem
 sealed interface ShoppingListScreenState {
     data object Loading : ShoppingListScreenState
 
+    data object Empty : ShoppingListScreenState
+
     data object Error : ShoppingListScreenState
 
     data class Content(
