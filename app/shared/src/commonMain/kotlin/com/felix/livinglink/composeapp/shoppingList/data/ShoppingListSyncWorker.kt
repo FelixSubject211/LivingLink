@@ -4,6 +4,9 @@ import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepositor
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository.ChangeCompleteStateResult
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListRepository.DeleteResult
 import com.felix.livinglink.composeapp.shoppingList.domain.ShoppingListSyncLocalDataStore
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import org.koin.core.annotation.Named
@@ -23,20 +26,36 @@ class ShoppingListSyncWorker(
         }
     }
 
-    private suspend fun drainOnce(): Boolean {
-        val batch = shoppingListSyncLocalDataStore.snapshot()
-
-        for (mutation in batch) {
-            when (apply(mutation)) {
-                Outcome.Done ->
-                    shoppingListSyncLocalDataStore.remove(mutation)
-
-                Outcome.RetryLater ->
-                    return false
-            }
-        }
-        return true
+    suspend fun syncOnce(): Boolean {
+        val pending = shoppingListSyncLocalDataStore.snapshot()
+        if (pending.isEmpty()) return true
+        return drainOnce()
     }
+
+    private suspend fun drainOnce(): Boolean = coroutineScope {
+        val plans = coalesce(shoppingListSyncLocalDataStore.snapshot())
+
+        val results = plans
+            .map { plan -> async { plan to apply(plan.mutation) } }
+            .awaitAll()
+
+        results
+            .filter { (_, outcome) -> outcome == Outcome.Done }
+            .forEach { (plan, _) ->
+                plan.superseded.forEach({ shoppingListSyncLocalDataStore.remove(it) })
+            }
+
+        results.all { (_, outcome) -> outcome == Outcome.Done }
+    }
+
+    private fun coalesce(batch: List<ShoppingListPendingMutation>): List<MutationPlan> =
+        batch
+            .groupBy { it.itemId }
+            .map { (_, mutations) -> MutationPlan(winner = pickWinner(mutations), superseded = mutations) }
+
+    private fun pickWinner(mutations: List<ShoppingListPendingMutation>): ShoppingListPendingMutation =
+        mutations.filterIsInstance<ShoppingListPendingMutation.Delete>().lastOrNull()
+            ?: mutations.filterIsInstance<ShoppingListPendingMutation.CompleteChange>().last()
 
     private suspend fun apply(mutation: ShoppingListPendingMutation): Outcome =
         when (mutation) {
@@ -70,6 +89,13 @@ class ShoppingListSyncWorker(
             DeleteResult.NoActiveGroup ->
                 Outcome.RetryLater
         }
+
+    private data class MutationPlan(
+        val winner: ShoppingListPendingMutation,
+        val superseded: List<ShoppingListPendingMutation>,
+    ) {
+        val mutation: ShoppingListPendingMutation get() = winner
+    }
 
     private enum class Outcome { Done, RetryLater }
 

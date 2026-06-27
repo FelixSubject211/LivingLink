@@ -58,6 +58,7 @@ kotlin {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.koin.android)
             implementation(libs.sqldelight.android.driver)
+            implementation(libs.androidx.work.runtime)
         }
         commonMain.dependencies {
             implementation(project(":shared"))

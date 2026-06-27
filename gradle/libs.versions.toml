@@ -36,6 +36,7 @@ turbine = "1.2.1"
 navigationCompose = "2.9.2"
 sqldelight = "2.3.2"
 kotlinxBrowser = "0.3"
+workManager = "2.10.0"
 
 [libraries]
 # Server + App + Shared
@@ -95,6 +96,7 @@ kotlinx-browser = { module = "org.jetbrains.kotlinx:kotlinx-browser", version.re
 
 # App: Android
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
+androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "workManager" }
 
 # App: Web
 wrappers-browser = { module = "org.jetbrains.kotlin-wrappers:kotlin-browser", version.ref = "kotlin-wrappers" }
