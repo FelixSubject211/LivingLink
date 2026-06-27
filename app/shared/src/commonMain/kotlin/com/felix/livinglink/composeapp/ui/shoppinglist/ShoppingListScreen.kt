@@ -1,8 +1,12 @@
 package com.felix.livinglink.composeapp.ui.shoppinglist
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -30,6 +34,7 @@ import com.tweener.czan.designsystem.atom.snackbar.Snackbar
 import com.tweener.czan.designsystem.atom.snackbar.SnackbarDefaults
 import com.tweener.czan.designsystem.atom.snackbar.rememberSnackbarHostState
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.merge
 import livinglink.app.shared.generated.resources.Res
 import livinglink.app.shared.generated.resources.network_error_title
 import livinglink.app.shared.generated.resources.shopping_list_add_failed
@@ -60,24 +65,22 @@ fun ShoppingListScreen(
     val addFailedMessage = stringResource(Res.string.shopping_list_add_failed)
 
     LaunchedEffect(Unit) {
-        viewModel.events.collectLatest { event ->
+        merge(
+            viewModel.events,
+            addItemViewModel.events,
+        ).collectLatest { event ->
             when (event) {
                 is ShoppingListEvent.ChangeFailed ->
                     snackbarHostState.showSnackbar(message = changeFailedMessage)
 
                 is ShoppingListEvent.DeleteFailed ->
                     snackbarHostState.showSnackbar(message = deleteFailedMessage)
-            }
-        }
-    }
 
-    LaunchedEffect(Unit) {
-        addItemViewModel.events.collectLatest { event ->
-            when (event) {
                 is AddItemEvent.AddFailed ->
                     snackbarHostState.showSnackbar(message = addFailedMessage)
 
-                is AddItemEvent.Added -> Unit
+                is AddItemEvent.Added ->
+                    listState.scrollToItem(0)
             }
         }
     }
@@ -93,7 +96,8 @@ fun ShoppingListScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
+                .padding(paddingValues)
+                .imePadding(),
         ) {
             Box(
                 modifier = Modifier
@@ -166,19 +170,28 @@ private fun ShoppingListContent(
         ) { index ->
             val item = shoppingList.itemAt(index)
             val isPending = item != null && item.id in pendingItemIds
-            CheckableListItem(
-                text = item?.name.orEmpty(),
-                checked = item?.completed ?: false,
-                enabled = item != null && !isPending,
-                loading = isPending,
-                onClick = item?.let { current ->
-                    { onToggleItem(current.id, !current.completed) }
-                },
-                onLongClick = item?.let { current ->
-                    { onRequestDeleteItem(current) }
-                },
-            )
-            Divider()
+
+            Column(
+                modifier = Modifier.animateItem(
+                    fadeInSpec = tween(durationMillis = 220),
+                    fadeOutSpec = tween(durationMillis = 160),
+                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                ),
+            ) {
+                CheckableListItem(
+                    text = item?.name.orEmpty(),
+                    checked = item?.completed ?: false,
+                    enabled = item != null && !isPending,
+                    loading = isPending,
+                    onClick = item?.let { current ->
+                        { onToggleItem(current.id, !current.completed) }
+                    },
+                    onLongClick = item?.let { current ->
+                        { onRequestDeleteItem(current) }
+                    },
+                )
+                Divider()
+            }
         }
     }
 

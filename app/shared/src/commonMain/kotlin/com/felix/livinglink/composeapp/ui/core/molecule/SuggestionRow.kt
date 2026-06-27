@@ -1,6 +1,9 @@
 package com.felix.livinglink.composeapp.ui.core.molecule
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -56,6 +59,13 @@ fun SuggestionRow(
                     text = suggestion.name,
                     enabled = enabled,
                     onClick = { onSuggestionClick(suggestion) },
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(durationMillis = 180),
+                        fadeOutSpec = tween(durationMillis = 120),
+                        placementSpec = spring(
+                            stiffness = Spring.StiffnessMediumLow,
+                        ),
+                    ),
                 )
             }
         }

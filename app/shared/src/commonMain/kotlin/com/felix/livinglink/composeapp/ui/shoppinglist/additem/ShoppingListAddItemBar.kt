@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -80,7 +81,9 @@ fun ShoppingListAddItemBar(
                     enabled = state.canSubmit,
                     loading = state.isAdding,
                     onClick = onSubmit,
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier
+                        .widthIn(min = 94.dp)
+                        .fillMaxHeight(),
                 )
             }
         }

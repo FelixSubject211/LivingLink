@@ -75,8 +75,10 @@ WHERE groupId = :groupId
   AND (:query = '' OR LOWER(name) LIKE '%' || :query || '%')
 GROUP BY name
 ORDER BY
-    CASE WHEN :query != '' AND LOWER(name) LIKE :query || '%' THEN 0 ELSE 1 END,
+    CASE WHEN SUM(CASE WHEN completed = 0 THEN 1 ELSE 0 END) > 0 THEN 1 ELSE 0 END ASC,
+    CASE WHEN :query != '' AND LOWER(name) LIKE :query || '%' THEN 0 ELSE 1 END ASC,
     usageCount DESC,
+    MAX(updatedAt) DESC,
     name ASC
 LIMIT :limit;
 

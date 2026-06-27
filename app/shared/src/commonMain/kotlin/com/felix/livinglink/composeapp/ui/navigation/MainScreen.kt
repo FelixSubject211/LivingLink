@@ -1,5 +1,6 @@
 package com.felix.livinglink.composeapp.ui.navigation
 
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -86,7 +87,9 @@ fun MainScreen() {
         NavHost(
             navController = navController,
             startDestination = Destination.Tab.ShoppingList,
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
         ) {
             composable<Destination.Tab.ShoppingList> {
                 ShoppingListScreen(
