@@ -8,7 +8,6 @@ import kotlinx.coroutines.test.runTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 
 class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
@@ -29,9 +28,9 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
     @Test
     fun `should only return items of the queried group`() =
         runTest {
-            val inGroup1 = createDocument(id = "a", name = "Milk", groupId = "group-1")
-            val alsoGroup1 = createDocument(id = "b", name = "Bread", groupId = "group-1")
-            val inGroup2 = createDocument(id = "c", name = "Eggs", groupId = "group-2")
+            val inGroup1 = createDocument(id = "a", name = "Milk", groupId = "group-1", position = "a0")
+            val alsoGroup1 = createDocument(id = "b", name = "Bread", groupId = "group-1", position = "a1")
+            val inGroup2 = createDocument(id = "c", name = "Eggs", groupId = "group-2", position = "a0")
             collection.insertMany(listOf(inGroup1, alsoGroup1, inGroup2))
 
             val group1Items =
@@ -49,10 +48,10 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
     @Test
     fun `should filter by completed status within the group`() =
         runTest {
-            val item1 = createDocument(id = "1", name = "Milk", completed = false)
-            val item2 = createDocument(id = "2", name = "Bread", completed = true)
-            val item3 = createDocument(id = "3", name = "Eggs", completed = false)
-            val otherGroup = createDocument(id = "4", name = "Cheese", completed = false, groupId = "group-2")
+            val item1 = createDocument(id = "1", name = "Milk", completed = false, position = "a0")
+            val item2 = createDocument(id = "2", name = "Bread", completed = true, position = "a1")
+            val item3 = createDocument(id = "3", name = "Eggs", completed = false, position = "a2")
+            val otherGroup = createDocument(id = "4", name = "Cheese", completed = false, groupId = "group-2", position = "a0")
             collection.insertMany(listOf(item1, item2, item3, otherGroup))
 
             val openItems =
@@ -76,26 +75,39 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
         }
 
     @Test
-    fun `should sort items correctly by created at and id descending`() =
+    fun `should sort items descending by position then id`() =
         runTest {
-            val now = Instant.fromEpochMilliseconds(1716474000000L)
-
-            val item1 = createDocument(id = "a", name = "Banana", createdAt = now.minus(10.seconds), updatedAt = now)
-            val item2 = createDocument(id = "b", name = "Apple", createdAt = now, updatedAt = now.minus(10.seconds))
+            val item1 = createDocument(id = "a", name = "Banana", position = "a1")
+            val item2 = createDocument(id = "b", name = "Apple", position = "a0")
 
             collection.insertMany(listOf(item1, item2))
 
-            val nameAsc =
+            val sorted =
                 repository.find(
                     ShoppingListItemQuery(groupId = "group-1", limit = 10, offset = 0),
                 )
-            assertEquals(listOf("b", "a"), nameAsc.map { it.id })
+            assertEquals(listOf("a", "b"), sorted.map { it.id })
+        }
+
+    @Test
+    fun `should break position ties deterministically by id descending`() =
+        runTest {
+            val item1 = createDocument(id = "b", name = "Banana", position = "a0")
+            val item2 = createDocument(id = "a", name = "Apple", position = "a0")
+
+            collection.insertMany(listOf(item1, item2))
+
+            val sorted =
+                repository.find(
+                    ShoppingListItemQuery(groupId = "group-1", limit = 10, offset = 0),
+                )
+            assertEquals(listOf("b", "a"), sorted.map { it.id })
         }
 
     @Test
     fun `should respect limit parameter`() =
         runTest {
-            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it") }
+            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it", position = "a$it") }
             collection.insertMany(items)
 
             val limited =
@@ -110,7 +122,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
     @Test
     fun `should respect offset (skip) parameter`() =
         runTest {
-            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it") }
+            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it", position = "a$it") }
             collection.insertMany(items)
 
             val page =
@@ -126,13 +138,34 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
         }
 
     @Test
+    fun `findLastPosition returns the highest position in the group`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "Milk", groupId = "group-1", position = "a0"),
+                    createDocument(id = "2", name = "Bread", groupId = "group-1", position = "a5"),
+                    createDocument(id = "3", name = "Eggs", groupId = "group-1", position = "a2"),
+                    createDocument(id = "4", name = "Cheese", groupId = "group-2", position = "a9"),
+                ),
+            )
+
+            assertEquals("a5", repository.findLastPosition("group-1"))
+        }
+
+    @Test
+    fun `findLastPosition returns null for an empty group`() =
+        runTest {
+            assertEquals(null, repository.findLastPosition("group-1"))
+        }
+
+    @Test
     fun `count should only count items of the queried group`() =
         runTest {
             collection.insertMany(
                 listOf(
-                    createDocument(id = "1", name = "Milk", groupId = "group-1"),
-                    createDocument(id = "2", name = "Bread", groupId = "group-1"),
-                    createDocument(id = "3", name = "Eggs", groupId = "group-2"),
+                    createDocument(id = "1", name = "Milk", groupId = "group-1", position = "a0"),
+                    createDocument(id = "2", name = "Bread", groupId = "group-1", position = "a1"),
+                    createDocument(id = "3", name = "Eggs", groupId = "group-2", position = "a0"),
                 ),
             )
 
@@ -149,10 +182,10 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
         runTest {
             collection.insertMany(
                 listOf(
-                    createDocument(id = "1", name = "Milk", completed = false),
-                    createDocument(id = "2", name = "Bread", completed = true),
-                    createDocument(id = "3", name = "Eggs", completed = false),
-                    createDocument(id = "4", name = "Cheese", completed = false, groupId = "group-2"),
+                    createDocument(id = "1", name = "Milk", completed = false, position = "a0"),
+                    createDocument(id = "2", name = "Bread", completed = true, position = "a1"),
+                    createDocument(id = "3", name = "Eggs", completed = false, position = "a2"),
+                    createDocument(id = "4", name = "Cheese", completed = false, groupId = "group-2", position = "a0"),
                 ),
             )
 
@@ -179,7 +212,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
     @Test
     fun `count should ignore limit and offset`() =
         runTest {
-            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it") }
+            val items = (1..5).map { createDocument(id = it.toString(), name = "Item $it", position = "a$it") }
             collection.insertMany(items)
 
             val count =
@@ -195,6 +228,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
         name: String,
         groupId: String = "group-1",
         completed: Boolean = false,
+        position: String = "a0",
         createdAt: Instant = Instant.fromEpochValue(),
         updatedAt: Instant = Instant.fromEpochValue(),
     ) = MongoShoppingListItemDocument(
@@ -202,6 +236,7 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
         groupId = groupId,
         name = name,
         createdByUserId = "user-123",
+        position = position,
         completed = completed,
         completionEvents = emptyList(),
         createdAt = createdAt,

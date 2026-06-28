@@ -9,6 +9,7 @@ import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepositor
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.Sorts
 import com.mongodb.kotlin.client.coroutine.MongoCollection
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.toList
 import org.bson.conversions.Bson
 import org.koin.core.annotation.Named
@@ -28,24 +29,25 @@ class MongoShoppingListItemRepository(
         toStorage = MongoShoppingListItemDocument::fromDomain,
         toDomain = MongoShoppingListItemDocument::toDomain,
     ) {
-    override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> {
-        val sort =
-            Sorts.orderBy(
-                Sorts.descending("createdAt"),
-                Sorts.descending("_id"),
-            )
-
-        return collection
+    override suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem> =
+        collection
             .find(query.toFilter())
-            .sort(sort)
+            .sort(POSITION_SORT)
             .skip(query.offset)
             .limit(query.limit)
             .toList()
             .map { it.toDomain() }
-    }
 
     override suspend fun count(query: ShoppingListItemQuery): Long =
         collection.countDocuments(query.toFilter())
+
+    override suspend fun findLastPosition(groupId: String): String? =
+        collection
+            .find(Filters.eq("groupId", groupId))
+            .sort(Sorts.descending("position"))
+            .limit(1)
+            .firstOrNull()
+            ?.position
 
     private fun ShoppingListItemQuery.toFilter(): Bson {
         val filters =
@@ -54,5 +56,13 @@ class MongoShoppingListItemRepository(
                 completed?.let { add(Filters.eq("completed", it)) }
             }
         return Filters.and(filters)
+    }
+
+    companion object {
+        private val POSITION_SORT =
+            Sorts.orderBy(
+                Sorts.descending("position"),
+                Sorts.descending("_id"),
+            )
     }
 }

@@ -18,6 +18,7 @@ class MongoShoppingListItemDocumentTest {
                 groupId = "group-1",
                 name = "Bread",
                 createdByUserId = "creator",
+                position = "a0",
                 createdAt = t0,
                 updatedAt = t0 + 2.hours,
                 version = 4L,
@@ -34,6 +35,7 @@ class MongoShoppingListItemDocumentTest {
                 groupId = "group-1",
                 name = "Bread",
                 createdByUserId = "creator",
+                position = "a0",
                 completed = false,
                 completionEvents =
                     listOf(
@@ -64,6 +66,7 @@ class MongoShoppingListItemDocumentTest {
                 groupId = "group-1",
                 name = "Bread",
                 createdByUserId = "creator",
+                position = "a0",
                 createdAt = t0,
                 updatedAt = t0 + 2.hours,
                 version = 4L,

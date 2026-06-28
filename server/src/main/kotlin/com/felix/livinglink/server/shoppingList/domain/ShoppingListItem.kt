@@ -7,6 +7,7 @@ data class ShoppingListItem(
     val groupId: String,
     val name: String,
     val createdByUserId: String,
+    val position: String,
     val completionEvents: List<CompletionEvent>,
     val createdAt: Instant,
     val updatedAt: Instant,

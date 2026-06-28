@@ -1,5 +1,6 @@
 package com.felix.livinglink.server.shoppingList.application
 
+import com.felix.livinglink.server.core.domain.OrderKeyProvider
 import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.core.domain.UuidGenerator
 import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
@@ -27,6 +28,7 @@ import kotlin.time.Duration.Companion.seconds
 class AddShoppingListItemsUseCaseTest {
     private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
     private val requireGroupMembershipUseCase = mock<RequireGroupMembershipUseCase>()
+    private val orderKeyProvider = mock<OrderKeyProvider>()
     private val uuidGenerator = mock<UuidGenerator>()
     private val timeProvider = mock<TimeProvider>()
 
@@ -34,6 +36,7 @@ class AddShoppingListItemsUseCaseTest {
         AddShoppingListItemsUseCase(
             shoppingListItemRepository = shoppingListItemRepository,
             requireGroupMembershipUseCase = requireGroupMembershipUseCase,
+            orderKeyProvider = orderKeyProvider,
             uuidGenerator = uuidGenerator,
             timeProvider = timeProvider,
         )
@@ -42,6 +45,13 @@ class AddShoppingListItemsUseCaseTest {
     fun `creates one item per name with correct mapping`() =
         runTest {
             every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
+
+            everySuspend { shoppingListItemRepository.findLastPosition("group-1") } returns null
+
+            every { orderKeyProvider.nKeysBetween(before = null, after = null, count = 2) } returns
+                listOf("a0", "a1")
+
+            every { orderKeyProvider.jitter(any()) } calls { (key: String) -> "$key-jit" }
 
             every { uuidGenerator() } sequentially {
                 returns("id-1")
@@ -74,6 +84,7 @@ class AddShoppingListItemsUseCaseTest {
                         groupId = "group-1",
                         name = "Milk",
                         createdByUserId = "user-1",
+                        position = "a0-jit",
                         createdAt = time1,
                         updatedAt = time1,
                     ),
@@ -82,6 +93,7 @@ class AddShoppingListItemsUseCaseTest {
                         groupId = "group-1",
                         name = "Bread",
                         createdByUserId = "user-1",
+                        position = "a1-jit",
                         createdAt = time2,
                         updatedAt = time2,
                     ),

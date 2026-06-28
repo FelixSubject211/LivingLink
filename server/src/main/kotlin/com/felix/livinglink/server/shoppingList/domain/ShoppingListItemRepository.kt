@@ -6,4 +6,6 @@ interface ShoppingListItemRepository : CrudRepository<ShoppingListItem> {
     suspend fun find(query: ShoppingListItemQuery): List<ShoppingListItem>
 
     suspend fun count(query: ShoppingListItemQuery): Long
+
+    suspend fun findLastPosition(groupId: String): String?
 }

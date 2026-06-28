@@ -12,6 +12,7 @@ data class MongoShoppingListItemDocument(
     val groupId: String,
     val name: String,
     val createdByUserId: String,
+    val position: String,
     val completed: Boolean,
     val completionEvents: List<MongoCompletionEventDocument>,
     val createdAt: Instant,
@@ -28,6 +29,7 @@ data class MongoShoppingListItemDocument(
             groupId = groupId,
             name = name,
             createdByUserId = createdByUserId,
+            position = position,
             completionEvents =
                 completionEvents.map { event ->
                     event.toDomain()
@@ -44,6 +46,7 @@ data class MongoShoppingListItemDocument(
                 groupId = item.groupId,
                 name = item.name,
                 createdByUserId = item.createdByUserId,
+                position = item.position,
                 completed = item.isCompleted,
                 completionEvents =
                     item.completionEvents.map { event ->
