@@ -29,6 +29,9 @@ data class ShoppingListItem(
     fun unComplete(byUserId: String, at: Instant): ShoppingListItem =
         addCompletedEvent(value = false, byUserId = byUserId, at = at)
 
+    fun moveTo(position: String, at: Instant): ShoppingListItem =
+        copy(position = position, updatedAt = at)
+
     private fun addCompletedEvent(value: Boolean, byUserId: String, at: Instant): ShoppingListItem =
         copy(
             updatedAt = at,

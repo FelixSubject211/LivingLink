@@ -49,6 +49,48 @@ class MongoShoppingListItemRepository(
             .firstOrNull()
             ?.position
 
+    override suspend fun findByIds(ids: Collection<String>): List<ShoppingListItem> {
+        if (ids.isEmpty()) return emptyList()
+        return collection
+            .find(Filters.`in`("_id", ids))
+            .toList()
+            .map { it.toDomain() }
+    }
+
+    override suspend fun findPositionBelow(
+        groupId: String,
+        position: String,
+        excludingIds: Set<String>,
+    ): String? =
+        collection
+            .find(
+                Filters.and(
+                    Filters.eq("groupId", groupId),
+                    Filters.lt("position", position),
+                    Filters.nin("_id", excludingIds),
+                ),
+            ).sort(Sorts.descending("position"))
+            .limit(1)
+            .firstOrNull()
+            ?.position
+
+    override suspend fun findPositionAbove(
+        groupId: String,
+        position: String,
+        excludingIds: Set<String>,
+    ): String? =
+        collection
+            .find(
+                Filters.and(
+                    Filters.eq("groupId", groupId),
+                    Filters.gt("position", position),
+                    Filters.nin("_id", excludingIds),
+                ),
+            ).sort(Sorts.ascending("position"))
+            .limit(1)
+            .firstOrNull()
+            ?.position
+
     private fun ShoppingListItemQuery.toFilter(): Bson {
         val filters =
             buildList {
