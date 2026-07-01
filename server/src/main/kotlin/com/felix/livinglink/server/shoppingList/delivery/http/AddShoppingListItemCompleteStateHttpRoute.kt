@@ -29,20 +29,24 @@ class AddShoppingListItemCompleteStateHttpRoute(
                         AddShoppingListItemsUseCase.Input(
                             byUserId = user.id,
                             groupId = request.groupId,
-                            names = listOf(request.name),
+                            items =
+                                listOf(
+                                    AddShoppingListItemsUseCase.NewItem(
+                                        id = request.id,
+                                        name = request.name,
+                                        position = request.position,
+                                        createdAt = request.createdAt,
+                                    ),
+                                ),
                         ),
                     )
 
-                require(
-                    output.size == 1,
-                ) { "Expected one result for a single item" }
+                require(output.size == 1) { "Expected one result for a single item" }
 
-                val response =
-                    AddShoppingListItemResponseV1(
-                        output.first().toDtoV1(),
-                    )
-
-                call.respond(HttpStatusCode.OK, response)
+                call.respond(
+                    HttpStatusCode.OK,
+                    AddShoppingListItemResponseV1(output.first().toDtoV1()),
+                )
             }
         }
     }

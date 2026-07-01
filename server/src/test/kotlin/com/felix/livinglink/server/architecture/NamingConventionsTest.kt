@@ -6,14 +6,14 @@ import kotlin.test.Test
 
 class NamingConventionsTest {
     @Test
-    fun `top-level classes in application packages end with 'UseCase'`() {
+    fun `top-level classes in application packages end with 'UseCase' or 'Factory'`() {
         Konsist
             .scopeFromProduction()
             .classes()
             .filter { it.resideInPackage("..server..") }
             .filter { it.resideInPackage("..application..") }
             .filter { it.isTopLevel }
-            .assertTrue { it.name.endsWith("UseCase") }
+            .assertTrue { it.name.endsWith("UseCase") || it.name.endsWith("Factory") }
     }
 
     @Test

@@ -29,7 +29,14 @@ class ChangeShoppingListItemCompleteStateHttpRoute(
                         ChangeShoppingListItemsCompleteStateUseCase.Input(
                             byUserId = user.id,
                             groupId = request.groupId,
-                            idsToCompleteState = mapOf(request.itemId to request.completed),
+                            changes =
+                                listOf(
+                                    ChangeShoppingListItemsCompleteStateUseCase.Change(
+                                        itemId = request.itemId,
+                                        completed = request.completed,
+                                        at = request.at,
+                                    ),
+                                ),
                         ),
                     )
 

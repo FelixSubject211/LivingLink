@@ -6,6 +6,7 @@ import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
 import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.shoppingList.application.AddShoppingListItemsUseCase
+import com.felix.livinglink.server.shoppingList.application.ShoppingListItemFactory
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.toMcpReferenceDto
 import io.modelcontextprotocol.kotlin.sdk.server.Server
@@ -16,6 +17,7 @@ import org.koin.core.annotation.Single
 class AddShoppingListItemsTool(
     private val addShoppingListItemsUseCase: AddShoppingListItemsUseCase,
     private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
+    private val shoppingListItemFactory: ShoppingListItemFactory,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -36,12 +38,18 @@ class AddShoppingListItemsTool(
                     getActiveMcpGroupUseCase(userId)
                         ?: return@handle toolError("No group is available for this user.")
 
+                val newItems =
+                    shoppingListItemFactory.createNewItems(
+                        groupId = group.id,
+                        names = names(),
+                    )
+
                 val items =
                     addShoppingListItemsUseCase(
                         AddShoppingListItemsUseCase.Input(
                             byUserId = userId,
                             groupId = group.id,
-                            names = names(),
+                            items = newItems,
                         ),
                     )
 

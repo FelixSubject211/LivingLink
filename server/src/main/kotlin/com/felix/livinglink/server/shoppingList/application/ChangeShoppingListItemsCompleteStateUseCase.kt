@@ -1,6 +1,5 @@
 package com.felix.livinglink.server.shoppingList.application
 
-import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.core.domain.UpdateOperationResult
 import com.felix.livinglink.server.core.domain.UpdateResult
 import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
@@ -10,29 +9,30 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.koin.core.annotation.Single
+import kotlin.time.Instant
 
 @Single
 class ChangeShoppingListItemsCompleteStateUseCase(
     private val shoppingListItemRepository: ShoppingListItemRepository,
     private val requireGroupMembershipUseCase: RequireGroupMembershipUseCase,
-    private val timeProvider: TimeProvider,
 ) {
     suspend operator fun invoke(input: Input): Output {
         requireGroupMembershipUseCase(userId = input.byUserId, groupId = input.groupId)
 
         return coroutineScope {
             val results =
-                input.idsToCompleteState
-                    .map { (id, completeAction) ->
+                input.changes
+                    .map { change ->
                         async {
-                            val existing = shoppingListItemRepository.findById(id)
+                            val existing = shoppingListItemRepository.findById(change.itemId)
                             if (existing == null || existing.groupId != input.groupId) {
-                                ItemResult.Missing(id)
+                                ItemResult.Missing(change.itemId)
                             } else {
                                 applyChange(
-                                    id = id,
-                                    completeAction = completeAction,
+                                    id = change.itemId,
+                                    completed = change.completed,
                                     byUserId = input.byUserId,
+                                    at = change.at,
                                 )
                             }
                         }
@@ -63,18 +63,19 @@ class ChangeShoppingListItemsCompleteStateUseCase(
 
     private suspend fun applyChange(
         id: String,
-        completeAction: Boolean,
+        completed: Boolean,
         byUserId: String,
+        at: Instant,
     ): ItemResult {
         val result =
             shoppingListItemRepository.updateWithOptimisticLocking(id) { current ->
-                when (completeAction) {
+                when (completed) {
                     true ->
                         if (current.isCompleted) {
                             UpdateOperationResult.noUpdate(current = current)
                         } else {
                             UpdateOperationResult.updated(
-                                newEntity = current.complete(byUserId = byUserId, at = timeProvider()),
+                                newEntity = current.complete(byUserId = byUserId, at = at),
                             )
                         }
                     false ->
@@ -82,7 +83,7 @@ class ChangeShoppingListItemsCompleteStateUseCase(
                             UpdateOperationResult.noUpdate(current = current)
                         } else {
                             UpdateOperationResult.updated(
-                                newEntity = current.unComplete(byUserId = byUserId, at = timeProvider()),
+                                newEntity = current.unComplete(byUserId = byUserId, at = at),
                             )
                         }
                 }
@@ -117,7 +118,13 @@ class ChangeShoppingListItemsCompleteStateUseCase(
     data class Input(
         val byUserId: String,
         val groupId: String,
-        val idsToCompleteState: Map<String, Boolean>,
+        val changes: List<Change>,
+    )
+
+    data class Change(
+        val itemId: String,
+        val completed: Boolean,
+        val at: Instant,
     )
 
     data class Output(

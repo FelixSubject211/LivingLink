@@ -4,6 +4,7 @@ import com.felix.livinglink.server.core.delivery.mcp.dsl.McpToolDsl.tool
 import com.felix.livinglink.server.core.delivery.mcp.dsl.success
 import com.felix.livinglink.server.core.delivery.mcp.dsl.toolError
 import com.felix.livinglink.server.core.delivery.mcp.server.McpToolRegistrar
+import com.felix.livinglink.server.core.domain.TimeProvider
 import com.felix.livinglink.server.group.application.GetActiveMcpGroupUseCase
 import com.felix.livinglink.server.shoppingList.application.ChangeShoppingListItemsCompleteStateUseCase
 import com.felix.livinglink.server.shoppingList.delivery.mcp.dto.ShoppingListItemReferenceMcpDto
@@ -16,6 +17,7 @@ import org.koin.core.annotation.Single
 class ChangeShoppingListItemsCompleteStateTool(
     private val changeShoppingListItemsCompleteStateUseCase: ChangeShoppingListItemsCompleteStateUseCase,
     private val getActiveMcpGroupUseCase: GetActiveMcpGroupUseCase,
+    private val timeProvider: TimeProvider,
 ) : McpToolRegistrar {
     override fun register(
         server: Server,
@@ -36,12 +38,21 @@ class ChangeShoppingListItemsCompleteStateTool(
                     getActiveMcpGroupUseCase(userId)
                         ?: return@handle toolError("No group is available for this user.")
 
+                val now = timeProvider()
+
                 val output =
                     changeShoppingListItemsCompleteStateUseCase(
                         ChangeShoppingListItemsCompleteStateUseCase.Input(
                             byUserId = userId,
                             groupId = group.id,
-                            idsToCompleteState = idsToCompleteState(),
+                            changes =
+                                idsToCompleteState().map { (id, completed) ->
+                                    ChangeShoppingListItemsCompleteStateUseCase.Change(
+                                        itemId = id,
+                                        completed = completed,
+                                        at = now,
+                                    )
+                                },
                         ),
                     )
 

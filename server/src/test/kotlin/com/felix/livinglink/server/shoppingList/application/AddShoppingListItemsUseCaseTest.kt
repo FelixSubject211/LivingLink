@@ -1,15 +1,11 @@
 package com.felix.livinglink.server.shoppingList.application
 
-import com.felix.livinglink.server.core.domain.OrderKeyProvider
-import com.felix.livinglink.server.core.domain.TimeProvider
-import com.felix.livinglink.server.core.domain.UuidGenerator
 import com.felix.livinglink.server.group.application.RequireGroupMembershipUseCase
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItem
 import com.felix.livinglink.server.shoppingList.domain.ShoppingListItemRepository
 import com.felix.livinglink.server.shoppingList.domain.shoppingListItem
 import dev.mokkery.answering.calls
 import dev.mokkery.answering.returns
-import dev.mokkery.answering.sequentially
 import dev.mokkery.answering.throws
 import dev.mokkery.every
 import dev.mokkery.everySuspend
@@ -28,52 +24,43 @@ import kotlin.time.Duration.Companion.seconds
 class AddShoppingListItemsUseCaseTest {
     private val shoppingListItemRepository = mock<ShoppingListItemRepository>()
     private val requireGroupMembershipUseCase = mock<RequireGroupMembershipUseCase>()
-    private val orderKeyProvider = mock<OrderKeyProvider>()
-    private val uuidGenerator = mock<UuidGenerator>()
-    private val timeProvider = mock<TimeProvider>()
 
     private val useCase =
         AddShoppingListItemsUseCase(
             shoppingListItemRepository = shoppingListItemRepository,
             requireGroupMembershipUseCase = requireGroupMembershipUseCase,
-            orderKeyProvider = orderKeyProvider,
-            uuidGenerator = uuidGenerator,
-            timeProvider = timeProvider,
         )
 
     @Test
-    fun `creates one item per name with correct mapping`() =
+    fun `creates one item per NewItem with correct mapping`() =
         runTest {
             every { requireGroupMembershipUseCase("user-1", "group-1") } returns Unit
 
-            everySuspend { shoppingListItemRepository.findLastPosition("group-1") } returns null
-
-            every { orderKeyProvider.nKeysBetween(before = null, after = null, count = 2) } returns
-                listOf("a0", "a1")
-
-            every { orderKeyProvider.jitter(any()) } calls { (key: String) -> "$key-jit" }
-
-            every { uuidGenerator() } sequentially {
-                returns("id-1")
-                returns("id-2")
-            }
+            everySuspend { shoppingListItemRepository.create(any()) } calls { (item: ShoppingListItem) -> item }
 
             val time1 = Clock.System.now()
             val time2 = time1 + 1.seconds
-
-            every { timeProvider() } sequentially {
-                returns(time1)
-                returns(time2)
-            }
-
-            everySuspend { shoppingListItemRepository.create(any()) } calls { (item: ShoppingListItem) -> item }
 
             val result =
                 useCase(
                     AddShoppingListItemsUseCase.Input(
                         byUserId = "user-1",
                         groupId = "group-1",
-                        names = listOf("Milk", "Bread"),
+                        items =
+                            listOf(
+                                AddShoppingListItemsUseCase.NewItem(
+                                    id = "id-1",
+                                    name = "Milk",
+                                    position = "a0-jit",
+                                    createdAt = time1,
+                                ),
+                                AddShoppingListItemsUseCase.NewItem(
+                                    id = "id-2",
+                                    name = "Bread",
+                                    position = "a1-jit",
+                                    createdAt = time2,
+                                ),
+                            ),
                     ),
                 )
 
@@ -116,7 +103,15 @@ class AddShoppingListItemsUseCaseTest {
                     AddShoppingListItemsUseCase.Input(
                         byUserId = "user-1",
                         groupId = "group-1",
-                        names = listOf("Milk", "Bread"),
+                        items =
+                            listOf(
+                                AddShoppingListItemsUseCase.NewItem(
+                                    id = "id-1",
+                                    name = "Milk",
+                                    position = "a0",
+                                    createdAt = Clock.System.now(),
+                                ),
+                            ),
                     ),
                 )
             }
