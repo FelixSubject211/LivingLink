@@ -115,4 +115,32 @@ class ShoppingListItemTest {
 
         assertEquals(expected, unCompleted)
     }
+
+    @Test
+    fun `moveTo updates position and updatedAt, keeps everything else`() {
+        val original =
+            shoppingListItem(
+                id = "id-1",
+                name = "Milk",
+                createdByUserId = "creator",
+                position = "a0",
+                createdAt = t0,
+                updatedAt = t0,
+                version = 7L,
+                completionEvents =
+                    listOf(
+                        completionEvent(byUserId = "user-a", at = t0, completed = true),
+                    ),
+            )
+
+        val moved = original.moveTo(position = "a5", at = t0 + 1.hours)
+
+        val expected =
+            original.copy(
+                position = "a5",
+                updatedAt = t0 + 1.hours,
+            )
+
+        assertEquals(expected, moved)
+    }
 }

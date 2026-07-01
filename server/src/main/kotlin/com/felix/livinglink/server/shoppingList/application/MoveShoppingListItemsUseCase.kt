@@ -82,7 +82,11 @@ class MoveShoppingListItemsUseCase(
                         )
             }
 
-        val newPosition = orderKeyProvider.between(before = lowerKey, after = upperKey)
+        val newPosition =
+            orderKeyProvider.jitter(
+                orderKeyProvider.between(before = lowerKey, after = upperKey),
+            )
+
         if (newPosition == item.position) {
             return SingleResult.Moved(item)
         }

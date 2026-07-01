@@ -223,6 +223,217 @@ class MongoShoppingListItemRepositoryTest : AbstractMongoRepositoryTest() {
             assertEquals(5, count)
         }
 
+    @Test
+    fun `findPositionBelow returns the highest position below the given one`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", position = "a1"),
+                    createDocument(id = "2", name = "B", position = "a3"),
+                    createDocument(id = "3", name = "C", position = "a5"),
+                    createDocument(id = "4", name = "D", position = "a7"),
+                ),
+            )
+
+            val result =
+                repository.findPositionBelow(
+                    groupId = "group-1",
+                    position = "a5",
+                    excludingIds = emptySet(),
+                )
+
+            assertEquals("a3", result)
+        }
+
+    @Test
+    fun `findPositionBelow excludes specified ids`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", position = "a1"),
+                    createDocument(id = "2", name = "B", position = "a3"),
+                    createDocument(id = "3", name = "C", position = "a5"),
+                ),
+            )
+
+            val result =
+                repository.findPositionBelow(
+                    groupId = "group-1",
+                    position = "a5",
+                    excludingIds = setOf("2"),
+                )
+
+            assertEquals("a1", result)
+        }
+
+    @Test
+    fun `findPositionBelow returns null when nothing is below`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", position = "a3"),
+                    createDocument(id = "2", name = "B", position = "a5"),
+                ),
+            )
+
+            val result =
+                repository.findPositionBelow(
+                    groupId = "group-1",
+                    position = "a3",
+                    excludingIds = emptySet(),
+                )
+
+            assertEquals(null, result)
+        }
+
+    @Test
+    fun `findPositionBelow only considers items in the same group`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", groupId = "group-1", position = "a5"),
+                    createDocument(id = "2", name = "B", groupId = "group-2", position = "a3"),
+                ),
+            )
+
+            val result =
+                repository.findPositionBelow(
+                    groupId = "group-1",
+                    position = "a5",
+                    excludingIds = emptySet(),
+                )
+
+            assertEquals(null, result)
+        }
+
+    @Test
+    fun `findPositionAbove returns the lowest position above the given one`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", position = "a1"),
+                    createDocument(id = "2", name = "B", position = "a3"),
+                    createDocument(id = "3", name = "C", position = "a5"),
+                    createDocument(id = "4", name = "D", position = "a7"),
+                ),
+            )
+
+            val result =
+                repository.findPositionAbove(
+                    groupId = "group-1",
+                    position = "a3",
+                    excludingIds = emptySet(),
+                )
+
+            assertEquals("a5", result)
+        }
+
+    @Test
+    fun `findPositionAbove excludes specified ids`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", position = "a1"),
+                    createDocument(id = "2", name = "B", position = "a3"),
+                    createDocument(id = "3", name = "C", position = "a5"),
+                    createDocument(id = "4", name = "D", position = "a7"),
+                ),
+            )
+
+            val result =
+                repository.findPositionAbove(
+                    groupId = "group-1",
+                    position = "a3",
+                    excludingIds = setOf("3"),
+                )
+
+            assertEquals("a7", result)
+        }
+
+    @Test
+    fun `findPositionAbove returns null when nothing is above`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", position = "a3"),
+                    createDocument(id = "2", name = "B", position = "a5"),
+                ),
+            )
+
+            val result =
+                repository.findPositionAbove(
+                    groupId = "group-1",
+                    position = "a5",
+                    excludingIds = emptySet(),
+                )
+
+            assertEquals(null, result)
+        }
+
+    @Test
+    fun `findPositionAbove only considers items in the same group`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "A", groupId = "group-1", position = "a3"),
+                    createDocument(id = "2", name = "B", groupId = "group-2", position = "a5"),
+                ),
+            )
+
+            val result =
+                repository.findPositionAbove(
+                    groupId = "group-1",
+                    position = "a3",
+                    excludingIds = emptySet(),
+                )
+
+            assertEquals(null, result)
+        }
+
+    @Test
+    fun `findByIds returns items matching the given ids`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "Milk", position = "a0"),
+                    createDocument(id = "2", name = "Bread", position = "a1"),
+                    createDocument(id = "3", name = "Eggs", position = "a2"),
+                ),
+            )
+
+            val result = repository.findByIds(listOf("1", "3"))
+
+            assertEquals(setOf("1", "3"), result.map { it.id }.toSet())
+        }
+
+    @Test
+    fun `findByIds returns empty list for empty input`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "Milk", position = "a0"),
+                ),
+            )
+
+            val result = repository.findByIds(emptyList())
+
+            assertEquals(emptyList(), result)
+        }
+
+    @Test
+    fun `findByIds ignores ids that do not exist`() =
+        runTest {
+            collection.insertMany(
+                listOf(
+                    createDocument(id = "1", name = "Milk", position = "a0"),
+                ),
+            )
+
+            val result = repository.findByIds(listOf("1", "nonexistent"))
+
+            assertEquals(listOf("1"), result.map { it.id })
+        }
+
     private fun createDocument(
         id: String,
         name: String,
